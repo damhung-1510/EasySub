@@ -238,14 +238,16 @@ function NavItem({
       aria-current={active ? 'page' : undefined}
       onClick={onClick}
       className={cn(
-        'titlebar-no-drag relative flex h-12 w-[52px] shrink-0 flex-col items-center justify-center gap-1 rounded-lg transition-colors [@media(max-height:760px)]:h-10',
+        'titlebar-no-drag relative flex h-12 w-[68px] shrink-0 flex-col items-center justify-center gap-1 rounded-lg transition-colors [@media(max-height:760px)]:h-10',
         active
           ? 'bg-primary/10 text-primary before:absolute before:inset-y-3 before:-left-1.5 before:w-[3px] before:rounded-r-full before:bg-primary'
           : 'text-muted-foreground hover:bg-accent hover:text-foreground',
       )}
     >
       <Icon className="h-[19px] w-[19px] flex-shrink-0" strokeWidth={1.8} />
-      <span className="text-[11px] font-medium leading-none">{label}</span>
+      <span className="w-full truncate px-0.5 text-center text-[11px] font-medium leading-[14px]">
+        {label}
+      </span>
     </Link>
   );
 }
@@ -828,12 +830,12 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="grid h-screen w-full pl-16">
-      {/* 左侧竖排导航 rail：固定 64px，任务组 / 配置组以分隔线区分，设置沉底。
+    <div className="grid h-screen w-full pl-20">
+      {/* 左侧竖排导航 rail：固定 80px，任务组 / 配置组以分隔线区分，设置沉底。
           底部预留 26px 给全宽状态栏。 */}
       <aside
         className={cn(
-          'titlebar-drag fixed left-0 top-0 bottom-[26px] z-20 flex w-16 flex-col items-center gap-0.5 overflow-x-hidden overflow-y-auto border-r border-border bg-chrome px-1.5 pb-2',
+          'titlebar-drag fixed left-0 top-0 bottom-[26px] z-20 flex w-20 flex-col items-center gap-0.5 overflow-x-hidden overflow-y-auto border-r border-border bg-chrome px-1.5 pb-2',
           !isMac && 'pt-2.5',
         )}
       >
@@ -930,7 +932,7 @@ const Layout = ({ children }) => {
           }
         >
           {currentSectionLabel && (
-            <span className="titlebar-no-drag flex-shrink-0 truncate text-sm font-medium text-muted-foreground">
+            <span className="titlebar-no-drag flex-shrink-0 truncate text-sm font-medium leading-5 text-muted-foreground">
               {currentSectionLabel}
             </span>
           )}

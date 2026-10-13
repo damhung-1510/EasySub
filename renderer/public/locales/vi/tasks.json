@@ -1,0 +1,669 @@
+{
+  "projectSave": {
+    "loading": "Đang đọc bản nháp tác vụ…",
+    "retryLoad": "Đọc lại",
+    "failed": "Lưu bản nháp tác vụ thất bại. Các thay đổi hiện tại chưa được ghi vào ổ đĩa.",
+    "details": "Chi tiết lỗi",
+    "retry": "Thử lưu lại",
+    "loadFailed": "Đọc bản nháp tác vụ thất bại, tạm thời không thể chỉnh sửa hoặc chạy."
+  },
+  "advancedSettings": "Cài đặt nâng cao",
+  "readiness": {
+    "translation_style_requires_ai": "Dịch theo phong cách cảm xúc, khẩu ngữ cần dịch vụ dịch AI. Chọn dịch vụ AI, hoặc chuyển sang dịch thông thường trong cài đặt nâng cao.",
+    "speaker_diarization_unavailable": "Model tách người nói hoặc thư viện chạy chưa sẵn sàng. Cài đặt ở trang Engine, hoặc tắt tách người nói trong cài đặt nâng cao.",
+    "tts_unavailable": "Engine lồng tiếng đã chọn không tồn tại hoặc cấu hình chưa đầy đủ.",
+    "tts_voice_unavailable": "Giọng đã chọn không còn khả dụng, hãy chọn lại.",
+    "tts_language_unsupported": "Engine lồng tiếng đã chọn không hỗ trợ ngôn ngữ lồng tiếng hiện tại.",
+    "files_required": "Thêm tệp cho tác vụ trước.",
+    "subtitle_files_required": "Tác vụ này chỉ nhận tệp phụ đề.",
+    "model_required": "Chọn model dùng cho tác vụ này.",
+    "model_unavailable": "Engine hoặc model đã chọn chưa sẵn sàng. Cài đặt lại, hoặc chọn một model khác đã sẵn sàng.",
+    "local_command_required": "Cấu hình lệnh Whisper cục bộ trước.",
+    "target_language_required": "Chọn ngôn ngữ đích rõ ràng để dịch.",
+    "provider_required": "Dịch vụ dịch đã chọn không tồn tại hoặc cấu hình chưa đầy đủ.",
+    "refine_provider_required": "Chọn dịch vụ AI đã cấu hình cho tinh chỉnh AI, hoặc tắt tinh chỉnh.",
+    "input_unavailable": "Tệp nguồn của tác vụ đã bị di chuyển hoặc xóa, hãy chọn lại.",
+    "paired_subtitle_unavailable": "Phụ đề ghép cặp đã bị di chuyển hoặc xóa, hãy ghép cặp lại."
+  },
+  "subtitleFilesRequired": "Dịch phụ đề có sẵn chỉ hỗ trợ tệp phụ đề. Gỡ các tệp không phải phụ đề như âm thanh/video khỏi danh sách trước; với âm thanh/video hãy dùng tác vụ phiên âm.",
+  "parakeet": {
+    "modelUnavailable": "Model {{model}} chưa sẵn sàng. Chọn model đã cài trong cấu hình tác vụ; với tác vụ có cấu hình cố định có thể cài lại model gốc hoặc tạo tác vụ mới.",
+    "languageMismatch": "{{model}} không hỗ trợ ngôn ngữ nguồn {{language}}, kết quả nhận dạng có thể không chính xác. Lựa chọn hiện tại được giữ nguyên."
+  },
+  "pageTitle": {
+    "generate-translate": "Video → Phụ đề song ngữ",
+    "generate": "Video → Phụ đề gốc",
+    "translate": "Dịch phụ đề có sẵn",
+    "pipelineDubCompose": "Video → Video lồng tiếng",
+    "pipelineCompose": "Video → Video có phụ đề",
+    "pipelineDub": "Video → Lồng tiếng",
+    "pipelineDubSubtitle": "Phụ đề → Lồng tiếng"
+  },
+  "snapshotBar": {
+    "fixedTip": "Tác vụ này do trình hướng dẫn tạo, cấu hình đã được cố định theo tác vụ khi tạo; nếu cần điều chỉnh cấu hình, hãy về Launchpad tạo tác vụ mới.",
+    "composeHard": "Phụ đề cứng",
+    "composeSoft": "Phụ đề mềm",
+    "composeNone": "Không phụ đề",
+    "qualityOriginal": "Chất lượng gốc",
+    "qualityHigh": "Chất lượng cao",
+    "qualityStandard": "Chất lượng tiêu chuẩn",
+    "encoderHardware": "Tăng tốc phần cứng",
+    "forceTranscription": "Đã tắt, buộc nhận dạng giọng nói"
+  },
+  "wizard": {
+    "filesTitle": "Bước 1 · Thêm tệp",
+    "importFiles": "Nhập tệp",
+    "dropHint": "Kéo video, phụ đề hoặc văn bản tham khảo vào đây, hoặc bấm nút ở góc trên bên phải để chọn",
+    "detectedMedia": "Đã nhận diện {{count}} video/âm thanh",
+    "detectedSubtitle": "Đã nhận diện {{count}} tệp phụ đề",
+    "detectedPaired": "Đã nhận diện {{media}} video/âm thanh · Đã ghép {{paired}} cặp phụ đề",
+    "pairHint": "Thêm cả video và phụ đề có thể bỏ qua bước nhận dạng giọng nói, thêm văn bản tham khảo sẽ tự động sửa lỗi chính tả; tệp cùng tên được tự động ghép cặp, hỗ trợ chỉ định thủ công ngay trên dòng",
+    "pairSelectPlaceholder": "Chọn phụ đề",
+    "pairBrowse": "Chọn phụ đề từ ổ đĩa",
+    "pairTxtUnsupported": "Phụ đề txt không có dòng thời gian, không thể dùng để ghép cặp",
+    "pairAttached": "Đã ghép cặp",
+    "pairUnmatched": "Chưa ghép cặp, sẽ bị bỏ qua",
+    "removeFile": "Gỡ bỏ",
+    "goalsTitle": "Bước 2 · Tôi muốn có",
+    "goal": {
+      "subtitle": "Tệp phụ đề",
+      "subtitleDesc": "Tạo phụ đề bằng cách nhận dạng giọng nói từ video",
+      "translate": "Dịch phụ đề",
+      "translateDesc": "Dịch phụ đề sang ngôn ngữ đích",
+      "dub": "Lồng tiếng",
+      "dubDesc": "Dùng giọng AI đọc phụ đề",
+      "video": "Video thành phẩm",
+      "videoDesc": "Ghép phụ đề (và lồng tiếng) vào video"
+    },
+    "goalSubtitleHave": "Tệp bạn thêm vào đã là phụ đề",
+    "goalSubtitlePaired": "Dùng phụ đề cùng tên bạn đã thêm, bỏ qua nhận dạng giọng nói",
+    "goalSubtitleAlways": "Tác vụ video luôn tạo ra phụ đề",
+    "goalVideoNeedsMedia": "Cần thêm tệp video mới ghép được",
+    "goalVideoNeedsVideoStream": "Tệp chỉ có âm thanh không thể tạo video thành phẩm",
+    "chainLabel": "Quy trình xử lý:",
+    "chainEmpty": "Chọn mục tiêu ở trên để hiển thị quy trình xử lý",
+    "subtitleConfigTitle": "Cài đặt phụ đề",
+    "dubConfigTitle": "Cài đặt lồng tiếng",
+    "dubEngine": "Engine lồng tiếng",
+    "dubEnginePlaceholder": "Chọn engine",
+    "dubVoice": "Giọng đọc",
+    "dubVoicePlaceholder": "Chọn giọng đọc",
+    "dubSpeed": "Tốc độ đọc",
+    "notReady": "Chưa sẵn sàng",
+    "dubBillingHint": "Lồng tiếng trên đám mây tính phí theo ký tự, chi phí phụ thuộc vào lượng văn bản phụ đề cuối cùng",
+    "composeConfigTitle": "Cài đặt video thành phẩm",
+    "composeSubtitle": "Kiểu phụ đề",
+    "composeHard": "Gắn cứng vào hình ảnh (khuyên dùng)",
+    "composeSoft": "Phụ đề mềm (bật/tắt được, MKV)",
+    "composeNone": "Không phụ đề (chỉ thay lồng tiếng)",
+    "composeStyle": "Kiểu phụ đề",
+    "composeStyleGroupSystem": "Mẫu hệ thống",
+    "composeStyleGroupMine": "Kiểu của tôi",
+    "composeQuality": "Chất lượng xuất",
+    "composeEncoder": "Bộ mã hóa",
+    "composeEncoderUnavailable": "(không khả dụng trên máy này)",
+    "composeAudioHint": "Sau khi lồng tiếng xong sẽ tự động thay âm thanh gốc của video",
+    "composeStyleHint": "Có thể tinh chỉnh kiểu trong bàn làm việc ghép và lưu thành \"Kiểu của tôi\", ",
+    "composeStyleLink": "chỉnh kiểu phụ đề",
+    "gatesTitle": "Tự duyệt từng bước (tùy chọn)",
+    "gateSubtitle": "Chỉnh sửa phụ đề",
+    "gateSubtitleDesc": "Dừng lại khi có phụ đề để bạn kiểm tra, rồi mới lồng tiếng/ghép",
+    "gateDubbing": "Xác nhận lồng tiếng",
+    "gateDubbingDesc": "Dừng lại sau khi lồng tiếng để bạn nghe thử, rồi mới xuất video",
+    "gatesHint": "Đến bước đó sẽ thông báo cho bạn; sau khi chỉnh sửa/xác nhận, bấm \"Cho qua\" để tự động tiếp tục. Nếu muốn chạy tự động hoàn toàn đến khi ra video, hãy tắt hết các công tắc kiểm soát",
+    "blockNoFiles": "Thêm tệp cần xử lý trước",
+    "blockNoModel": "Chưa có model giọng nói khả dụng",
+    "blockNoProvider": "Chưa cấu hình dịch vụ dịch",
+    "blockNoTts": "Engine lồng tiếng chưa sẵn sàng",
+    "blockVideoNeedsMedia": "Video thành phẩm cần đầu vào là video, hãy bỏ chọn hoặc thêm tệp video",
+    "blockVideoNeedsVideoStream": "Video thành phẩm cần luồng video, hãy gỡ tệp chỉ có âm thanh hoặc bỏ chọn",
+    "blockUnpairedMedia": "Có {{count}} video chưa được ghép phụ đề, hãy chọn phụ đề ở dòng video, bổ sung tệp hoặc gỡ chúng",
+    "blockNoGoal": "Chọn ít nhất một sản phẩm cần có",
+    "blockRefineFollow": "\"Theo dịch vụ dịch\" của tinh chỉnh AI không thể xác định (dịch chưa bật hoặc không phải loại AI), hãy chọn rõ nhà cung cấp tinh chỉnh trong thanh công cụ \"Ngắt câu và tinh chỉnh\"",
+    "blockRefineFollowNeedsAi": "Đã bật \"{{feature}}\", cần hỗ trợ của model ngôn ngữ lớn (LLM), nhưng \"{{provider}}\" đang chọn là API truyền thống không thực hiện được chức năng này",
+    "blockRefineFollowTranslationOff": "Đã bật \"{{feature}}\", nhưng chưa bật dịch vụ dịch (không thể đi theo), hãy bật dịch hoặc chỉ định rõ nhà cung cấp tinh chỉnh",
+    "blockRefineProviderInvalid": "Nhà cung cấp đã chọn cho tinh chỉnh AI không khả dụng (không tồn tại hoặc chưa cấu hình), hãy chọn lại",
+    "refineFeatureBoth": "Ngắt câu theo ngữ nghĩa và chỉnh sửa văn bản bằng AI",
+    "refineFeatureSegmentation": "Ngắt câu theo ngữ nghĩa bằng AI",
+    "refineFeatureCorrection": "Chỉnh sửa văn bản bằng AI",
+    "refineActionDisableCorrection": "Tắt chỉnh sửa AI",
+    "refineActionDisableSegmentation": "Tắt ngắt câu AI",
+    "refineActionDisableBoth": "Tắt tinh chỉnh AI",
+    "refineActionUseProvider": "Chuyển sang dùng {{name}}",
+    "refineActionAdjust": "Điều chỉnh cấu hình tinh chỉnh",
+    "blockSummaryFollow": "Dịch vụ dịch mà tóm tắt đi theo không phải AI đã cấu hình, hãy chọn rõ một dịch vụ tóm tắt",
+    "blockSummaryProviderInvalid": "Dịch vụ tóm tắt không khả dụng (không tồn tại, không phải AI hoặc chưa cấu hình), hãy chọn lại",
+    "goConfigure": "Mở cài đặt",
+    "readyHint": "Sẵn sàng: sau khi bắt đầu, {{count}} tệp sẽ được xử lý tự động theo quy trình",
+    "clearFiles": "Xóa danh sách",
+    "draftRestored": "Đã khôi phục bản nháp tác vụ chỉnh sửa lần trước ({{count}} tệp)",
+    "clearDraft": "Xóa bản nháp",
+    "start": "Bắt đầu",
+    "recipe": {
+      "save": "Lưu thành công thức",
+      "dialogTitle": "Lưu thành công thức",
+      "dialogDesc": "Lưu mục tiêu và cấu hình hiện tại thành công thức, sau đó dùng một chạm trên Launchpad, kéo tệp vào là chạy.",
+      "namePlaceholder": "Tên công thức, ví dụ: Video tiếng Anh → Video lồng tiếng Trung",
+      "cancel": "Hủy",
+      "confirm": "Lưu",
+      "saved": "Đã lưu công thức \"{{name}}\", có thể dùng trên Launchpad",
+      "applied": "Đã áp dụng công thức \"{{name}}\""
+    }
+  },
+  "backToLaunchpad": "Quay lại Launchpad",
+  "newTaskHint": "Tác vụ mới · Nhập tệp xong sẽ tự động lưu vào tác vụ gần đây",
+  "renameTask": "Đổi tên tác vụ",
+  "configBar": {
+    "model": "Model giọng nói",
+    "sourceLanguage": "Ngôn ngữ video",
+    "subtitleSourceLanguage": "Ngôn ngữ nguồn",
+    "targetLanguage": "Dịch sang",
+    "provider": "Dịch bằng",
+    "scenario": "Bối cảnh",
+    "tagAi": "Model AI",
+    "tagTraditional": "Dịch máy truyền thống",
+    "toastTraditionalRefineConflict": "Đã chuyển sang \"{{provider}}\". Do đã bật \"{{feature}}\", API truyền thống không thực hiện được tinh chỉnh, nên chọn riêng một model AI trong \"Ngắt câu và tinh chỉnh\" hoặc tắt chức năng này.",
+    "style": "Nội dung đầu ra",
+    "format": "Định dạng phụ đề",
+    "embeddedSubtitles": "Ưu tiên phụ đề nhúng",
+    "glossary": "Thuật ngữ",
+    "glossaryAllEnabled": "Đã bật toàn cục",
+    "glossaryNone": "Không dùng thuật ngữ",
+    "glossaryCount": "{{count}} bộ thuật ngữ",
+    "glossaryDisabled": "Đã tắt",
+    "glossaryRestoreDefault": "Khôi phục mặc định (bật tất cả)",
+    "glossaryEmpty": "Chưa có bộ thuật ngữ",
+    "glossaryGoManage": "Quản lý thuật ngữ",
+    "glossaryIntro": "Chọn các bộ thuật ngữ tham gia đối chiếu cho tác vụ này. Nếu không chọn, sẽ dùng tất cả bộ thuật ngữ đã bật.",
+    "generateSummary": "Tạo tóm tắt",
+    "summaryProvider": "Dịch vụ tóm tắt",
+    "summaryProviderPlaceholder": "Chọn dịch vụ AI",
+    "summaryProviderMissing": "Chưa có dịch vụ dịch AI nào được cấu hình",
+    "summaryFollowHint": "(theo dịch vụ dịch)",
+    "summaryFollowLabel": "Theo dịch vụ dịch",
+    "summarySkipHint": "Phụ đề ngắn (dưới 20 dòng, hoặc toàn văn có thể dịch xong trong một lô) sẽ tự động bỏ qua tóm tắt.",
+    "summaryNotInjectedHint": "Dịch vụ dịch hiện tại không thể đưa tóm tắt vào prompt, tóm tắt chỉ để đối chiếu."
+  },
+  "manuscript": {
+    "label": "Văn bản tham khảo",
+    "globalLabel": "Văn bản tham khảo toàn cục (dự phòng)",
+    "select": "Chọn TXT / Markdown",
+    "clear": "Xóa văn bản tham khảo",
+    "hint": "Tùy chọn. Sau khi phiên âm, đối chiếu văn bản tham khảo theo thứ tự, chỉ dùng văn bản có độ tin cậy cao để thay kết quả nhận dạng, luôn giữ nguyên dòng thời gian ASR.",
+    "globalHint": "Văn bản tham khảo toàn cục (video chưa chỉ định văn bản riêng sẽ mặc định dùng văn bản này)",
+    "globalAdvancedHint": "Video chưa chỉ định văn bản riêng trong danh sách sẽ mặc định dùng văn bản này để căn chỉnh và sửa lỗi; từng tệp có thể ghi đè hoặc bỏ qua ngay trên dòng. Luôn giữ nguyên dòng thời gian ASR.",
+    "tagSpecific": "Văn bản: {{name}}",
+    "tagGlobal": "Văn bản toàn cục: {{name}}",
+    "addScript": "+ Văn bản tham khảo",
+    "changeScript": "Đổi văn bản",
+    "unlinkScript": "Gỡ văn bản",
+    "skipScript": "Video này không đối chiếu văn bản",
+    "browseLocal": "Chọn tệp cục bộ...",
+    "poolLabel": "Văn bản ứng viên đã nhập",
+    "poolAddedToast": "Đã lưu tạm {{count}} văn bản tham khảo vào nhóm ứng viên, thêm video vào sẽ tự động ghép cặp",
+    "poolSingleAddedToast": "Đã lưu tạm văn bản tham khảo \"{{name}}\", thêm video vào sẽ tự động ghép cặp",
+    "emptyWaitingVideos": "Đã lưu tạm {{count}} văn bản tham khảo chờ ghép cặp, thêm video vào là tự động khớp",
+    "autoMatchedToast": "Đã tự động khớp văn bản tham khảo cùng tên cho {{count}} video",
+    "singleMatchedToast": "Đã liên kết văn bản \"{{scriptName}}\" với video \"{{videoName}}\"",
+    "unmatchedToast": "Không tìm thấy video cùng tên cho văn bản \"{{name}}\", có thể chỉ định thủ công ở dòng video",
+    "chainTooltip": "Đối chiếu văn bản tham khảo: {{matched}}/{{total}} video đã cấu hình văn bản",
+    "unpairedNonBlockingHint": "Video chưa cấu hình văn bản sẽ dùng thẳng kết quả nhận dạng giọng nói, không ảnh hưởng việc bắt đầu tác vụ",
+    "selected": "Đã chọn văn bản tham khảo: {{name}}",
+    "cleared": "Đã xóa văn bản tham khảo",
+    "stageSummary": "Đối chiếu văn bản {{replaced}}/{{total}} dòng, độ tin cậy trung bình {{confidence}}%",
+    "stageWarning": "Đối chiếu văn bản đã quay lui an toàn: {{reason}}",
+    "error": {
+      "unsupported": "Chỉ hỗ trợ văn bản tham khảo TXT, MD hoặc Markdown",
+      "notFound": "Văn bản tham khảo không tồn tại hoặc đã bị di chuyển",
+      "notFile": "Mục đã chọn không phải tệp",
+      "tooLarge": "Văn bản tham khảo không được vượt quá 1 MB",
+      "tooComplex": "Văn bản tham khảo có quá nhiều chữ cần đối chiếu hoặc phân đoạn quá vụn",
+      "empty": "Văn bản tham khảo không có chữ nào để đối chiếu",
+      "invalidEncoding": "Không nhận diện được mã hóa văn bản; hãy dùng UTF-8, UTF-16, GBK hoặc GB18030",
+      "unreadable": "Không đọc được văn bản tham khảo",
+      "noCues": "Phụ đề nguồn không có mục dòng thời gian nào để đối chiếu",
+      "noMatch": "Không có kết quả khớp đạt ngưỡng an toàn, đã giữ nguyên văn bản nhận dạng gốc",
+      "timeline": "Kiểm tra dòng thời gian không đạt, đã giữ nguyên văn bản nhận dạng gốc",
+      "processing": "Có sự cố khi xử lý văn bản, đã giữ nguyên văn bản nhận dạng gốc"
+    }
+  },
+  "notConfigured": "(Chưa cấu hình)",
+  "providerGroup": {
+    "configured": "Đã cấu hình",
+    "notConfigured": "Khác (chưa cấu hình)"
+  },
+  "skippedDuplicates": "Đã bỏ qua {{count}} tệp trùng lặp",
+  "goDownloadModel": "Tải model",
+  "goConfigureProvider": "Cài đặt dịch vụ dịch",
+  "advanced": "Tùy chọn nâng cao",
+  "advancedDesc": "Các cài đặt chi tiết ít khi đổi, giá trị mặc định là thực hành tốt nhất",
+  "outcome": {
+    "label": "Chế độ phụ đề",
+    "recommended": "Đề xuất",
+    "accurate": {
+      "title": "Chữ chính xác nhất",
+      "desc": "Ngắt câu chi tiết nhất, dấu câu đầy đủ nhất, cố gắng giữ nguyên từng câu nói; ở chỗ im lặng/âm nền đôi khi có thêm một hai dòng phụ đề.",
+      "fasterWhisperDesc": "Ưu tiên giữ từ ngắn và giọng nhỏ, cố gắng giảm bỏ sót nội dung; khi có nhiều âm nền có thể thừa phụ đề, thời gian nhận dạng cũng có thể tăng.",
+      "scene": "Phù hợp bài giảng, phỏng vấn, video nói chuyện... chủ yếu là nội dung chữ, cần văn bản đầy đủ nhất"
+    },
+    "balanced": {
+      "title": "Cân bằng",
+      "desc": "Chữ đầy đủ mà gọn, dòng thời gian ổn định, phụ đề thừa ở chỗ im lặng gần như được loại bỏ; lựa chọn an toàn cho đa số video.",
+      "scene": "Phù hợp đa số video, không chắc thì chọn mục này"
+    },
+    "clean": {
+      "title": "Sạch và ổn định nhất",
+      "desc": "Ức chế mạnh nhất phụ đề lặp và phụ đề ảo giác, văn bản kiềm chế nhất; có thể bỏ một vài câu mơ hồ.",
+      "scene": "Phù hợp video dài, hoặc tư liệu có nhạc / tiếng vỗ tay / im lặng kéo dài"
+    },
+    "custom": {
+      "title": "Tùy chỉnh",
+      "desc": "Tự điều chỉnh các tham số nền như độ dài ngữ cảnh, VAD, chống lặp.",
+      "sectionTitle": "Thông số tùy chỉnh",
+      "sherpaNote": "VAD của engine hiện tại (FunASR / Qwen / FireRed / Parakeet) luôn bật theo cấu trúc, và không có khái niệm \"độ dài ngữ cảnh / chống lặp\". Nếu cần tinh chỉnh độ nhạy VAD, hãy điều chỉnh ở trang \"Cài đặt\"."
+    },
+    "compare": {
+      "toggle": "Xem khác biệt phụ đề giữa các hiệu quả",
+      "caption": "Cùng một đoạn giọng nói (cuối có một đoạn ngắn im lặng) ở các mức khác nhau, kết quả hiển thị đại khái như sau:",
+      "accurate": "Hôm nay, chúng ta sẽ nói về tính năng mới này. Cảm ơn đã xem.",
+      "balanced": "Hôm nay chúng ta sẽ nói về tính năng mới này.",
+      "clean": "Hôm nay chúng ta sẽ nói về tính năng mới này"
+    }
+  },
+  "section": {
+    "recognition": "Phiên âm",
+    "output": "Xuất và lưu",
+    "execution": "Thực thi"
+  },
+  "vad": {
+    "label": "Phát hiện hoạt động giọng nói (VAD)",
+    "on": "Nhanh và ổn định hơn: engine whisper tích hợp chỉ nhận dạng trong các đoạn giọng nói được phát hiện, tự động bỏ qua im lặng/âm nền, giảm rõ rệt phụ đề lặp hoặc ảo giác ở đó; phụ đề được căn theo token vào đoạn giọng nói, dòng thời gian khớp với giọng nói và ổn định hơn.",
+    "off": "Văn bản đầy đủ nhất: engine whisper tích hợp chia đoạn chi tiết hơn, dấu câu đầy đủ hơn (khuyên dùng cho tệp ngắn / vừa, tiếng Trung); phụ đề thừa ở chỗ im lặng được kìm bằng ngưỡng năng lượng; các engine khác như faster-whisper vẫn có thể xuất hiện phụ đề lặp hoặc ảo giác ở chỗ im lặng/nhạc.",
+    "hint": "Khi muốn văn bản đầy đủ nhất, chia đoạn chi tiết nhất thì có thể tắt; khi muốn dòng thời gian ổn định nhất, ít chữ thừa nhất ở chỗ im lặng thì nên bật. Chỉ áp dụng cho tác vụ hiện tại."
+  },
+  "reduceRepetition": {
+    "label": "Giảm phụ đề lặp / ảo giác",
+    "on": "Đã bật: ngắt điều kiện ngữ cảnh trước và ức chế lặp, giảm đáng kể phụ đề lặp vòng ở đoạn im lặng/lặp; tính liền mạch của giọng nói sạch có thể giảm nhẹ.",
+    "off": "Đã tắt: dùng mặc định của engine (giữ tính liền mạch ngữ cảnh); video dài hoặc chỗ im lặng có thể xuất hiện phụ đề lặp hoặc ảo giác.",
+    "hint": "Bật khi phụ đề bị lặp nhiều đoạn. Chỉ áp dụng cho tác vụ hiện tại, hỗ trợ faster-whisper và whisper.cpp."
+  },
+  "fasterWhisperAdvanced": {
+    "title": "Thông số giải mã nâng cao",
+    "summary": "Tùy chọn; để trống sẽ dùng giá trị mặc định của engine",
+    "description": "Chỉ có hiệu lực với tác vụ faster-whisper hiện tại. Tham số sẽ được kiểm tra kiểu và phạm vi trước; để trống thì không gửi giá trị ghi đè nào, vẫn dùng chiến lược mặc định của engine.",
+    "runtimeNote": "Cần dùng runtime faster-whisper mới nhất có hỗ trợ truyền tham số nâng cao; runtime cũ hơn có thể bỏ qua một số cài đặt. Có thể kiểm tra và cập nhật tại Trung tâm tài nguyên → Engine.",
+    "rangeError": "Nhập số từ {{min}} đến {{max}}",
+    "integerRangeError": "Nhập số nguyên từ {{min}} đến {{max}}",
+    "reset": "Khôi phục tất cả về mặc định của engine",
+    "fields": {
+      "beam_size": {
+        "label": "Độ rộng beam search (Beam size)",
+        "placeholder": "Mặc định của engine: 5",
+        "hint": "Số nguyên từ 1–20. Giá trị càng lớn thường nhận dạng càng ổn định, nhưng tăng khối lượng tính toán và thời gian."
+      },
+      "best_of": {
+        "label": "Số mẫu ứng viên (Best of)",
+        "placeholder": "Mặc định của engine: 5",
+        "hint": "Số nguyên từ 1–20. Giữ nhiều ứng viên hơn khi lấy mẫu với nhiệt độ khác không, giá trị càng lớn khối lượng tính toán càng cao."
+      },
+      "temperature": {
+        "label": "Nhiệt độ lấy mẫu",
+        "placeholder": "Mặc định của engine: 0.0 → 1.0 lùi thích ứng",
+        "hint": "Phạm vi 0–1. Càng cao càng ngẫu nhiên; đặt một giá trị đơn sẽ thay thế chuỗi lùi nhiều nhiệt độ mặc định của engine."
+      },
+      "compression_ratio_threshold": {
+        "label": "Ngưỡng tỷ lệ nén",
+        "placeholder": "Mặc định của engine: 2.4",
+        "hint": "Phạm vi 0–10. Khi tỷ lệ nén văn bản vượt giá trị này sẽ kích hoạt giải mã lùi; quá thấp có thể tăng số lần thử lại."
+      },
+      "log_prob_threshold": {
+        "label": "Ngưỡng log xác suất trung bình",
+        "placeholder": "Mặc định của engine: -1.0",
+        "hint": "Phạm vi -5–0. Khi log xác suất trung bình thấp hơn giá trị này sẽ kích hoạt giải mã lùi."
+      },
+      "no_speech_threshold": {
+        "label": "Ngưỡng không có giọng nói",
+        "placeholder": "Mặc định của engine: 0.6",
+        "hint": "Phạm vi 0–1. Kết hợp với ngưỡng log xác suất để quyết định có bỏ qua đoạn không có giọng nói; càng thấp càng dễ bỏ qua."
+      }
+    }
+  },
+  "subtitleLength": {
+    "label": "Cách ngắt câu",
+    "modeSmart": "Ngắt câu tiêu chuẩn (mặc định)",
+    "modeUnlimited": "Không giới hạn độ dài",
+    "modeCustom": "Giới hạn số chữ tùy chỉnh",
+    "modeAi": "Ngắt câu ngữ nghĩa bằng AI (giống người làm hơn)",
+    "hintSmart": "Tự động ngắt câu theo chỗ ngừng khi nói và dấu câu, mỗi dòng phụ đề giữ độ dài dễ đọc. Không tốn chi phí, dùng ngay.",
+    "hintUnlimited": "Chỉ ngắt câu ở chỗ ngừng khi nói và dấu câu, không buộc tách theo số chữ, mỗi dòng phụ đề có thể khá dài.",
+    "hintCustom": "Khi vượt giới hạn sẽ tách ở dấu câu hoặc ranh giới từ, không tách rời từ.",
+    "hintAi": "AI ngắt câu theo ngữ nghĩa, số và cụm từ cố định không bị cắt ngang. Cần nhà cung cấp AI, nếu thất bại sẽ tự động quay về ngắt câu tiêu chuẩn."
+  },
+  "chinesePunctuation": {
+    "label": "Bỏ dấu câu phụ đề tiếng Trung",
+    "hint": "Thay dấu câu tiếng Trung (，。、？！ v.v.) trong phụ đề tiếng Trung bằng khoảng trắng và bỏ khoảng trắng cuối dòng để phụ đề gọn gàng hơn. Khi ngôn ngữ nguồn là tiếng Trung áp dụng cho phụ đề nguồn, khi đích là tiếng Trung áp dụng cho bản dịch."
+  },
+  "speakerDiarization": {
+    "warnings": {
+      "SPEAKER_DIARIZATION_AUDIO_UNAVAILABLE": "Chưa thực hiện tách người nói: âm thanh của tệp không khả dụng, hãy kiểm tra tệp nguồn rồi thử lại.",
+      "SPEAKER_DIARIZATION_MODEL_UNAVAILABLE": "Chưa thực hiện tách người nói: model hoặc thư viện chạy không khả dụng, hãy cài đặt ở trang Engine rồi thử lại.",
+      "SPEAKER_DIARIZATION_INFERENCE_FAILED": "Tách người nói thất bại, phụ đề đã được giữ lại. Xem nhật ký và thử lại.",
+      "SPEAKER_DIARIZATION_EMPTY_RESULT": "Tách người nói không phát hiện giọng nói hợp lệ, phụ đề đã được giữ lại.",
+      "SPEAKER_DIARIZATION_SUBTITLE_UNAVAILABLE": "Đã nhận diện người nói, nhưng không có phụ đề nào để ghi nhãn. Thông tin người nói đã được lưu vào dữ liệu chỉnh sửa.",
+      "SPEAKER_DIARIZATION_ANNOTATION_FAILED": "Ghi nhãn người nói thất bại, thông tin người nói đã được giữ trong dữ liệu chỉnh sửa, hãy xem nhật ký.",
+      "SPEAKER_DIARIZATION_IMPORTED_SUBTITLE_PROTECTED": "Phụ đề nhập vào được giữ nguyên, thông tin người nói đã lưu vào dữ liệu chỉnh sửa, không ghi nhãn vào tệp gốc."
+    },
+    "label": "Tách người nói",
+    "hint": "Sau khi phiên âm và dịch xong, phân tích toàn bộ âm thanh ở máy cục bộ, tách lời nói theo từng người nói và căn vào từng dòng phụ đề. Thời gian tỷ lệ thuận với độ dài âm thanh, có thể chọn có ghi nhãn người nói vào tệp phụ đề xuất ra hay không.",
+    "modelReady": "Thư viện chạy và model đã sẵn sàng",
+    "modelMissing": "Chưa sẵn sàng",
+    "modelMissingHint": "Trước khi bắt đầu cần cài thư viện chạy và model tách người nói; cũng có thể tắt tách người nói. Cấu hình ở trang \"Engine\".",
+    "speakerCount": "Số người nói",
+    "speakerCountHint": "Khi biết số người, chỉ định thường ổn định hơn",
+    "autoDetect": "Tự động xác định",
+    "embedInSubtitle": "Ghi nhãn người nói vào tệp phụ đề",
+    "embedInSubtitleHint": "Sau khi tắt, các tệp SRT/TXT... xuất ra không chứa nhãn; thông tin người nói chỉ lưu trong dữ liệu chỉnh sửa của ứng dụng.",
+    "summaryLabel": "Tách người nói",
+    "summaryAuto": "Tự xác định số người",
+    "summaryKnown": "{{count}} người",
+    "summaryEmbedded": "Ghi vào phụ đề",
+    "summaryMetadataOnly": "Chỉ trong ứng dụng"
+  },
+  "refine": {
+    "provider": {
+      "label": "Nhà cung cấp tinh chỉnh",
+      "follow": "Theo dịch vụ dịch (hiện tại: {{name}})",
+      "followUnavailable": "Theo dịch vụ dịch (hiện không xác định được)",
+      "followBlocked": "Dịch vụ dịch chưa bật hoặc không phải loại AI, hãy chọn rõ một nhà cung cấp AI.",
+      "hint": "Ngắt câu ngữ nghĩa AI và chỉnh sửa phụ đề dùng chung nhà cung cấp này. Mặc định theo dịch vụ dịch; cũng có thể chỉ định riêng (ví dụ dịch bằng model lớn, tinh chỉnh bằng Ollama cục bộ để tiết kiệm chi phí)."
+    },
+    "approxNote": "Engine phiên âm hiện tại không có mốc thời gian theo từ, ngắt câu AI sẽ dùng dòng thời gian xấp xỉ (nội suy theo tỷ lệ trong từng dòng).",
+    "summary": {
+      "segmentation": "Ngắt câu ngữ nghĩa",
+      "correction": "Chỉnh sửa phụ đề"
+    },
+    "control": {
+      "label": "Ngắt câu và tinh chỉnh",
+      "title": "Ngắt câu và tinh chỉnh",
+      "intro": "Quyết định phụ đề được ngắt thế nào, có cần AI giúp sửa văn bản không. Nếu tính năng AI thất bại sẽ tự động quay lui, không tệ hơn so với khi không bật.",
+      "state": {
+        "smart": "Ngắt câu tiêu chuẩn",
+        "unlimited": "Không giới hạn độ dài",
+        "custom": "≤ {{n}} chữ",
+        "ai": "Ngắt câu AI",
+        "corrSuffix": " · Chỉnh sửa",
+        "warningSuffix": " (chờ cấu hình nhà cung cấp)"
+      },
+      "corrLabel": "Chỉnh sửa văn bản bằng AI",
+      "corrHint": "Tự động sửa lỗi chính tả đồng âm, xóa từ đệm như \"ờ, ừm\", chuẩn hóa dấu câu và chữ hoa/thường tiếng Anh; không thay đổi dòng thời gian.",
+      "maxCharsLabel": "Số chữ tối đa mỗi dòng",
+      "maxCharsPlaceholder": "Để trống = mặc định thông minh (khoảng 20 chữ Hán)",
+      "maxCharsHint": "Tiếng Trung tính số chữ Hán ×2 (ví dụ 40 ≈ 20 chữ Hán), tiếng Anh tính theo số ký tự. Khi quá dài sẽ tách an toàn ở ranh giới từ, không tách rời từ."
+    }
+  },
+  "stage": {
+    "extract": "Trích xuất",
+    "transcribe": "Phiên âm",
+    "refine": "Tối ưu",
+    "manuscript": "Đối chiếu văn bản",
+    "summarize": "Tóm tắt",
+    "translate": "Dịch",
+    "speakerDiarization": "Tách người nói",
+    "export": "Xuất phụ đề",
+    "dubbing": "Lồng tiếng",
+    "compose": "Ghép phụ đề"
+  },
+  "summarize": {
+    "error": {
+      "skipped-trivial": "Phụ đề ngắn hoặc có thể dịch xong trong một lô, đã bỏ qua tóm tắt",
+      "skipped-resume": "Lần chạy tiếp dùng lại bản dịch có sẵn, chưa tạo tóm tắt",
+      "empty": "Kết quả tóm tắt trống, đã tiếp tục dịch",
+      "empty-after-think-strip": "Tóm tắt chỉ chứa nội dung suy nghĩ, đã bỏ qua",
+      "provider-unresolved": "Không xác định được dịch vụ tóm tắt, đã bỏ qua",
+      "provider-not-ai": "Dịch vụ tóm tắt không phải AI, đã bỏ qua",
+      "provider-unconfigured": "Dịch vụ tóm tắt chưa cấu hình xong, đã bỏ qua",
+      "call-failed": "Gọi tóm tắt thất bại, đã tiếp tục dịch"
+    }
+  },
+  "gate": {
+    "subtitle": "Chỉnh sửa phụ đề",
+    "dubbing": "Xác nhận lồng tiếng",
+    "reviewBadge": "Chờ chỉnh sửa",
+    "reviewTooltip": "Tệp này đang chờ bạn chỉnh sửa, xử lý xong sẽ tự động tiếp tục",
+    "review": "Chỉnh sửa",
+    "inspectDubbing": "Kiểm tra lồng tiếng",
+    "release": "Cho qua",
+    "releaseAndNext": "Cho qua và tiếp tục tệp kế",
+    "releaseAndFinish": "Cho qua và tiếp tục",
+    "inspectorLabel": "Chỉnh sửa phụ đề · Tệp {{index}} / {{total}}",
+    "barSubtitle": "{{count}} tệp đang chờ chỉnh sửa phụ đề",
+    "barDubbing": "{{count}} tệp đang chờ xác nhận lồng tiếng",
+    "reviewOneByOne": "Chỉnh sửa từng tệp",
+    "releaseAll": "Cho qua tất cả",
+    "releaseAllTitle": "Cho qua tất cả?",
+    "releaseAllDesc": "{{count}} tệp sẽ không chờ chỉnh sửa nữa mà tiếp tục xử lý các bước sau (lồng tiếng/ghép có thể tốn thời gian và chi phí).",
+    "releaseAllConfirm": "Cho qua tất cả",
+    "releaseAllCancel": "Hủy"
+  },
+  "row": {
+    "aiCorrectionValidationFailed": "{{count}} dòng chỉnh sửa AI không qua kiểm tra, đã giữ nguyên bản gốc. Kiểm tra ở trang chỉnh sửa rồi thử lại.",
+    "cancelling": "Đang hủy…",
+    "proofread": "Chỉnh sửa",
+    "openFolder": "Mở thư mục chứa tệp",
+    "retry": "Thử lại",
+    "remove": "Gỡ bỏ",
+    "embeddedSubtitle": "Trích trực tiếp phụ đề mềm nhúng (đã bỏ qua nhận dạng giọng nói/ASR)",
+    "speakerDiarizationMetadataSaveFailed": "Đã tách người nói xong, nhưng ghi metadata người nói thất bại; xử lý phụ đề vẫn tiếp tục, hãy xem nhật ký rồi thử lại.",
+    "translationFailureWarning": "Có {{count}} chỗ dịch chưa hoàn thành, có thể kiểm tra và thử lại trong chỉnh sửa",
+    "translationIncompletePipelinePaused": "Có {{count}} chỗ dịch chưa hoàn thành, đã tạm dừng các bước sau (hãy thử lại các dòng lỗi trong chỉnh sửa)",
+    "translationIncompleteForDubbing": "Dịch chưa hoàn thành, không thể lồng tiếng (hãy thử lại các dòng lỗi trong chỉnh sửa trước)",
+    "translationIncompleteForCompose": "Dịch chưa hoàn thành, không thể ghép video (hãy thử lại các dòng lỗi trong chỉnh sửa trước)",
+    "speechReviewing": "Đang tự động rà soát giọng nói",
+    "speechRecovered": "Đã bổ sung lại {{count}} đoạn",
+    "missedSpeechWarning": "Kết quả nhận dạng có {{count}} chỗ cần rà soát (mức cao nhất: {{level}}), hãy mở chỉnh sửa để xem",
+    "missedSpeechLevel": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao"
+    },
+    "proofreadTxtUnsupported": "Tệp TXT không chứa dòng thời gian, chưa hỗ trợ chỉnh sửa. Tạo SRT/VTT/ASS để chỉnh sửa, hoặc chỉnh sửa xong rồi lưu thành TXT.",
+    "proofreadTxtUnsupportedShort": "TXT không hỗ trợ chỉnh sửa"
+  },
+  "waiting": "Đang chờ",
+  "interrupted": "Lần chạy trước bị gián đoạn, bấm Thử lại để tiếp tục",
+  "completion": {
+    "title": "{{done}} tệp đã hoàn thành",
+    "sampleTitle": "Hoàn thành mẫu, bản phụ đề đầu tiên của bạn đã sẵn sàng!",
+    "sampleHint": "Có thể sang chỉnh sửa xem kết quả, hoặc quay về Launchpad để xử lý tệp của riêng bạn",
+    "backHome": "Về Launchpad",
+    "failed": "{{failed}} thất bại",
+    "goProofread": "Chỉnh sửa phụ đề",
+    "goMerge": "Ghép vào video",
+    "goDubbing": "Lồng tiếng",
+    "openFolder": "Mở thư mục",
+    "retryFailed": "Thử lại tác vụ lỗi",
+    "allFailedTitle": "Cả {{failed}} tệp đều xử lý thất bại",
+    "someFailedTitle": "{{failed}} tệp xử lý thất bại",
+    "dismiss": "Đóng"
+  },
+  "logs": {
+    "title": "Nhật ký (tác vụ này)",
+    "clear": "Xóa",
+    "empty": "Chưa có nhật ký"
+  },
+  "empty": {
+    "dragMedia": "Cũng có thể kéo tệp media hoặc thư mục trực tiếp vào trang này",
+    "dragMediaAndManuscript": "Có thể kéo cùng lúc media và văn bản tham khảo (.txt/.md) hoặc thư mục vào, bấm \"Nhập\" cũng có thể chọn đồng thời",
+    "dragSubtitle": "Cũng có thể kéo tệp phụ đề hoặc thư mục trực tiếp vào trang này",
+    "mediaFormats": "Hỗ trợ 29 định dạng video và âm thanh phổ biến như MP4 / MKV / MOV / MP3 / WAV",
+    "mediaAndManuscriptFormats": "Hỗ trợ âm thanh/video phổ biến như MP4 / MKV / MP3, có thể nhập đồng thời văn bản tham khảo TXT / MD cùng tên để tự động ghép cặp và sửa lỗi",
+    "subtitleFormats": "Hỗ trợ phụ đề SRT / VTT / ASS / SSA / LRC",
+    "step1": "Nhập tệp",
+    "step2": "Kiểm tra cấu hình",
+    "step2Desc": "Chọn engine, model và ngôn ngữ ở thanh phía trên; cài đặt nâng cao ở góc trên bên phải",
+    "step3": "Bắt đầu tác vụ",
+    "step3Desc": "Bấm nút bắt đầu ở góc dưới bên phải, xử lý hàng loạt và xem tiến độ theo thời gian thực"
+  },
+  "import": "Nhập",
+  "clearList": "Xóa danh sách",
+  "taskCount": "{{count}} tác vụ",
+  "view": {
+    "list": "Dạng danh sách",
+    "grid": "Dạng lưới"
+  },
+  "listCleared": "Đã xóa danh sách tệp",
+  "modeSwitch": {
+    "confirmTitle": "Chuyển chế độ tác vụ",
+    "incompatibleDesc": "Danh sách hiện tại có tệp không tương thích với chế độ đích, chuyển chế độ sẽ xóa danh sách. Tiếp tục không?",
+    "busyHint": "Tác vụ đang chạy, không thể chuyển chế độ tác vụ",
+    "confirm": "Xóa và chuyển",
+    "cancel": "Hủy",
+    "saveFailed": "Lưu chuyển chế độ thất bại, hãy thử lại"
+  },
+  "meta": {
+    "etaMin": "Còn khoảng {{min}} phút",
+    "etaLessMin": "Sắp xong"
+  },
+  "presets": {
+    "layout": {
+      "label": "Bố cục phụ đề xuất ra",
+      "original": "Giữ nguyên xuống dòng gốc",
+      "twoLine": "Hai dòng gọn (mỗi ngôn ngữ một dòng)",
+      "width": "Độ rộng mục tiêu một dòng (tiếng Trung tính 2)"
+    },
+    "language": {
+      "fillers": "Chiến lược xử lý từ đệm khi AI chỉnh sửa",
+      "legacy": "Chỉnh sửa mặc định",
+      "removeHesitations": "Tự động bỏ từ ngập ngừng vô nghĩa",
+      "preserve": "Giữ các từ cảm thán biểu cảm",
+      "translation": "Phong cách dịch",
+      "neutral": "Dịch thông thường",
+      "conversational": "Giàu cảm xúc, văn nói (AI)"
+    },
+    "controls": {
+      "vadThreshold": "Ngưỡng giọng nói VAD",
+      "vadMinSpeechDuration": "Giọng nói ngắn nhất (mili giây)",
+      "vadMinSilenceDuration": "Im lặng ngắn nhất (mili giây)",
+      "vadMaxSpeechDuration": "Giọng nói dài nhất (giây, 0 là không giới hạn)",
+      "vadSpeechPad": "Đệm hai đầu giọng nói (mili giây)",
+      "vadSamplesOverlap": "Chồng lấn mẫu (giây)",
+      "subtitleMaxDuration": "Thời lượng tối đa mỗi dòng phụ đề (giây)",
+      "subtitleMaxGap": "Khoảng ngừng để ngắt câu (giây)",
+      "preserveSpeechPauses": "Giữ quãng ngừng của giọng gốc"
+    },
+    "title": "Mẫu theo bối cảnh",
+    "customHint": "Chỉnh các thông số bên dưới sẽ tự chuyển sang chế độ tùy chỉnh",
+    "interview": {
+      "name": "Phỏng vấn / Podcast",
+      "desc": "Cắt câu ngắn, gom cụm người nói cục bộ, giữ quãng ngừng của giọng gốc; cần model tách người nói"
+    },
+    "lecture": {
+      "name": "Khóa học / Bài giảng / Hướng dẫn",
+      "desc": "VAD và chống lặp, chỉnh thuật ngữ bằng AI, tự động bỏ từ ngập ngừng; cần dịch vụ tinh chỉnh AI"
+    },
+    "movie": {
+      "name": "Phim / Vlog",
+      "desc": "Hai dòng gọn, ngắt câu tự nhiên, giữ cảm xúc; khi dịch cần dịch vụ AI khẩu ngữ"
+    },
+    "shortDrama": {
+      "name": "Phim ngắn / Video ngắn",
+      "desc": "Câu ngắn hai dòng gọn, giữ cảm xúc và quãng ngừng; khi dịch cần dịch vụ AI khẩu ngữ"
+    },
+    "balanced": {
+      "name": "Cân bằng (thông dụng)",
+      "desc": "Cân bằng tốc độ phiên âm và độ ổn định ngắt câu, phù hợp đại đa số bối cảnh thông thường"
+    },
+    "custom": {
+      "name": "Tùy chỉnh nâng cao",
+      "desc": "Tự do cấu hình các tham số nền như Beam Size, độ nhạy VAD và lọc ảo giác"
+    }
+  },
+  "configLoad": {
+    "loading": "Đang đọc cấu hình tác vụ…",
+    "failed": "Đọc cấu hình tác vụ thất bại, tạm thời không thể chỉnh sửa hoặc chạy.",
+    "repair": "Kiểm tra quyền đọc của thư mục cấu hình và kết nối thiết bị lưu trữ, rồi thử lại."
+  },
+  "speechReview": {
+    "title": "Kết quả tự động rà soát",
+    "description": "Các nội dung dưới đây đã qua hai lần kiểm tra tính nhất quán của nhận dạng cục bộ và được tự động bổ sung. Vẫn nên nghe thử xác nhận khi chỉnh sửa.",
+    "before": "Nhận dạng gốc:",
+    "after": "Sau rà soát:",
+    "empty": "(không có chữ)",
+    "retimed": "Đã chỉnh thời gian {{count}} đoạn",
+    "original": "Xem bản sao lưu phụ đề trước khi rà soát",
+    "openFailed": "Không thể mở vị trí sao lưu",
+    "unavailable": "Chưa hoàn thành tự động rà soát",
+    "unavailableDetail": "Đã giữ kết quả nhận dạng lần đầu, có thể kiểm tra các chỗ nghi bị nghe sót ở trang chỉnh sửa.",
+    "timingDescription": "Đã chỉnh các mốc thời gian lệch rõ rệt với điều kiện chữ khớp nhau. Có thể nghe thử khi chỉnh sửa, hoặc xem bản sao lưu phụ đề trước khi rà soát."
+  },
+  "activity": {
+    "phase": {
+      "idle": "Chờ bắt đầu",
+      "checking": "Đang kiểm tra kết quả nhận dạng và điều kiện chạy",
+      "queued": "Đang xếp hàng chờ xử lý",
+      "preparing": "Đang chuẩn bị nhận dạng giọng nói",
+      "loadingModel": "Đang nạp model nhận dạng",
+      "readingAudio": "Đang đọc âm thanh",
+      "recognizing": "Đang nhận dạng giọng nói",
+      "requesting": "Đang chờ phản hồi từ dịch vụ",
+      "reviewing": "Đang rà soát giọng nói",
+      "segmenting": "Ngắt câu AI",
+      "correcting": "Chỉnh sửa AI",
+      "validating": "Đang kiểm tra kết quả ngắt câu",
+      "aligning": "Đang căn dòng thời gian",
+      "interval": "Chờ theo cấu hình dịch vụ",
+      "retrying": "Đang yêu cầu lại",
+      "organizing": "Đang sắp xếp phụ đề",
+      "saving": "Đang lưu phụ đề",
+      "translating": "Đang dịch phụ đề",
+      "repairing": "Đang dịch lại các dòng không đạt"
+    },
+    "count": {
+      "batches": "Đã xử lý {{completed}}/{{total}} lô",
+      "cues": "Đã xử lý {{completed}}/{{total}} dòng",
+      "chunks": "Đã xử lý {{completed}}/{{total}} đoạn"
+    },
+    "cancelling": "Đang hủy, chờ bên thực thi kết thúc",
+    "audioPosition": "Đã nhận dạng đến {{position}}{{total}}",
+    "activeBatches": "{{count}} lô đang xử lý",
+    "elapsed": "Đã dùng {{seconds}} giây",
+    "requestElapsed": "Yêu cầu gửi sớm nhất đã chờ {{seconds}} giây",
+    "segmentElapsed": "Đoạn giọng nói hiện tại đã xử lý {{seconds}} giây",
+    "noResponse": "Yêu cầu này chưa có phản hồi",
+    "noUpdate": "Chưa nhận được tiến độ xử lý mới",
+    "coremlFirstRun": "Model này lần đầu dùng CoreML, hệ thống chuẩn bị có thể mất khá lâu.",
+    "sourceSaved": "Đã lưu kết quả nhận dạng, đang tối ưu phụ đề.",
+    "details": "Xem chi tiết xử lý",
+    "batch": "Lô {{index}}",
+    "segment": "Đoạn {{index}}",
+    "waitUntil": "Chờ {{seconds}} giây rồi gửi yêu cầu",
+    "validationRetry": "Kiểm tra kết quả không đạt, đang yêu cầu lại lần {{retry}}/{{max}}",
+    "requestRetry": "Yêu cầu thất bại, đang thử lại lần {{retry}}/{{max}}",
+    "segmentationSummary": "Đã xử lý ngắt câu: {{accepted}} lô dùng kết quả AI, {{fallback}} lô dùng ngắt câu theo quy tắc",
+    "correctionSummary": "{{count}} dòng chỉnh sửa không đạt, giữ nguyên văn bản trước khi chỉnh",
+    "saveFailed": "Kết quả tối ưu chưa được lưu, đã giữ phụ đề đầu vào.",
+    "fallbackWarning": "Một phần hoặc toàn bộ ngắt câu AI không đạt, đã dùng ngắt câu theo quy tắc.",
+    "preparingRefine": "Đang chuẩn bị tối ưu phụ đề",
+    "waitingAi": "Đang chờ AI trả về",
+    "translation": {
+      "preparing": "Đang chuẩn bị dịch",
+      "requesting": "Đang chờ dịch vụ dịch trả về",
+      "validating": "Đang kiểm tra bản dịch",
+      "saving": "Đang ghi bản dịch",
+      "received": "Đã nhận {{completed}}/{{total}} lô",
+      "saved": "Đã ghi {{count}} lô"
+    },
+    "status": {
+      "idle": "Chờ bắt đầu",
+      "queued": "Xếp hàng chờ xử lý",
+      "running": "Đang {{stage}}",
+      "gate": "Chờ bạn xác nhận: {{stage}}",
+      "done": "Xử lý hoàn tất",
+      "cancelled": "Đã hủy",
+      "cancelling": "Đang hủy, chờ bên thực thi kết thúc",
+      "error": "Xử lý thất bại",
+      "interrupted": "Tác vụ đã bị ngắt, chờ thử lại",
+      "paused": "Đã tạm dừng, chờ tiếp tục"
+    }
+  }
+}

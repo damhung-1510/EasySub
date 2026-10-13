@@ -99,6 +99,7 @@ function FlowNode({
 const ONBOARDING_LANGS = [
   { value: 'zh', label: '中文' },
   { value: 'en', label: 'English' },
+  { value: 'vi', label: 'Tiếng Việt' },
 ];
 
 const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
@@ -112,7 +113,9 @@ const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
   const { locale } = router.query;
   const currentLang = (i18n.language || '').toLowerCase().startsWith('zh')
     ? 'zh'
-    : 'en';
+    : (i18n.language || '').toLowerCase().startsWith('vi')
+      ? 'vi'
+      : 'en';
 
   /**
    * 引导内切换界面语言：持久化到设置，并只替换当前路由的 locale 段（保留页面与查询），

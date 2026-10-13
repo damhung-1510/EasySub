@@ -1,0 +1,118 @@
+{
+  "scope": { "project": "Chỉ dự án hiện tại", "global": "Toàn cục" },
+  "list": {
+    "title": "Bảng thuật ngữ",
+    "priorityHint": "Ưu tiên từ trên xuống",
+    "toggleAria": "Bật hoặc tắt bảng thuật ngữ \"{{name}}\"",
+    "entryCount": "{{count}} mục"
+  },
+  "status": {
+    "enabled": "Đã bật",
+    "disabled": "Đã tắt"
+  },
+  "actions": {
+    "addGlossary": "Tạo bảng thuật ngữ",
+    "editGlossary": "Sửa bảng thuật ngữ",
+    "deleteGlossary": "Xóa bảng thuật ngữ",
+    "moveUp": "Tăng mức ưu tiên bảng thuật ngữ",
+    "moveDown": "Giảm mức ưu tiên bảng thuật ngữ",
+    "backToList": "Quay lại danh sách bảng thuật ngữ",
+    "addEntry": "Thêm mục",
+    "editEntry": "Sửa mục",
+    "deleteEntry": "Xóa mục",
+    "import": "Nhập",
+    "export": "Xuất",
+    "exportCsv": "Xuất CSV",
+    "exportTxt": "Xuất TXT",
+    "downloadCsvTemplate": "Tải mẫu CSV",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "saving": "Đang lưu…",
+    "delete": "Xóa"
+  },
+  "empty": {
+    "noGlossaries": "Chưa có bảng thuật ngữ nào",
+    "noGlossariesHint": "Tạo nhiều bảng thuật ngữ theo bộ phim hoặc lĩnh vực, khi cần dùng thì bật công tắc kích hoạt.",
+    "selectGlossary": "Chọn một bảng thuật ngữ",
+    "selectGlossaryHint": "Thuật ngữ dự án chỉ có hiệu lực trong dự án sở hữu, thuật ngữ toàn cục có hiệu lực trên mọi dự án.",
+    "noEntries": "Bảng thuật ngữ này chưa có mục nào",
+    "noEntriesHint": "Thêm mục mới, hoặc nhập hàng loạt từ tệp CSV / TXT.",
+    "noSearchResults": "Không có mục phù hợp",
+    "noSearchResultsHint": "Có thể tìm theo văn bản gốc, bản dịch hoặc ghi chú."
+  },
+  "format": {
+    "templateHint": "Các cột của mẫu là source, target, note, ghi chú là tùy chọn; khi cần giữ nguyên vẹn nội dung các trường, khuyến nghị dùng CSV.",
+    "txtExportHint": "TXT sẽ thay các ký tự xuống dòng và tab trong văn bản gốc, bản dịch và ghi chú bằng dấu cách; cần giữ nguyên bản hãy dùng CSV."
+  },
+  "aiGuide": {
+    "title": "Dịch bằng AI tự động dùng các bảng thuật ngữ đã bật",
+    "description": "Mỗi lô AI/LLM chỉ đưa vào các mục khớp trong dự án hiện tại và bảng thuật ngữ toàn cục. Thuật ngữ dự án được ưu tiên hơn thuật ngữ toàn cục, trong cùng phạm vi sẽ dùng mục đã bật nằm trên cùng trong danh sách, xung đột sẽ được ghi vào nhật ký."
+  },
+  "traditionalGuide": {
+    "title": "Với dịch máy truyền thống, hãy quản lý thuật ngữ trong bảng điều khiển của nhà cung cấp",
+    "description": "Bảng thuật ngữ trong ứng dụng không làm thay đổi kết quả của các dịch vụ dịch máy truyền thống như Baidu, Alibaba, Volcano, Tencent; nếu nhà cung cấp hỗ trợ kho thuật ngữ, hãy cấu hình trong bảng điều khiển tương ứng.",
+    "providers": {
+      "baidu": "Baidu Translate",
+      "aliyun": "Alibaba Cloud",
+      "volc": "Volcano Engine",
+      "tencent": "Tencent Cloud"
+    }
+  },
+  "search": {
+    "placeholder": "Tìm văn bản gốc, bản dịch hoặc ghi chú",
+    "resultCount": "Tìm thấy {{count}} mục"
+  },
+  "fields": {
+    "source": "Văn bản gốc",
+    "target": "Bản dịch",
+    "note": "Ghi chú",
+    "actions": "Thao tác"
+  },
+  "glossaryDialog": {
+    "addTitle": "Tạo bảng thuật ngữ",
+    "editTitle": "Sửa bảng thuật ngữ",
+    "description": "Thứ tự bảng thuật ngữ quyết định mức ưu tiên khi văn bản gốc giống nhau bị xung đột.",
+    "name": "Tên bảng thuật ngữ",
+    "namePlaceholder": "Ví dụ: Tên nhân vật mùa 1",
+    "descriptionLabel": "Mô tả (tùy chọn)",
+    "descriptionPlaceholder": "Ghi lại bộ phim, lĩnh vực áp dụng hoặc quy ước sử dụng"
+  },
+  "entryDialog": {
+    "addTitle": "Thêm mục",
+    "editTitle": "Sửa mục",
+    "description": "Điền bằng văn bản thuần, không cần biểu thức chính quy. Từ chữ Latin sẽ được khớp theo ranh giới từ, tránh nhầm với chuỗi con.",
+    "sourcePlaceholder": "Ví dụ: Alice, C++, Dr. Smith",
+    "targetPlaceholder": "Ví dụ: Ai-li-xơ",
+    "notePlaceholder": "Nhân vật, ngữ cảnh hoặc ghi chú khác (tùy chọn)"
+  },
+  "deleteGlossary": {
+    "title": "Xóa toàn bộ bảng thuật ngữ?",
+    "description": "Bảng thuật ngữ \"{{name}}\" cùng {{count}} mục trong đó sẽ bị xóa vĩnh viễn."
+  },
+  "deleteEntry": {
+    "title": "Xóa mục?",
+    "description": "Văn bản gốc \"{{source}}\" sẽ bị xóa khỏi bảng thuật ngữ hiện tại."
+  },
+  "toasts": {
+    "glossaryCreated": "Đã tạo bảng thuật ngữ",
+    "glossaryUpdated": "Đã cập nhật bảng thuật ngữ",
+    "glossaryDeleted": "Đã xóa bảng thuật ngữ",
+    "entryCreated": "Đã thêm mục",
+    "entryUpdated": "Đã cập nhật mục",
+    "entryDeleted": "Đã xóa mục",
+    "imported": "Nhập hoàn tất: thêm {{added}}, cập nhật {{updated}}, bỏ qua {{skipped}}",
+    "exported": "Đã xuất bảng thuật ngữ",
+    "templateExported": "Đã xuất mẫu CSV"
+  },
+  "errors": {
+    "GLOSSARY_NAME_REQUIRED": "Hãy nhập tên bảng thuật ngữ",
+    "DUPLICATE_GLOSSARY_NAME": "Đã có bảng thuật ngữ trùng tên",
+    "GLOSSARY_NOT_FOUND": "Bảng thuật ngữ không tồn tại hoặc đã bị xóa",
+    "ENTRY_SOURCE_REQUIRED": "Hãy nhập văn bản gốc",
+    "ENTRY_TARGET_REQUIRED": "Hãy nhập bản dịch",
+    "DUPLICATE_ENTRY_SOURCE": "Bảng thuật ngữ hiện tại đã có văn bản gốc giống vậy",
+    "UNSUPPORTED_FILE_TYPE": "Chỉ hỗ trợ tệp CSV hoặc TXT",
+    "NO_VALID_ENTRIES": "Trong tệp không có mục hợp lệ nào để nhập",
+    "generic": "Thao tác thất bại, hãy xem nhật ký rồi thử lại"
+  }
+}

@@ -251,7 +251,7 @@ app.on('before-quit', (event) => {
   }
 
   const settings = store.get('settings');
-  const userLanguage = settings?.language || 'zh'; // 默认为中文
+  const userLanguage = settings?.language || 'vi'; // 默认为越南语
 
   let desktopWindow: Electron.BrowserWindow | undefined;
   let updaterRegistered = false;

@@ -1,0 +1,132 @@
+{
+  "title": "Tham số tùy chỉnh",
+  "subtitle": "Cấu hình header và tham số body riêng cho nhà cung cấp này",
+  "actions": {
+    "export": "Xuất",
+    "import": "Nhập",
+    "refresh": "Tải lại",
+    "addParameter": "Thêm tham số",
+    "duplicate": "Nhân bản",
+    "cancel": "Hủy"
+  },
+  "tabs": {
+    "headers": "Header",
+    "bodyParameters": "Tham số body"
+  },
+  "headers": {
+    "title": "Header HTTP",
+    "description": "Header tùy chỉnh gửi kèm mỗi yêu cầu API (ví dụ: xác thực, phiên bản API)"
+  },
+  "bodyParameters": {
+    "title": "Tham số body",
+    "description": "Tham số tùy chỉnh thêm vào body yêu cầu API (ví dụ: cài đặt model, hành vi phản hồi)"
+  },
+  "search": {
+    "placeholder": "Tìm tham số..."
+  },
+  "more": {
+    "label": "Thêm",
+    "search": "Tìm tham số",
+    "import": "Nhập JSON",
+    "export": "Xuất JSON",
+    "refresh": "Tải lại từ ổ đĩa"
+  },
+  "addDialog": {
+    "title": "Thêm tham số mới",
+    "description": "Tạo tham số tùy chỉnh mới cho nhà cung cấp này.",
+    "fields": {
+      "key": "Khóa tham số",
+      "category": "Nhóm",
+      "type": "Kiểu",
+      "initialValue": "Giá trị ban đầu"
+    },
+    "placeholders": {
+      "key": "Ví dụ: temperature, max_tokens",
+      "initialValue": "Nhập giá trị ban đầu"
+    },
+    "tooltips": {
+      "initialValue": "Giá trị ban đầu của tham số mới"
+    }
+  },
+  "types": {
+    "string": "Chuỗi",
+    "integer": "Số nguyên",
+    "float": "Số thực",
+    "boolean": "Boolean",
+    "object": "Đối tượng",
+    "array": "Mảng"
+  },
+  "table": {
+    "emptyValue": "Hãy nhập giá trị tham số trước khi lưu.",
+    "keyColumn": "Tên tham số",
+    "valueColumn": "Giá trị",
+    "typeColumn": "Kiểu",
+    "actionColumn": "Hành động",
+    "keyPlaceholder": "Ví dụ: temperature",
+    "valuePlaceholder": "Ví dụ: 0.3",
+    "stringPlaceholder": "Ví dụ: hello",
+    "numberPlaceholder": "Ví dụ: 0.3",
+    "arrayPlaceholder": "[1, 2, 3]",
+    "arrayHint": "Mảng JSON, ví dụ [1, 2, 3] hoặc [\"a\", \"b\"]",
+    "objectPlaceholder": "{\"type\": \"enabled\"}",
+    "objectHint": "Đối tượng JSON, có thể chứa đối tượng và mảng lồng nhau.",
+    "booleanHint": "Bật/tắt (true / false)",
+    "duplicateKey": "Tên tham số này đã có",
+    "emptyKey": "Hãy nhập tên tham số",
+    "addRowLabel": "Tham số mới",
+    "addButton": "Thêm",
+    "addHint": "Nhập tên, kiểu và giá trị ở dòng \"Tham số mới\", rồi bấm Thêm hoặc nhấn Enter. Trong ô JSON, Enter để xuống dòng, Ctrl/⌘ + Enter để thêm tham số.",
+    "delete": "Xóa"
+  },
+  "categories": {
+    "headers": "Header",
+    "body": "Body"
+  },
+  "status": {
+    "saving": "Đang lưu...",
+    "saved": "Đã lưu",
+    "error": "Lỗi",
+    "loadFailed": "Không đọc được cấu hình tham số. Bạn chưa thể chỉnh sửa cho đến khi đọc thành công.",
+    "saveFailed": "Thay đổi chưa được lưu. Hãy thử lại trước khi rời đi.",
+    "retry": "Thử lại",
+    "details": "Chi tiết lỗi",
+    "upToDate": "Đã cập nhật",
+    "unsavedChanges": "Có thay đổi chưa lưu",
+    "savedAutomatically": "Đã tự động lưu"
+  },
+  "summary": {
+    "title": "Tóm tắt cấu hình",
+    "totalParameters": "Tổng số tham số:",
+    "headers": "Header:",
+    "bodyParameters": "Tham số body:",
+    "validationErrors": "Lỗi xác thực:",
+    "saveStatus": "Trạng thái lưu:",
+    "lastSaved": "Lưu lần cuối:"
+  },
+  "validation": {
+    "valid": "Hợp lệ",
+    "invalidJson": "JSON không hợp lệ: {message}",
+    "notArray": "Giá trị phải là mảng JSON, ví dụ [1, 2, 3]",
+    "notObject": "Giá trị phải là đối tượng JSON, ví dụ {\"type\": \"enabled\"}"
+  },
+  "placeholders": {
+    "enterValue": "Nhập {key}",
+    "jsonArray": "[]",
+    "itemNumber": "Mục {number}"
+  },
+  "arrayEditor": {
+    "addItem": "Thêm mục",
+    "jsonArrayEditor": "Trình sửa mảng JSON"
+  },
+  "emptyStates": {
+    "noHeadersSearch": "Không tìm thấy header phù hợp.",
+    "noHeadersConfigured": "Chưa có header tùy chỉnh.",
+    "noBodyParamsSearch": "Không tìm thấy tham số body phù hợp.",
+    "noBodyParamsConfigured": "Chưa có tham số body tùy chỉnh."
+  },
+  "unsavedChangesDialog": {
+    "title": "Thay đổi chưa lưu",
+    "description": "Bạn có thay đổi chưa lưu và sẽ mất nếu tải lại. Các thay đổi đang được tự động lưu, nhưng tải lại ngay bây giờ sẽ bỏ những chỉnh sửa gần nhất.",
+    "refreshAnyway": "Vẫn tải lại"
+  }
+}

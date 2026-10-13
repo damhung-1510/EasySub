@@ -881,6 +881,7 @@ const Settings = () => {
                 <SelectContent>
                   <SelectItem value="zh">{t('chinese')}</SelectItem>
                   <SelectItem value="en">{t('english')}</SelectItem>
+                  <SelectItem value="vi">{t('vietnamese')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

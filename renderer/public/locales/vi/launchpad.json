@@ -1,0 +1,223 @@
+{
+  "title": "Bạn muốn làm gì?",
+  "subtitle": "Chọn quy trình hoặc thêm tệp của bạn vào",
+  "startPanel": {
+    "title": "Bắt đầu"
+  },
+  "globalDrop": {
+    "entryTitle": "Kéo tệp vào đây để bắt đầu",
+    "entryDesc": "Video, âm thanh, phụ đề, văn bản. Bạn có thể thả vào bất kỳ đâu trong khu vực này.",
+    "selectFiles": "Chọn tệp",
+    "title": "Thả để thêm tệp",
+    "desc": "Tệp sẽ được lưu thành bản nháp. Sau đó hãy chọn quy trình.",
+    "recipeTitle": "Thả để thêm vào \"{{name}}\"",
+    "recipeDesc": "Tệp sẽ dùng quy trình này. Nếu thiếu thiết lập, hãy hoàn tất trước.",
+    "importing": "Đang thêm tệp…",
+    "unsupported": "Không có tệp video, âm thanh, phụ đề hay văn bản được hỗ trợ",
+    "subtitleRequired": "Quy trình này chỉ nhận tệp phụ đề. Hãy kéo video/âm thanh vào vùng trống của Launchpad hoặc vào thẻ tác vụ phiên âm.",
+    "failed": "Không thêm được tệp. Hãy thử lại.",
+    "existingTitle": "Có bản nháp tác vụ chưa hoàn tất",
+    "existingDescription": "Thêm tệp sẽ giữ nguyên mục tiêu, công thức và cài đặt của bản nháp hiện có. Tạo tác vụ mới sẽ thay thế bản nháp đó.",
+    "unreadableDescription": "Không đọc được bản nháp hiện có, nhưng dữ liệu gốc vẫn được giữ. Bạn có thể hủy để thử lại sau, hoặc chọn thay thế bằng tác vụ mới.",
+    "replaceDraft": "Thay bằng tác vụ mới",
+    "appendDraft": "Thêm vào bản nháp hiện có",
+    "storageFailed": "Không lưu được bản nháp vào ổ đĩa. Chưa cài đặt hay chuyển trang. Hãy thử lưu lại; bản nháp hiện có sẽ không bị xóa ngầm.",
+    "retrySave": "Lưu lại"
+  },
+  "quickDownload": {
+    "title": "Cần model nhận dạng giọng nói",
+    "desc": "Đã lưu {{count}} tệp và cài đặt tác vụ. Hãy cài model Whisper Base (khoảng 140MB, tải mất khoảng 15 giây nếu mạng nhanh, tùy tốc độ mạng của bạn).",
+    "downloading": "Đang tải model ({{progress}}%)…",
+    "startDownload": "Cài đặt và tiếp tục",
+    "installComplete": "Đã cài xong model, đang mở tác vụ…",
+    "cancel": "Để sau",
+    "source": "Nguồn tải xuống",
+    "mirror": "Máy chủ phản chiếu Trung Quốc",
+    "busy": "Đang tải một model khác. Hãy thử lại sau.",
+    "failed": "Cài đặt không thành công. Hãy kiểm tra mạng hoặc đổi nguồn tải xuống rồi thử lại. Bản nháp vẫn được giữ.",
+    "notInstalled": "Chưa cài được model Base. Hãy thử lại. Bản nháp vẫn được giữ."
+  },
+  "recipes": {
+    "custom": "Quy trình tùy chỉnh",
+    "customDesc": "Mở trình hướng dẫn, tự chọn mục tiêu và cài đặt, rồi lưu thành công thức",
+    "rename": "Đổi tên",
+    "delete": "Xóa",
+    "deleteTitle": "Xóa công thức này?",
+    "deleteDesc": "Công thức \"{{name}}\" sẽ bị xóa. Các tác vụ đã tạo không bị ảnh hưởng.",
+    "cancel": "Hủy",
+    "confirmDelete": "Xóa"
+  },
+  "quickLinks": {
+    "title": "Lối tắt",
+    "mcpHint": "Kết nối Cursor, Codex hoặc công cụ AI bên ngoài",
+    "downloadHint": "Dán liên kết để tải hàng loạt video trực tuyến",
+    "proofreadHint": "Kiểm tra từng dòng, nhờ AI chau chuốt",
+    "mergeHint": "Gắn cứng phụ đề vào hình ảnh",
+    "dubbingHint": "Chuyển từng dòng phụ đề thành giọng nói"
+  },
+  "aiGuide": {
+    "title": "Trợ lý AI",
+    "desc": "Hiểu bối cảnh toàn bộ ứng dụng, sẵn sàng hỗ trợ ở mọi màn hình.",
+    "painPoints": {
+      "modelSelection": "Không biết nên tải model nào?",
+      "paramTuning": "Không biết chỉnh tham số ra sao?",
+      "troubleshooting": "Tác vụ báo lỗi, không biết xử lý thế nào?",
+      "omnipresent": "Hỗ trợ ở mọi màn hình"
+    },
+    "notConfigured": {
+      "title": "Chưa cấu hình dịch vụ AI",
+      "action": "Cài đặt dịch vụ AI"
+    },
+    "configured": {
+      "title": "Dịch vụ AI sẵn sàng"
+    },
+    "openAssistant": "Mở trợ lý AI",
+    "closeAssistant": "Đóng trợ lý AI",
+    "manageProviders": "Quản lý dịch vụ"
+  },
+  "hero": {
+    "morning": "Chào buổi sáng",
+    "noon": "Chào buổi trưa",
+    "afternoon": "Chào buổi chiều",
+    "evening": "Chào buổi tối",
+    "statTasks": "{{count}} tác vụ",
+    "statRunning": "{{count}} đang chạy",
+    "statDone": "{{count}} xong"
+  },
+  "quickStart": {
+    "title": "Bắt đầu nhanh",
+    "intro": "Mới dùng lần đầu? Tạo phụ đề đầu tiên chỉ với ba bước.",
+    "import": {
+      "title": "Thêm video hoặc âm thanh",
+      "description": "Bấm nút bên dưới để thêm một đoạn ngắn có giọng nói rõ."
+    },
+    "configure": {
+      "title": "Chọn ngôn ngữ và model",
+      "description": "Chọn ngôn ngữ trong video/âm thanh và model giọng nói. Các cài đặt khác cứ để mặc định.",
+      "models": "Chưa có model? Cài đặt ngay"
+    },
+    "result": {
+      "title": "Bắt đầu và xem phụ đề",
+      "description": "Bấm \"Bắt đầu\". Khi xong, \"Mở thư mục\" sẽ đưa bạn đến tệp phụ đề; \"Chỉnh sửa\" giúp bạn sửa lỗi."
+    },
+    "start": "Tạo phụ đề đầu tiên"
+  },
+  "env": {
+    "title": "Tình trạng hệ thống",
+    "canWork": "Sẵn sàng",
+    "model": "Model giọng nói",
+    "gpu": "Tăng tốc GPU",
+    "translation": "Dịch",
+    "voice": "Lồng tiếng (TTS)",
+    "ready": "Đã sẵn sàng",
+    "notInstalled": "Chưa cài đặt",
+    "notConfigured": "Chưa cấu hình",
+    "notDetected": "Đang kiểm tra",
+    "gpuOn": "Đã bật {{backend}}",
+    "cpuMode": "Chế độ CPU",
+    "configuredCount": "Đã cấu hình {{count}}",
+    "manage": "Quản lý",
+    "detail": "Chi tiết",
+    "goConfigure": "Thiết lập"
+  },
+  "pipeline": {
+    "transcribe": "Phiên âm",
+    "translate": "Dịch",
+    "proofread": "Chỉnh sửa",
+    "compose": "Ghép",
+    "dubbing": "Lồng tiếng"
+  },
+  "card": {
+    "pipeline": "Video → Video lồng tiếng",
+    "pipelineDesc": "Phiên âm, dịch, lồng tiếng và ghép trọn gói, có bước kiểm tra phụ đề (hoặc chạy hoàn toàn tự động)",
+    "generateTranslate": "Video → Phụ đề song ngữ",
+    "generateTranslateDesc": "Phiên âm giọng nói và dịch sang ngôn ngữ đích trong một lần",
+    "generate": "Video → Phụ đề gốc",
+    "generateDesc": "Chỉ phiên âm giọng nói, không dịch",
+    "translate": "Dịch phụ đề có sẵn",
+    "translateDesc": "Dịch tệp phụ đề SRT và các định dạng khác sang ngôn ngữ khác",
+    "mcp": "Kết nối MCP",
+    "download": "Tải video",
+    "proofread": "Chỉnh sửa phụ đề",
+    "proofreadDesc": "Kiểm tra từng dòng, xem lại cùng video và nhờ AI chau chuốt",
+    "merge": "Ghép phụ đề",
+    "mergeDesc": "Gắn cứng phụ đề vào hình ảnh để luôn hiển thị",
+    "dubbing": "Lồng tiếng",
+    "dubbingDesc": "Tạo giọng đọc cho từng dòng phụ đề và căn khớp với dòng thời gian",
+    "compose": "Ghép video",
+    "toolbox": "Công cụ"
+  },
+  "fromDownload": "Từ tải xuống",
+  "needsModelBadge": "Cần model",
+  "qualityGateBadge": "Có bước kiểm tra · Dừng ở chỉnh sửa",
+  "banner": {
+    "noModel": "Chưa có model giọng nói để chuyển lời nói thành văn bản. Hãy tải một model để bắt đầu",
+    "noModelCta": "Tải model đề xuất",
+    "noProvider": "Muốn dịch phụ đề? Hãy thiết lập dịch vụ dịch trước (có cả lựa chọn miễn phí)",
+    "noProviderCta": "Thiết lập",
+    "noTtsCta": "Thiết lập engine lồng tiếng"
+  },
+  "recentTasks": "Tác vụ gần đây",
+  "noRecentTasks": "Chưa có tác vụ nào. Hãy chọn một mục ở trên để bắt đầu",
+  "dropHint": "Thả để thêm tệp",
+  "fileCount": "{{count}} tệp",
+  "recent": {
+    "footerHint": "Kéo tệp vào Launchpad để thêm, hoặc thả lên thẻ tác vụ để dùng đúng quy trình đó",
+    "rename": "Đổi tên",
+    "delete": "Xóa",
+    "deleteTitle": "Xóa tác vụ này?",
+    "deleteDesc": "Tác vụ \"{{name}}\" sẽ bị xóa cùng âm thanh lồng tiếng nội bộ, các chỉnh sửa và bản nháp khôi phục. Tệp nguồn và tệp đã xuất vẫn được giữ lại.",
+    "deleteFailed": "Chưa xóa xong. Hãy đóng trình lồng tiếng của dự án này, dừng tác vụ và kiểm tra quyền truy cập ổ đĩa rồi thử lại.",
+    "errorDetails": "Chi tiết lỗi",
+    "cancel": "Hủy",
+    "viewAll": "Xem tất cả ({{count}})",
+    "viewAllPage": "Xem tất cả ({{count}})",
+    "collapse": "Thu gọn",
+    "searchPlaceholder": "Tìm tác vụ…",
+    "noMatch": "Không có tác vụ phù hợp"
+  },
+  "allTasks": {
+    "title": "Tất cả tác vụ",
+    "description": "Xem, lọc và quản lý các tác vụ gần đây",
+    "back": "Về Launchpad",
+    "searchPlaceholder": "Tìm theo tên tác vụ…",
+    "typeFilter": "Loại tác vụ",
+    "typeAll": "Tất cả loại",
+    "pageRange": "{{from}}–{{to}} / {{total}}",
+    "pageInfo": "Trang {{page}} / {{totalPages}}",
+    "prevPage": "Trang trước",
+    "nextPage": "Trang sau",
+    "resultCount": "Hiển thị {{shown}} / {{total}}",
+    "noMatch": "Không có tác vụ nào khớp bộ lọc",
+    "loading": "Đang tải…",
+    "clearAll": "Xóa tất cả",
+    "clearAllTitle": "Xóa tất cả tác vụ?",
+    "clearAllDesc": "{{count}} tác vụ sẽ bị xóa cùng âm thanh lồng tiếng nội bộ, các chỉnh sửa và bản nháp khôi phục. Tệp nguồn và tệp đã xuất vẫn được giữ lại.",
+    "clearAllConfirm": "Xóa tất cả",
+    "emptyTitle": "Chưa có tác vụ nào",
+    "emptyHint": "Quay về Launchpad để bắt đầu một tác vụ. Tác vụ đã xong sẽ hiện ở đây.",
+    "emptyCta": "Về Launchpad"
+  },
+  "status": {
+    "waiting": "Đang chờ",
+    "running": "Đang chạy",
+    "done": "Đã hoàn thành",
+    "error": "Lỗi",
+    "review": "Chờ chỉnh sửa"
+  },
+  "noRecentTasksHint": "Tác vụ đã xong sẽ hiện ở đây. Kéo tệp vào Launchpad để bắt đầu",
+  "result": {
+    "back": "Về tất cả tác vụ",
+    "loading": "Đang tải bản ghi xử lý…",
+    "unavailable": "Bản ghi xử lý này không còn hoặc đã bị xóa",
+    "retry": "Tải lại",
+    "outputs": "Tệp đầu ra",
+    "inputs": "Tệp nguồn",
+    "noOutputs": "Chưa có tệp đầu ra nào hoàn tất",
+    "openFolder": "Hiện trong thư mục",
+    "fileMissing": "Tệp đã bị di chuyển hoặc xóa: {{path}}",
+    "openFailed": "Không mở được vị trí tệp",
+    "openCompose": "Mở tệp nguồn trong trình ghép",
+    "openTool": "Mở công cụ"
+  }
+}

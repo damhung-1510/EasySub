@@ -1,0 +1,228 @@
+{
+  "queue": {
+    "invalidSubtitles": "Hãy chọn tệp phụ đề được hỗ trợ (.srt / .vtt / .ass / .ssa / .sub).",
+    "choosePair": "Chọn phụ đề phụ để ghép cặp",
+    "files": "{{count}} tệp",
+    "noTextTracks": "Không có track phụ đề văn bản nào được chọn hoặc khả dụng.",
+    "invalidTracks": "Các track đã chọn không còn khả dụng. Hãy quét lại video.",
+    "extractAll": "Trích xuất tất cả phụ đề trong hàng đợi",
+    "title": "Hàng đợi tệp",
+    "pending": "Đang chờ",
+    "running": "Đang xử lý",
+    "done": "Hoàn tất",
+    "error": "Lỗi",
+    "cancelled": "Đã dừng",
+    "stop": "Dừng hàng đợi",
+    "stopping": "Đang dừng...",
+    "clear": "Xóa hàng đợi",
+    "retry": "Thử lại tệp này",
+    "remove": "Bỏ tệp",
+    "errorDetails": "Chi tiết lỗi",
+    "failed": "Không xử lý được."
+  },
+  "title": "Công cụ",
+  "subtitle": "Các công cụ gọn nhẹ cho âm thanh, video và phụ đề, xử lý hoàn toàn trên máy bạn.",
+  "categories": {
+    "all": "Tất cả công cụ",
+    "subtitles": "Phụ đề",
+    "video": "Video",
+    "audio": "Âm thanh"
+  },
+  "searchPlaceholder": "Tìm công cụ...",
+  "noToolsFound": "Không tìm thấy công cụ phù hợp",
+  "backToDashboard": "Quay lại Công cụ",
+  "openFolder": "Mở thư mục",
+  "selectFile": "Chọn tệp",
+  "dropFilesHere": "Kéo thả tệp vào đây, hoặc bấm để chọn",
+  "processing": "Đang xử lý...",
+  "success": "Thành công",
+  "failed": "Thất bại",
+  "cancel": "Hủy",
+  "confirm": "Đồng ý",
+  "save": "Lưu",
+  "outputFolder": "Thư mục xuất",
+  "defaultOutputFolder": "Mặc định (cùng thư mục với tệp gốc)",
+  "changeFolder": "Đổi thư mục",
+  "sendToTask": "Gửi đến tác vụ phụ đề",
+  "badges": {
+    "popular": "Phổ biến",
+    "lossless": "Không giảm chất lượng",
+    "new": "Mới"
+  },
+  "tools": {
+    "subtitle-converter": {
+      "name": "Chuyển định dạng và mã hóa phụ đề",
+      "desc": "Chuyển đổi giữa SRT, VTT, ASS, LRC, TXT, tự nhận diện và sửa lỗi mã hóa ANSI/GBK, chuyển chữ Hán giản thể/phồn thể"
+    },
+    "video-trimmer": {
+      "name": "Cắt video nhanh, không giảm chất lượng",
+      "desc": "Chọn đoạn cắt chính xác đến mili giây bằng thanh trượt hai đầu, xuất trong vài giây nhờ sao chép luồng, gửi thẳng sang phiên âm"
+    },
+    "audio-extractor": {
+      "name": "Tách và chuyển đổi âm thanh nhanh",
+      "desc": "Tách âm thanh ra MP3, WAV, AAC hoặc FLAC, có sẵn cấu hình giọng nói chuẩn 16kHz cho nhận dạng giọng nói"
+    },
+    "embedded-subtitles": {
+      "name": "Trích xuất phụ đề nhúng trong video",
+      "desc": "Quét nhanh các track phụ đề văn bản nhúng trong MKV/MP4 và xuất track bạn chọn thành tệp riêng"
+    },
+    "subtitle-sync": {
+      "name": "Dịch thời gian và căn chỉnh phụ đề",
+      "desc": "Dịch toàn bộ mốc thời gian, co giãn theo tỷ lệ tốc độ khung hình, hoặc căn chỉnh theo hai điểm mốc"
+    },
+    "bilingual-subtitles": {
+      "name": "Ghép/tách phụ đề song ngữ",
+      "desc": "Ghép hai phụ đề đơn ngữ thành song ngữ dựa trên thời gian trùng nhau, hoặc tách phụ đề song ngữ thành hai tệp riêng"
+    },
+    "video-compressor": {
+      "name": "Nén video nhanh để chia sẻ",
+      "desc": "Giảm dung lượng video dễ dàng với cấu hình sẵn cho WeChat (<25MB) hoặc chia sẻ 1080p/720p"
+    },
+    "video-to-gif": {
+      "name": "Chuyển video thành GIF nét cao",
+      "desc": "Cắt đoạn video thành GIF sắc nét, không nhiễu hạt bằng bảng màu hai lượt"
+    }
+  },
+  "subtitleConverter": {
+    "targetFormat": "Định dạng đích",
+    "targetEncoding": "Mã hóa đích",
+    "encodingAuto": "Tự động phát hiện",
+    "detectedEncoding": "Mã hóa phát hiện được",
+    "chineseConversion": "Chuyển chữ Hán giản thể/phồn thể",
+    "chineseNone": "Không chuyển",
+    "chineseS2T": "Giản thể → Phồn thể (chuẩn)",
+    "chineseT2S": "Phồn thể → Giản thể (chuẩn)",
+    "chineseS2TW": "Giản thể → Phồn thể (Đài Loan)",
+    "chineseTW2S": "Phồn thể (Đài Loan) → Giản thể",
+    "chineseS2HK": "Giản thể → Phồn thể (Hồng Kông)",
+    "chineseHK2S": "Phồn thể (Hồng Kông) → Giản thể",
+    "cleanFormatting": "Xóa thẻ định dạng (chỉ giữ văn bản)",
+    "includeTimestampsInTxt": "Giữ mốc thời gian khi xuất TXT",
+    "batchAction": "Chuyển đổi tất cả",
+    "clearList": "Xóa danh sách",
+    "statusReady": "Sẵn sàng",
+    "statusConverting": "Đang chuyển đổi",
+    "statusDone": "Xong",
+    "statusError": "Lỗi",
+    "fileCount": "{{count}} tệp",
+    "previewTitle": "Xem trước (5 dòng đầu)"
+  },
+  "videoTrimmer": {
+    "inPoint": "Điểm bắt đầu",
+    "outPoint": "Điểm kết thúc",
+    "duration": "Độ dài đoạn cắt",
+    "totalDuration": "Tổng thời lượng",
+    "mode": "Chế độ cắt",
+    "modeLossless": "Sao chép luồng, không giảm chất lượng",
+    "modeLosslessDesc": "Sao chép trực tiếp luồng dữ liệu, giữ nguyên 100% chất lượng và định dạng gốc, căn theo khung hình chính, xong trong vài giây (nên dùng)",
+    "modeAccurate": "Mã hóa lại, cắt chính xác",
+    "modeAccurateDesc": "Giải mã và mã hóa lại từng khung hình, cắt chính xác tuyệt đối đến từng khung, mất nhiều thời gian hơn",
+    "exportButton": "Xuất đoạn cắt",
+    "exporting": "Đang xuất...",
+    "shortcutTip": "Mẹo: kéo hai thanh [ ] để chọn đoạn cắt; bấm [-1s][-0.1s][+0.1s][+1s] để tinh chỉnh; phím [ đặt điểm bắt đầu, ] đặt điểm kết thúc, Space phát/tạm dừng, ←/→ lùi/tiến từng khung hình",
+    "sendToTranscribe": "Tạo tác vụ từ đoạn này",
+    "previewClip": "Xem trước đoạn đã chọn",
+    "pausePreview": "Tạm dừng xem trước",
+    "resetRange": "Chọn lại toàn bộ video",
+    "setAsIn": "Đặt làm điểm bắt đầu",
+    "setAsOut": "Đặt làm điểm kết thúc"
+  },
+  "audioExtractor": {
+    "format": "Định dạng âm thanh",
+    "quality": "Chất lượng / Cấu hình sẵn",
+    "bitrate": "Bitrate",
+    "presetAsr": "WAV mono 16kHz (chuẩn cho nhận dạng giọng nói)",
+    "presetStandard": "Stereo, giữ tần số lấy mẫu gốc",
+    "startExtract": "Tách âm thanh",
+    "batchTip": "Có thể tách âm thanh từ nhiều video cùng lúc"
+  },
+  "embeddedSubtitles": {
+    "scanning": "Đang quét các track phụ đề nhúng...",
+    "noSubtitlesFound": "Video này không có track phụ đề văn bản nhúng",
+    "streamList": "Các track phụ đề nhúng tìm thấy:",
+    "trackHeader": "Track",
+    "codecHeader": "Bộ mã hóa",
+    "langHeader": "Ngôn ngữ",
+    "titleHeader": "Tiêu đề",
+    "exportSelected": "Xuất các track đã chọn",
+    "selectAll": "Chọn tất cả",
+    "deselectAll": "Bỏ chọn tất cả"
+  },
+  "subtitleSync": {
+    "mode": "Cách căn chỉnh",
+    "modeOffset": "Dịch toàn bộ thời gian (+/- mili giây)",
+    "modeScale": "Co giãn theo tốc độ khung hình (sửa lệch tăng dần)",
+    "modeTwoPoint": "Căn theo hai điểm mốc",
+    "offsetInput": "Độ lệch (mili giây, số dương là trễ, số âm là sớm)",
+    "scaleRatioInput": "Tỷ lệ co giãn (ví dụ 24/25 = 0.96, 25/24 = 1.04167)",
+    "p1Source": "Thời gian hiện tại của dòng đầu (ms hoặc 00:00:00,000)",
+    "p1Target": "Thời gian mong muốn của dòng đầu (ms hoặc 00:00:00,000)",
+    "p2Source": "Thời gian hiện tại của dòng cuối (ms hoặc 00:00:00,000)",
+    "p2Target": "Thời gian mong muốn của dòng cuối (ms hoặc 00:00:00,000)",
+    "startSync": "Áp dụng và xuất",
+    "syncSuccess": "Đã căn chỉnh xong, cập nhật {{count}} dòng phụ đề"
+  },
+  "bilingualSubtitles": {
+    "action": "Thao tác",
+    "actionMerge": "Ghép hai phụ đề đơn ngữ thành song ngữ",
+    "actionSplit": "Tách phụ đề song ngữ thành hai tệp đơn ngữ",
+    "primaryFile": "Phụ đề chính (ngôn ngữ chính)",
+    "secondaryFile": "Phụ đề phụ (ngôn ngữ phụ)",
+    "position": "Thứ tự hiển thị",
+    "posTop": "Phụ đề chính ở trên, phụ đề phụ ở dưới",
+    "posBottom": "Phụ đề chính ở dưới, phụ đề phụ ở trên",
+    "startMerge": "Ghép phụ đề",
+    "startSplit": "Tách phụ đề"
+  },
+  "videoCompressor": {
+    "preset": "Mức nén",
+    "presetWechat": "Chia sẻ WeChat (dưới 25MB, tự điều chỉnh bitrate)",
+    "presetBalanced": "1080p cân bằng (H.264 CRF 24, tối ưu dung lượng và chất lượng)",
+    "presetFast": "720p nhanh (tệp nhỏ hơn, gửi nhanh hơn)",
+    "presetTarget": "Chọn dung lượng mong muốn",
+    "targetSize": "Dung lượng mong muốn (MB)",
+    "startCompress": "Nén video"
+  },
+  "videoToGif": {
+    "fps": "Khung hình/giây của GIF",
+    "width": "Chiều rộng GIF",
+    "startExport": "Tạo GIF nét cao",
+    "highQualityNotice": "Dùng bảng màu hai lượt (PaletteGen) để GIF sống động, không nhiễu hạt"
+  },
+  "finishBar": {
+    "partial": "Một số tệp đã xong. Hãy xem các mục bị lỗi.",
+    "importFailed": "Không đưa được kết quả vào tác vụ tiếp theo. Hãy kiểm tra xem tệp còn tồn tại không.",
+    "title": "Hoàn tất!",
+    "savedTo": "Đã lưu tại: {{path}}",
+    "stats": "Dung lượng: {{original}} → {{compressed}} (giảm {{saved}}%)",
+    "openFolder": "Mở thư mục",
+    "goToSubtitle": "Tạo phụ đề",
+    "goToDubbing": "Lồng tiếng AI",
+    "goToProofread": "Chỉnh sửa phụ đề",
+    "goToBurn": "Ghép phụ đề",
+    "processNext": "Xử lý tệp khác",
+    "statsIncreased": "Dung lượng: {{original}} → {{compressed}} (tăng {{saved}}%)",
+    "statsUnchanged": "Dung lượng: {{original}} → {{compressed}} (không giảm)"
+  },
+  "videoCompressorQueue": {
+    "queueTitle": "Hàng đợi nén video",
+    "addFiles": "Thêm video",
+    "clearAll": "Xóa hàng đợi",
+    "compressAll": "Nén tất cả",
+    "compressingItem": "Đang nén mục {{current}} / {{total}}...",
+    "itemOriginal": "Gốc: {{size}}",
+    "itemCompressed": "Sau khi nén: {{size}} (giảm {{saved}}%)",
+    "itemFailed": "Nén không thành công",
+    "allFinished": "Đã nén xong {{count}} video!",
+    "skipped": "Đã nằm trong giới hạn dung lượng, giữ nguyên tệp gốc",
+    "finished": "Đã xử lý {{count}} video, trong đó {{skipped}} video không cần nén"
+  },
+  "leaveQueue": {
+    "title": "Rời khỏi công cụ này?",
+    "pending": "Rời đi sẽ xóa hàng đợi hiện tại. Tệp gốc và kết quả đã xong vẫn được giữ lại.",
+    "running": "Rời đi sẽ hủy tác vụ đang chạy và xóa hàng đợi. Tệp gốc và kết quả đã xong vẫn được giữ lại.",
+    "stay": "Ở lại",
+    "cancelAndLeave": "Hủy và rời đi",
+    "clearAndLeave": "Xóa hàng đợi và rời đi"
+  }
+}
