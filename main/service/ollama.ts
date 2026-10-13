@@ -92,10 +92,10 @@ export default async function translateWithOllama(
           // 动态批次 schema 体积随批量线性增长（45 条 echo schema ≈ 3900 tokens），
           // 全文内嵌会挤爆上下文窗口、把字幕原文截断（实测回显崩坏 44/45）。
           // 结构约束交给 format 参数，提示词只留一句说明。
-          enhancedSystemPrompt = `${systemPrompt}\n\n你必须以JSON格式返回数据，不要包含任何其他文本、解释或思考过程。`;
+          enhancedSystemPrompt = `${systemPrompt}\n\nBạn phải trả dữ liệu ở định dạng JSON, không kèm bất kỳ văn bản, giải thích hay quá trình suy nghĩ nào khác.`;
         } else {
           // 未传动态 schema 的调用方（如校对）沿用静态 schema 全文内嵌（体积很小）
-          enhancedSystemPrompt = `${systemPrompt}\n\n你必须以JSON格式返回数据，不要包含任何其他文本或说明。输出应该是一个有效的JSON对象，其中键是字幕ID，值是翻译后的内容。\n\n下面是返回的JSON Schema:\n${JSON.stringify(TRANSLATION_JSON_SCHEMA, null, 2)}`;
+          enhancedSystemPrompt = `${systemPrompt}\n\nBạn phải trả dữ liệu ở định dạng JSON, không kèm bất kỳ văn bản hay chú thích nào khác. Đầu ra phải là một đối tượng JSON hợp lệ, trong đó khóa là ID phụ đề và giá trị là nội dung đã dịch.\n\nDưới đây là JSON Schema của kết quả trả về:\n${JSON.stringify(TRANSLATION_JSON_SCHEMA, null, 2)}`;
         }
       }
 

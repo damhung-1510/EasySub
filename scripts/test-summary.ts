@@ -67,9 +67,9 @@ ok(
   'factory prompt does not ask the summary to use glossary translations',
 );
 ok(
-  defaultSummaryPrompt.includes('源字幕中的写法') &&
-    defaultSummaryPrompt.includes('不要') &&
-    defaultSummaryPrompt.includes('表内译文'),
+  defaultSummaryPrompt.includes('cách viết trong phụ đề gốc') &&
+    defaultSummaryPrompt.includes('không') &&
+    defaultSummaryPrompt.includes('cách dịch trong bảng'),
   'factory prompt keeps source proper nouns; glossary is not for rewriting the summary',
 );
 
@@ -326,7 +326,10 @@ ok(
   'missing generateSummary ignores a non-empty episodeSummary',
 );
 ok(
-  !shouldUseEpisodeSummary({ generateSummary: true }, { episodeSummary: '   ' }),
+  !shouldUseEpisodeSummary(
+    { generateSummary: true },
+    { episodeSummary: '   ' },
+  ),
   'blank episodeSummary is not injected',
 );
 ok(
@@ -355,10 +358,7 @@ ok(
     fingerprint,
     'same fingerprint inputs produce the same hash',
   );
-  ok(
-    /^[0-9a-f]{40}$/.test(fingerprint),
-    'fingerprint is lowercase sha1 hex',
-  );
+  ok(/^[0-9a-f]{40}$/.test(fingerprint), 'fingerprint is lowercase sha1 hex');
   const changed = [
     ['source', { source: '1\n2x' }],
     ['prompt', { prompt: '提示${targetLanguage}' }],

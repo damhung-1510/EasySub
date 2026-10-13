@@ -62,14 +62,14 @@ function getLanguageName(code: string): string {
     normalized === 'zh-cn' ||
     normalized === 'zh-hans'
   ) {
-    return '简体中文';
+    return 'Tiếng Trung giản thể';
   }
   if (
     normalized === 'zh-hant' ||
     normalized === 'zh-tw' ||
     normalized === 'zh-hk'
   ) {
-    return '繁体中文';
+    return 'Tiếng Trung phồn thể';
   }
   const customName = getCustomLanguageName(
     code,
@@ -116,7 +116,7 @@ async function repairSubtitleEntry(
       const attemptPrompt =
         attempt === 0
           ? repairPrompt
-          : `${repairPrompt}\n\n上一次结果仍为空、无效或直接重复了原文。请实际翻译目标句后再返回。`;
+          : `${repairPrompt}\n\nKết quả lần trước vẫn rỗng, không hợp lệ hoặc sao chép nguyên văn. Hãy thực sự dịch câu mục tiêu rồi mới trả về.`;
       params.onAttempt?.(attempt);
       const responseOrigin = await params.translator(
         attemptPrompt,
@@ -183,10 +183,7 @@ export async function handleAIBatchTranslation(
   const summaryText = String(config.episodeSummary || '').trim();
   const summaryBlock = buildSummaryPromptBlock(summaryText);
   if (summaryText) {
-    logMessage(
-      `本集摘要已注入翻译提示词（${summaryText.length} 字）`,
-      'info',
-    );
+    logMessage(`本集摘要已注入翻译提示词（${summaryText.length} 字）`, 'info');
   } else if (config.summarySkipReason) {
     logMessage(
       `本文件无摘要（原因：${config.summarySkipReason}），翻译提示词不附加摘要`,
@@ -320,8 +317,8 @@ export async function handleAIBatchTranslation(
 
         if (retryCount > 0 || alignmentRetryUsed) {
           translationContent += echoEnabled
-            ? '\n\n上一次响应存在错位、未翻译或无法解析。请只返回一个 JSON 对象：键必须与输入字幕 ID 完全一致，每个键的值是 {"src": ..., "tr": ...}。注意：src 必须逐字复制输入中该 ID 对应的原文（保持原语言，绝对不能填译文），tr 才是目标语言译文且不能直接复制原文；禁止合并或拆分条目，不要返回 markdown、解释或思考过程。'
-            : '\n\n上一次响应存在未翻译或无法解析。请只返回一个 JSON 对象，键必须是输入字幕 ID，值必须是目标语言翻译结果且不能直接复制原文；不要返回 markdown、解释、注释或思考过程。';
+            ? '\n\nPhản hồi lần trước có lỗi lệch dòng, chưa dịch hoặc không phân tích được. Chỉ trả về một đối tượng JSON: các khóa phải hoàn toàn trùng với ID phụ đề đầu vào, giá trị của mỗi khóa là {"src": ..., "tr": ...}. Lưu ý: src phải sao chép từng chữ nguyên văn ứng với ID đó trong đầu vào (giữ nguyên ngôn ngữ gốc, tuyệt đối không điền bản dịch), tr mới là bản dịch sang ngôn ngữ đích và không được sao chép nguyên văn; cấm gộp hoặc tách dòng, không trả về markdown, giải thích hay quá trình suy nghĩ.'
+            : '\n\nPhản hồi lần trước có dòng chưa dịch hoặc không phân tích được. Chỉ trả về một đối tượng JSON, khóa phải là ID phụ đề đầu vào, giá trị phải là kết quả dịch sang ngôn ngữ đích và không được sao chép nguyên văn; không trả về markdown, giải thích, ghi chú hay quá trình suy nghĩ.';
         }
 
         let systemPrompt = renderTranslationSystemPrompt(

@@ -511,8 +511,8 @@ function offlineChecks(): void {
   );
   ok(
     repair.prompt.includes('How are you') &&
-      repair.prompt.includes('请勿翻译') &&
-      repair.prompt.includes('不要把原文直接复制为译文') &&
+      repair.prompt.includes('đừng dịch chúng') &&
+      repair.prompt.includes('không sao chép nguyên văn làm bản dịch') &&
       repair.prompt.includes('"2"'),
     'repair prompt quotes target line and explicitly rejects source copying',
   );

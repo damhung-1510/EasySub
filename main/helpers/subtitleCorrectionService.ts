@@ -151,11 +151,13 @@ function makeCorrectionSchema(ids: string[]): Record<string, unknown> {
     properties: {
       src: {
         type: 'string',
-        description: '逐字复制该条字幕的输入原文，禁止改动',
+        description:
+          'Sao chép nguyên văn từng chữ dòng phụ đề đầu vào, cấm sửa đổi',
       },
       tr: {
         type: 'string',
-        description: '该条字幕的校正结果（无需修改时与原文一致）',
+        description:
+          'Kết quả hiệu chỉnh của dòng phụ đề (giữ nguyên như nguyên văn nếu không cần sửa)',
       },
     },
     required: ['src', 'tr'],

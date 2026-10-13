@@ -66,14 +66,14 @@ function getLanguageName(code: string): string {
     normalized === 'zh-cn' ||
     normalized === 'zh-hans'
   ) {
-    return '简体中文';
+    return 'Tiếng Trung giản thể';
   }
   if (
     normalized === 'zh-hant' ||
     normalized === 'zh-tw' ||
     normalized === 'zh-hk'
   ) {
-    return '繁体中文';
+    return 'Tiếng Trung phồn thể';
   }
   const customName = getCustomLanguageName(
     code,
@@ -96,11 +96,11 @@ function summaryCompressionPrompt(
   targetLanguage: string,
   maxUnits: number,
 ): string {
-  const unit = isCjkSummaryTarget(targetLanguage) ? '字' : 'words';
+  const unit = isCjkSummaryTarget(targetLanguage) ? 'chữ' : 'từ';
   const langName = getLanguageName(targetLanguage);
   return (
-    `把给定摘要压缩到 ${maxUnits} ${unit}以内，用${langName}输出。` +
-    '人名、地名、建制、称谓保持源文写法。只输出摘要正文。'
+    `Hãy nén bản tóm tắt đã cho xuống dưới ${maxUnits} ${unit}, xuất bằng ${langName}. ` +
+    'Tên người, địa danh, tổ chức, danh xưng giữ nguyên cách viết gốc. Chỉ xuất phần nội dung tóm tắt.'
   );
 }
 
@@ -145,7 +145,10 @@ function compressSettledSummary(options: {
       summary,
       {
         ...requestConfig,
-        systemPrompt: summaryCompressionPrompt(options.targetLanguage, maxUnits),
+        systemPrompt: summaryCompressionPrompt(
+          options.targetLanguage,
+          maxUnits,
+        ),
       },
       options.sourceLanguage,
       options.targetLanguage,
@@ -281,128 +284,282 @@ export async function runEpisodeSummaryStage(params: {
   );
   let activityStatus: 'done' | 'cancelled' = 'done';
   try {
-  try {
-    throwIfTaskCancelled();
-    const loaded = await loadSummaryFingerprint({
-      file,
-      formData,
-      sourceLanguage,
-      targetLanguage,
-    });
-    if (loaded.kind === 'missing-srt') {
-      applySummaryState(
+    try {
+      throwIfTaskCancelled();
+      const loaded = await loadSummaryFingerprint({
         file,
-        {
-          ...clearedSummaryFields(),
-          summarizeEpisode: 'done',
-          summarizeEpisodeError: 'empty',
-        },
-        event,
-      );
-      logMessage(
-        `episode summary degraded (empty source) for ${file.fileName}`,
-        'warning',
-      );
-      return;
-    }
-    if (loaded.kind === 'provider-unresolved') {
-      applySummaryState(
-        file,
-        {
-          ...clearedSummaryFields(),
-          summarizeEpisode: 'done',
-          summarizeEpisodeError: loaded.reason,
-        },
-        event,
-      );
-      logMessage(
-        `episode summary degraded (${loaded.reason}) for ${file.fileName}`,
-        'warning',
-      );
-      return;
-    }
+        formData,
+        sourceLanguage,
+        targetLanguage,
+      });
+      if (loaded.kind === 'missing-srt') {
+        applySummaryState(
+          file,
+          {
+            ...clearedSummaryFields(),
+            summarizeEpisode: 'done',
+            summarizeEpisodeError: 'empty',
+          },
+          event,
+        );
+        logMessage(
+          `episode summary degraded (empty source) for ${file.fileName}`,
+          'warning',
+        );
+        return;
+      }
+      if (loaded.kind === 'provider-unresolved') {
+        applySummaryState(
+          file,
+          {
+            ...clearedSummaryFields(),
+            summarizeEpisode: 'done',
+            summarizeEpisodeError: loaded.reason,
+          },
+          event,
+        );
+        logMessage(
+          `episode summary degraded (${loaded.reason}) for ${file.fileName}`,
+          'warning',
+        );
+        return;
+      }
 
-    const { srtFile, raw, provider, prompt, fingerprint } = loaded;
-    const existing = String(file.episodeSummary || '');
-    if (
-      decideSummaryReuse({
-        existing,
-        storedHash: file.summarySourceHash,
-        fingerprint,
-      }) === 'reuse'
-    ) {
-      // 复用只截断，不再请求模型。不写 summarySourceHash，沿用已有指纹。
-      const normalized = normalizeReusedSummary(existing, targetLanguage);
+      const { srtFile, raw, provider, prompt, fingerprint } = loaded;
+      const existing = String(file.episodeSummary || '');
+      if (
+        decideSummaryReuse({
+          existing,
+          storedHash: file.summarySourceHash,
+          fingerprint,
+        }) === 'reuse'
+      ) {
+        // 复用只截断，不再请求模型。不写 summarySourceHash，沿用已有指纹。
+        const normalized = normalizeReusedSummary(existing, targetLanguage);
+        applySummaryState(
+          file,
+          {
+            summarizeEpisode: 'done',
+            ...(normalized.changed ? { episodeSummary: normalized.text } : {}),
+            ...(file.summarizeEpisodeError
+              ? {}
+              : { summarizeEpisodeError: undefined }),
+          },
+          event,
+        );
+        if (normalized.changed) {
+          logMessage(
+            formatSummaryCapLog(
+              normalized.originalUnits,
+              undefined,
+              normalized.finalUnits,
+            ),
+            'info',
+          );
+        }
+        logMessage(
+          `resume: reuse episode summary for ${file.fileName} (${normalized.text.length} chars)`,
+          'info',
+        );
+        return;
+      }
+
+      applySummaryState(
+        file,
+        {
+          ...clearedSummaryFields(),
+          summarizeEpisode: 'loading',
+          summarizeEpisodeError: undefined,
+        },
+        event,
+      );
+
+      const cues = cuesFromRaw(srtFile, raw);
+
+      const translators: Provider[] = store.get('translationProviders') || [];
+      const translateProvider = translators.find(
+        (item) => item.id === formData?.translateProvider,
+      );
+      const translateBatchSize = translateProvider?.isAi
+        ? translateProvider.batchSize
+        : DEFAULT_BATCH_SIZE.API;
+
+      if (shouldSkipTrivialSummary(cues.length, translateBatchSize)) {
+        applySummaryState(
+          file,
+          {
+            ...clearedSummaryFields(),
+            summarizeEpisode: 'done',
+            summarizeEpisodeError: 'skipped-trivial',
+          },
+          event,
+        );
+        const batches = estimateSummaryBatches(cues.length, translateBatchSize);
+        logMessage(
+          `字幕仅 ${cues.length} 条 / 预计 ${batches} 批，已跳过摘要（省一次调用）: ${file.fileName}`,
+          'info',
+        );
+        return;
+      }
+
+      const translator = TRANSLATOR_MAP[
+        provider.type as keyof typeof TRANSLATOR_MAP
+      ] as unknown as TranslatorFunction | undefined;
+      if (!translator) {
+        applySummaryState(
+          file,
+          {
+            ...clearedSummaryFields(),
+            summarizeEpisode: 'done',
+            summarizeEpisodeError: 'call-failed',
+          },
+          event,
+        );
+        logMessage(
+          `episode summary degraded (no translator ${provider.type}) for ${file.fileName}`,
+          'warning',
+        );
+        return;
+      }
+
+      const glossaryIds = formData?.glossaryIds as string[] | undefined;
+      const glossaryResolution = getTaskGlossaryResolution(glossaryIds);
+      const glossaryContext = describeGlossaryContext('通读摘要', glossaryIds);
+      logGlossaryConflicts(glossaryResolution.conflicts, glossaryContext);
+      const matches = matchGlossaryEntries(
+        glossaryResolution.entries,
+        cues.map((cue) => cue.text),
+      );
+      const selection = selectGlossaryPromptEntries(matches);
+      logGlossaryMatches(
+        selection.included,
+        glossaryContext,
+        selection.omittedCount,
+      );
+      const glossaryBlock = buildSummaryGlossaryBlock(selection.included);
+      const sourceName = getLanguageName(sourceLanguage);
+      const targetName = getLanguageName(targetLanguage);
+      const instructions = buildSummaryInstructions({
+        prompt,
+        sourceLanguage: sourceName,
+        targetLanguage: targetName,
+        glossaryBlock,
+      });
+      const userText = buildSummaryInput(cues);
+      const batches = estimateSummaryBatches(cues.length, translateBatchSize);
+      logMessage(
+        `📖 通读摘要 ${file.fileName}: cues=${cues.length} translateBatches≈${batches} provider=${provider.name} [${glossaryContext}]`,
+        'info',
+      );
+
+      throwIfTaskCancelled();
+      activity?.update({ phase: 'requesting' });
+      const callProvider = await resolveSummaryCallProvider(
+        provider,
+        params.translationProvider,
+      );
+      let usage: { input_tokens?: number; output_tokens?: number } | undefined;
+      const signal = getTaskSignal() || getTaskContext()?.signal;
+      const modelRaw = await translator(
+        userText,
+        { ...summaryRequestConfig(callProvider), systemPrompt: instructions },
+        sourceLanguage,
+        targetLanguage,
+        {
+          signal,
+          onResponseMeta: (meta) => {
+            usage = {
+              input_tokens: meta.promptTokens,
+              output_tokens: meta.completionTokens,
+            };
+          },
+        },
+      );
+
+      const settled = settleSummaryText(modelRaw);
+      if (settled.ok === false) {
+        applySummaryState(
+          file,
+          {
+            ...clearedSummaryFields(),
+            summarizeEpisode: 'done',
+            summarizeEpisodeError: settled.error,
+            summaryUsage: usage,
+          },
+          event,
+        );
+        logMessage(
+          `episode summary degraded (${settled.error}) for ${file.fileName}`,
+          'warning',
+        );
+        return;
+      }
+
+      const firstUsage = usage;
+      const capped = await enforceSummaryCap({
+        text: settled.text,
+        targetLang: targetLanguage,
+        compress: compressSettledSummary({
+          translator,
+          provider: callProvider,
+          sourceLanguage,
+          targetLanguage,
+          signal,
+          onRetryTokens: (retryMeta) => {
+            // 同一次调用若回传多次，后来的覆盖先前的；两次调用再相加。
+            usage = accumulateSummaryUsage(firstUsage, retryMeta);
+          },
+        }),
+      });
+
       applySummaryState(
         file,
         {
           summarizeEpisode: 'done',
-          ...(normalized.changed ? { episodeSummary: normalized.text } : {}),
-          ...(file.summarizeEpisodeError
-            ? {}
-            : { summarizeEpisodeError: undefined }),
+          summarizeEpisodeError: undefined,
+          episodeSummary: capped.text,
+          summaryUsage: usage,
+          summarySourceHash: fingerprint,
         },
         event,
       );
-      if (normalized.changed) {
+      if (capped.retryError) {
+        logMessage(
+          `摘要压缩失败，已截断第一轮: ${capped.retryError}`,
+          'warning',
+        );
+      }
+      if (capped.retried || capped.truncated) {
         logMessage(
           formatSummaryCapLog(
-            normalized.originalUnits,
-            undefined,
-            normalized.finalUnits,
+            capped.originalUnits,
+            capped.retryUnits,
+            capped.finalUnits,
           ),
           'info',
         );
       }
       logMessage(
-        `resume: reuse episode summary for ${file.fileName} (${normalized.text.length} chars)`,
+        `✓ 摘要完成 ${file.fileName} chars=${capped.text.length}`,
         'info',
       );
-      return;
-    }
-
-    applySummaryState(
-      file,
-      {
-        ...clearedSummaryFields(),
-        summarizeEpisode: 'loading',
-        summarizeEpisodeError: undefined,
-      },
-      event,
-    );
-
-    const cues = cuesFromRaw(srtFile, raw);
-
-    const translators: Provider[] = store.get('translationProviders') || [];
-    const translateProvider = translators.find(
-      (item) => item.id === formData?.translateProvider,
-    );
-    const translateBatchSize = translateProvider?.isAi
-      ? translateProvider.batchSize
-      : DEFAULT_BATCH_SIZE.API;
-
-    if (shouldSkipTrivialSummary(cues.length, translateBatchSize)) {
-      applySummaryState(
-        file,
-        {
-          ...clearedSummaryFields(),
-          summarizeEpisode: 'done',
-          summarizeEpisodeError: 'skipped-trivial',
-        },
-        event,
-      );
-      const batches = estimateSummaryBatches(cues.length, translateBatchSize);
-      logMessage(
-        `字幕仅 ${cues.length} 条 / 预计 ${batches} 批，已跳过摘要（省一次调用）: ${file.fileName}`,
-        'info',
-      );
-      return;
-    }
-
-    const translator = TRANSLATOR_MAP[
-      provider.type as keyof typeof TRANSLATOR_MAP
-    ] as unknown as TranslatorFunction | undefined;
-    if (!translator) {
+      if (translateProvider?.isAi) {
+        const extra = Math.ceil(capped.text.length / 1.5) * batches;
+        logMessage(
+          `摘要将随 ${batches} 个翻译批次重发，约 ${extra} token`,
+          'info',
+        );
+      }
+    } catch (error) {
+      if (isTaskCancelledError(error)) {
+        activityStatus = 'cancelled';
+        applySummaryState(
+          file,
+          { summarizeEpisode: '', summarizeEpisodeError: undefined },
+          event,
+        );
+        throw error;
+      }
       applySummaryState(
         file,
         {
@@ -413,163 +570,12 @@ export async function runEpisodeSummaryStage(params: {
         event,
       );
       logMessage(
-        `episode summary degraded (no translator ${provider.type}) for ${file.fileName}`,
+        `episode summary degraded (call-failed) for ${file.fileName}: ${
+          error instanceof Error ? error.message : error
+        }`,
         'warning',
       );
-      return;
     }
-
-    const glossaryIds = formData?.glossaryIds as string[] | undefined;
-    const glossaryResolution = getTaskGlossaryResolution(glossaryIds);
-    const glossaryContext = describeGlossaryContext('通读摘要', glossaryIds);
-    logGlossaryConflicts(glossaryResolution.conflicts, glossaryContext);
-    const matches = matchGlossaryEntries(
-      glossaryResolution.entries,
-      cues.map((cue) => cue.text),
-    );
-    const selection = selectGlossaryPromptEntries(matches);
-    logGlossaryMatches(
-      selection.included,
-      glossaryContext,
-      selection.omittedCount,
-    );
-    const glossaryBlock = buildSummaryGlossaryBlock(selection.included);
-    const sourceName = getLanguageName(sourceLanguage);
-    const targetName = getLanguageName(targetLanguage);
-    const instructions = buildSummaryInstructions({
-      prompt,
-      sourceLanguage: sourceName,
-      targetLanguage: targetName,
-      glossaryBlock,
-    });
-    const userText = buildSummaryInput(cues);
-    const batches = estimateSummaryBatches(cues.length, translateBatchSize);
-    logMessage(
-      `📖 通读摘要 ${file.fileName}: cues=${cues.length} translateBatches≈${batches} provider=${provider.name} [${glossaryContext}]`,
-      'info',
-    );
-
-    throwIfTaskCancelled();
-    activity?.update({ phase: 'requesting' });
-    const callProvider = await resolveSummaryCallProvider(
-      provider,
-      params.translationProvider,
-    );
-    let usage: { input_tokens?: number; output_tokens?: number } | undefined;
-    const signal = getTaskSignal() || getTaskContext()?.signal;
-    const modelRaw = await translator(
-      userText,
-      { ...summaryRequestConfig(callProvider), systemPrompt: instructions },
-      sourceLanguage,
-      targetLanguage,
-      {
-        signal,
-        onResponseMeta: (meta) => {
-          usage = {
-            input_tokens: meta.promptTokens,
-            output_tokens: meta.completionTokens,
-          };
-        },
-      },
-    );
-
-    const settled = settleSummaryText(modelRaw);
-    if (settled.ok === false) {
-      applySummaryState(
-        file,
-        {
-          ...clearedSummaryFields(),
-          summarizeEpisode: 'done',
-          summarizeEpisodeError: settled.error,
-          summaryUsage: usage,
-        },
-        event,
-      );
-      logMessage(
-        `episode summary degraded (${settled.error}) for ${file.fileName}`,
-        'warning',
-      );
-      return;
-    }
-
-    const firstUsage = usage;
-    const capped = await enforceSummaryCap({
-      text: settled.text,
-      targetLang: targetLanguage,
-      compress: compressSettledSummary({
-        translator,
-        provider: callProvider,
-        sourceLanguage,
-        targetLanguage,
-        signal,
-        onRetryTokens: (retryMeta) => {
-          // 同一次调用若回传多次，后来的覆盖先前的；两次调用再相加。
-          usage = accumulateSummaryUsage(firstUsage, retryMeta);
-        },
-      }),
-    });
-
-    applySummaryState(
-      file,
-      {
-        summarizeEpisode: 'done',
-        summarizeEpisodeError: undefined,
-        episodeSummary: capped.text,
-        summaryUsage: usage,
-        summarySourceHash: fingerprint,
-      },
-      event,
-    );
-    if (capped.retryError) {
-      logMessage(`摘要压缩失败，已截断第一轮: ${capped.retryError}`, 'warning');
-    }
-    if (capped.retried || capped.truncated) {
-      logMessage(
-        formatSummaryCapLog(
-          capped.originalUnits,
-          capped.retryUnits,
-          capped.finalUnits,
-        ),
-        'info',
-      );
-    }
-    logMessage(
-      `✓ 摘要完成 ${file.fileName} chars=${capped.text.length}`,
-      'info',
-    );
-    if (translateProvider?.isAi) {
-      const extra = Math.ceil(capped.text.length / 1.5) * batches;
-      logMessage(
-        `摘要将随 ${batches} 个翻译批次重发，约 ${extra} token`,
-        'info',
-      );
-    }
-  } catch (error) {
-    if (isTaskCancelledError(error)) {
-      activityStatus = 'cancelled';
-      applySummaryState(
-        file,
-        { summarizeEpisode: '', summarizeEpisodeError: undefined },
-        event,
-      );
-      throw error;
-    }
-    applySummaryState(
-      file,
-      {
-        ...clearedSummaryFields(),
-        summarizeEpisode: 'done',
-        summarizeEpisodeError: 'call-failed',
-      },
-      event,
-    );
-    logMessage(
-      `episode summary degraded (call-failed) for ${file.fileName}: ${
-        error instanceof Error ? error.message : error
-      }`,
-      'warning',
-    );
-  }
   } finally {
     activity?.finish(activityStatus);
   }
