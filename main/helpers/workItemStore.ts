@@ -77,7 +77,11 @@ function applyInterruptedMarkToWorkItems() {
         ? { ...item, downloadEntries, status: 'interrupted' as const }
         : { ...item, downloadEntries };
     }
-    if (item.type === 'compose' || item.type === 'toolbox') {
+    if (
+      item.type === 'compose' ||
+      item.type === 'toolbox' ||
+      item.type === 'videoCreation'
+    ) {
       return item.status === 'running' || item.status === 'waiting'
         ? { ...item, status: 'interrupted' as const }
         : item;

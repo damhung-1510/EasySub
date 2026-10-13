@@ -145,7 +145,8 @@
     "dubbing": "Lồng tiếng",
     "dubbingDesc": "Tạo giọng đọc cho từng dòng phụ đề và căn khớp với dòng thời gian",
     "compose": "Ghép video",
-    "toolbox": "Công cụ"
+    "toolbox": "Công cụ",
+    "videoCreation": "Tạo video"
   },
   "fromDownload": "Từ tải xuống",
   "needsModelBadge": "Cần model",

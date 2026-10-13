@@ -145,7 +145,8 @@
     "dubbing": "Dubbing",
     "dubbingDesc": "Synthesize speech line by line and align it to the timeline",
     "compose": "Video composition",
-    "toolbox": "Toolbox"
+    "toolbox": "Toolbox",
+    "videoCreation": "Create video"
   },
   "fromDownload": "From download",
   "needsModelBadge": "Needs a model",

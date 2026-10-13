@@ -1,4 +1,4 @@
-import ffmpegStatic from 'ffmpeg-static';
+import { resolveFfmpegBinary } from './ffmpegBinary';
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
@@ -25,7 +25,7 @@ import {
 } from './builtinAudioChunking';
 
 // 设置ffmpeg路径
-const ffmpegPath = ffmpegStatic.replace('app.asar', 'app.asar.unpacked');
+const ffmpegPath = resolveFfmpegBinary();
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 /** 正在运行的提取进程：fileUuid -> fluent-ffmpeg command（取消时 kill） */

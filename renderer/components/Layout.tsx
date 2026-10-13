@@ -135,6 +135,12 @@ const NAV_TASK_ITEMS: NavItemDef[] = [
     isActive: (p) => p.includes('subtitleMerge'),
   },
   {
+    href: 'videoCreation',
+    labelKey: 'nav.videoCreation',
+    icon: Clapperboard,
+    isActive: (p) => p.includes('/videoCreation'),
+  },
+  {
     href: 'dubbing',
     labelKey: 'nav.dubbing',
     icon: Mic,

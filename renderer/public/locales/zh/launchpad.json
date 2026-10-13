@@ -145,7 +145,8 @@
     "dubbing": "配音",
     "dubbingDesc": "把字幕逐条合成语音，对齐时间轴生成配音",
     "compose": "视频合成",
-    "toolbox": "工具箱"
+    "toolbox": "工具箱",
+    "videoCreation": "生成视频"
   },
   "fromDownload": "来自下载",
   "needsModelBadge": "需要模型",

@@ -1,4 +1,4 @@
-import ffmpegStatic from 'ffmpeg-static';
+import { resolveFfmpegBinary } from '../ffmpegBinary';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
 import path from 'path';
@@ -8,7 +8,7 @@ import { stderrTail } from '../ffmpegErrorUtils';
 import { assertDubbingSpeakerSettings } from '../../../types/dubbing';
 
 // 与 audioProcessor 同源的 ffmpeg 路径设置（本模块可被独立引入）。
-const FFMPEG_BIN = ffmpegStatic.replace('app.asar', 'app.asar.unpacked');
+const FFMPEG_BIN = resolveFfmpegBinary();
 ffmpeg.setFfmpegPath(FFMPEG_BIN);
 
 /**

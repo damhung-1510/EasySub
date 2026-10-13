@@ -5,6 +5,10 @@ import { createWindowPort } from './automation/events';
 import { startAutomationServer } from './automation/server';
 import { AutomationService } from './automation/service';
 import { setupAssistantHandlers } from './assistant/ipc';
+import {
+  setupVideoCreationHandlers,
+  shutdownVideoCreation,
+} from './videoCreation/ipc';
 import { setupMcpConfigHandlers } from './automation/mcpSetup';
 
 // 在最开始加载环境变量（仅开发模式；路径相对 app/ 编译产物）
@@ -162,7 +166,10 @@ app.on('before-quit', (event) => {
     shutdownVideoDownloads();
     shutdownToolboxProcesses();
     cancelProofreadWaveforms();
-    void shutdownPythonRuntime().finally(() => {
+    void Promise.allSettled([
+      shutdownPythonRuntime(),
+      shutdownVideoCreation(),
+    ]).finally(() => {
       // 走到这里才算“正常退出”：之后进程被收尾崩溃的话，下次启动仍能看到证据
       markCleanExit();
       app.exit(0);
@@ -324,6 +331,7 @@ app.on('before-quit', (event) => {
   setMainWindowForEngine(mainWindow);
   const automationService = new AutomationService();
   setupAssistantHandlers(automationService);
+  await setupVideoCreationHandlers();
   setupMcpConfigHandlers();
   await startAutomationServer(automationService);
   if (desktopRequested) await showDesktop();

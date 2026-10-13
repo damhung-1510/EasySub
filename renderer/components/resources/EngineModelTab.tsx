@@ -37,6 +37,8 @@ import SherpaEngineGroupPanel, {
 } from '@/components/resources/engines/SherpaEngineGroupPanel';
 import LocalCliPanel from '@/components/resources/engines/panels/LocalCliPanel';
 import BuiltinPanel from '@/components/resources/engines/panels/BuiltinPanel';
+import useVideoProviders from '../../hooks/useVideoProviders';
+import VideoProviderPanel from './engines/panels/VideoProviderPanel';
 import CloudProviderPanel from '@/components/resources/engines/panels/CloudProviderPanel';
 import EngineOverviewPanel from '@/components/resources/engines/EngineOverviewPanel';
 import EngineIcon from '@/components/resources/engines/EngineIcon';
@@ -117,7 +119,10 @@ function StatusDot({ tone, label }: { tone: StatusTone; label?: string }) {
  * ASR_PROVIDER_TYPES），右栏 = 选中视图的运行时管理 / 服务商配置面板。
  * 选中态为本地 state，不写全局；不提供"设为当前/启用"。
  */
-const EngineModelTab: React.FC = () => {
+const EngineModelTab: React.FC<{ initialView?: string }> = ({
+  initialView,
+}) => {
+  const videoProviders = useVideoProviders();
   const { t } = useTranslation('resources');
   const { t: commonT } = useTranslation('common');
 
@@ -128,6 +133,11 @@ const EngineModelTab: React.FC = () => {
     'overview',
     isEngineViewId,
   );
+
+  useEffect(() => {
+    if (initialView && isEngineViewId(initialView))
+      setSelectedView(initialView as EngineView);
+  }, [initialView, setSelectedView]);
 
   // FunASR 与 Qwen 共用的 sherpa-onnx 运行库状态（上提到此常驻组件，切换引擎不丢进度）。
   const sherpa = useSherpaRuntime();
@@ -589,6 +599,25 @@ const EngineModelTab: React.FC = () => {
    */
   const selectedRaw = selectedView as string;
   const isOverview = selectedRaw === 'overview';
+  const isVideoView = selectedRaw.startsWith('video:');
+  const selectedVideoProviderId = selectedRaw.startsWith('video:provider:')
+    ? selectedRaw.slice('video:provider:'.length)
+    : undefined;
+  useEffect(() => {
+    if (
+      videoProviders.loaded &&
+      selectedVideoProviderId &&
+      !videoProviders.providers.some(
+        (p) => p.id === selectedVideoProviderId && !p.archived,
+      )
+    )
+      setSelectedView('video:overview');
+  }, [
+    videoProviders.loaded,
+    videoProviders.providers,
+    selectedVideoProviderId,
+    setSelectedView,
+  ]);
   const activeCloudView = (() => {
     if (isOverview) return null;
     if (selectedRaw === 'cloud') {
@@ -821,6 +850,18 @@ const EngineModelTab: React.FC = () => {
     null;
 
   const renderRuntimePanel = () => {
+    if (isVideoView)
+      return (
+        <VideoProviderPanel
+          key={selectedRaw}
+          selectedProviderId={selectedVideoProviderId}
+          imagesOnly={selectedRaw === 'video:images'}
+          api={videoProviders}
+          onSelect={(id) =>
+            setSelectedView(id ? `video:provider:${id}` : 'video:overview')
+          }
+        />
+      );
     if (
       !asr.loaded &&
       (selectedRaw === 'cloud' || selectedRaw.startsWith('cloud:'))
@@ -997,7 +1038,10 @@ const EngineModelTab: React.FC = () => {
               </div>
               {LOCAL_ENGINE_VIEWS.map((id) => {
                 const active =
-                  !activeCloudView && !isOverview && effectiveLocalView === id;
+                  !activeCloudView &&
+                  !isOverview &&
+                  !isVideoView &&
+                  effectiveLocalView === id;
                 const tone = engineTone(id);
                 const tags = engineTags(id);
                 return (
@@ -1093,6 +1137,63 @@ const EngineModelTab: React.FC = () => {
                   {t('cloudAsr.addCustom')}
                 </span>
               </button>
+              <div className="label-caps px-2 pb-1 pt-2.5">
+                {t('videoProviders.group')}
+              </div>
+              <button
+                type="button"
+                aria-current={
+                  selectedRaw === 'video:overview' ? 'true' : undefined
+                }
+                onClick={() => setSelectedView('video:overview')}
+                className={cn(
+                  'rounded-md px-2 py-2 text-left text-[13px] hover:bg-accent',
+                  selectedRaw === 'video:overview' &&
+                    'bg-primary/10 text-primary',
+                )}
+              >
+                {t('videoProviders.overview')}
+              </button>
+              {videoProviders.providers
+                .filter((p) => p.kind === 'video' && !p.archived)
+                .map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    aria-current={
+                      selectedVideoProviderId === p.id ? 'true' : undefined
+                    }
+                    onClick={() => setSelectedView(`video:provider:${p.id}`)}
+                    className={cn(
+                      'rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-accent',
+                      selectedVideoProviderId === p.id &&
+                        'bg-primary/10 text-primary',
+                    )}
+                  >
+                    <span className="block truncate">{p.name}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {t(
+                        p.verifiedAt
+                          ? 'videoProviders.verified'
+                          : 'videoProviders.unverified',
+                      )}
+                    </span>
+                  </button>
+                ))}
+              <button
+                type="button"
+                aria-current={
+                  selectedRaw === 'video:images' ? 'true' : undefined
+                }
+                onClick={() => setSelectedView('video:images')}
+                className={cn(
+                  'rounded-md px-2 py-2 text-left text-[13px] hover:bg-accent',
+                  selectedRaw === 'video:images' &&
+                    'bg-primary/10 text-primary',
+                )}
+              >
+                {t('videoProviders.images')}
+              </button>
             </nav>
           </Panel>
 
@@ -1101,13 +1202,15 @@ const EngineModelTab: React.FC = () => {
             <div className="flex flex-none flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2.5">
               <div className="min-w-0">
                 <h2 className="text-[15px] font-semibold leading-tight">
-                  {isOverview
-                    ? t('engines.overview.name')
-                    : activeCloudView
-                      ? activeCloudView.kind === 'brand'
-                        ? activeCloudView.type.name
-                        : activeCloudView.label
-                      : engineName(effectiveLocalView)}
+                  {isVideoView
+                    ? t('videoProviders.group')
+                    : isOverview
+                      ? t('engines.overview.name')
+                      : activeCloudView
+                        ? activeCloudView.kind === 'brand'
+                          ? activeCloudView.type.name
+                          : activeCloudView.label
+                        : engineName(effectiveLocalView)}
                 </h2>
                 {/* 预设槽位/自定义条目以类型全名作副标题（标明协议归属） */}
                 {isOverview && (
@@ -1131,6 +1234,7 @@ const EngineModelTab: React.FC = () => {
                   )}
               </div>
               {!isOverview &&
+                !isVideoView &&
                 (activeCloudView ? (
                   activeCloudView.configured ? (
                     <Badge variant="secondary">
@@ -1154,6 +1258,7 @@ const EngineModelTab: React.FC = () => {
 
               {/* sherpa 组的模型清单由组面板内联渲染；云服务商无本地模型清单（模型在面板内配置）。 */}
               {!isOverview &&
+                !isVideoView &&
                 !activeCloudView &&
                 effectiveLocalView !== 'sherpa' && (
                   <div className="border-t pt-4">

@@ -44,6 +44,8 @@
     "test:e2e:ergonomics": "node scripts/e2e/ergonomics.mjs",
     "test:navigation-save": "tsx scripts/test-navigation-save.ts",
     "test:work-item-durability": "node scripts/test-work-item-durability.cjs",
+    "test:video-creation": "node --import tsx --test scripts/videoCreation/*.test.ts",
+    "test:video-creation:e2e": "node --import tsx --test scripts/videoCreation/acceptance.test.ts",
     "test:provider-health": "tsx scripts/test-provider-health.ts",
     "test:task-draft": "tsx --tsconfig renderer/tsconfig.json scripts/test-unified-task-draft.ts",
     "test:task-project": "tsx --tsconfig renderer/tsconfig.json scripts/test-task-project-persistence.tsx",

@@ -19,7 +19,10 @@ export const LOCAL_ENGINE_VIEWS = [
 export type LocalEngineView = (typeof LOCAL_ENGINE_VIEWS)[number];
 
 /** 左栏视图 id：总览 + 本地四视图 + 云服务商视图（cloud:<typeId>）。 */
-export type EngineView = 'overview' | LocalEngineView | `cloud:${string}`;
+export type VideoEngineView =
+  'video:overview' | 'video:images' | `video:provider:${string}`;
+export type EngineView =
+  'overview' | LocalEngineView | `cloud:${string}` | VideoEngineView;
 
 /**
  * localStorage 选中态校验（宽进严出）：接受总览、本地四视图、任意 `cloud:*`
@@ -28,7 +31,17 @@ export type EngineView = 'overview' | LocalEngineView | `cloud:${string}`;
  */
 export function isEngineViewId(value: unknown): boolean {
   if (typeof value !== 'string') return false;
-  if (value === 'overview') return true;
+  if (
+    value === 'overview' ||
+    value === 'video:overview' ||
+    value === 'video:images'
+  )
+    return true;
+  if (
+    value.startsWith('video:provider:') &&
+    value.length > 'video:provider:'.length
+  )
+    return true;
   if ((LOCAL_ENGINE_VIEWS as readonly string[]).includes(value)) return true;
   if (value === 'cloud') return true;
   return (

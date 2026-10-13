@@ -5,9 +5,7 @@ import type { ToolboxToolId } from './toolbox';
 
 /** 流水线类工作项（转写 / 翻译） */
 export type PipelineWorkItemType =
-  | 'generateAndTranslate'
-  | 'generateOnly'
-  | 'translateOnly';
+  'generateAndTranslate' | 'generateOnly' | 'translateOnly';
 
 /** 校对批次工作项 */
 export type ProofreadWorkItemType = 'proofread';
@@ -24,7 +22,8 @@ export type WorkItemType =
   | DubbingWorkItemType
   | DownloadWorkItemType
   | 'compose'
-  | 'toolbox';
+  | 'toolbox'
+  | 'videoCreation';
 
 export type WorkItemStatus =
   | 'waiting'
@@ -65,6 +64,8 @@ export interface WorkItem {
   /** download（每条粘贴链接一项） */
   downloadEntries?: DownloadEntry[];
 
+  videoProjectId?: string;
+  episodeId?: string;
   configSnapshot?: Record<string, unknown>;
   /** Editable next-run settings; never replaces an accepted execution snapshot. */
   taskDraft?: {

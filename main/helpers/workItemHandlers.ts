@@ -32,7 +32,9 @@ export function setupWorkItemHandlers(): void {
     if (
       items.some(
         (item) =>
-          (item.type === 'compose' || item.type === 'toolbox') &&
+          (item.type === 'compose' ||
+            item.type === 'toolbox' ||
+            item.type === 'videoCreation') &&
           ['waiting', 'running'].includes(item.status),
       ) ||
       items.some(

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import EngineModelTab from '@/components/resources/EngineModelTab';
 import { getStaticPaths, makeStaticProperties } from '../../lib/get-static';
 
@@ -7,10 +8,13 @@ import { getStaticPaths, makeStaticProperties } from '../../lib/get-static';
  * 含转写引擎运行时管理、语音模型清单，以及 builtin 的 GPU 加速（见 fold-gpu-into-builtin）。
  */
 const EnginesPage = () => {
+  const router = useRouter();
+  const initialView =
+    typeof router.query.view === 'string' ? router.query.view : undefined;
   // 配置页版式：定位由顶栏面包屑与面板标题承担，无页内大标题
   return (
     <div className="h-full min-h-0 overflow-hidden p-3">
-      <EngineModelTab />
+      <EngineModelTab initialView={initialView} />
     </div>
   );
 };
