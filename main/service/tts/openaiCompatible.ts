@@ -70,6 +70,9 @@ async function readErrorDetail(res: Response): Promise<string> {
 
 const RIFF_MAGIC = Buffer.from('RIFF', 'ascii');
 
+/** 与 transcodeToPcm16Wav 默认值及本地/Edge 引擎输出一致。 */
+const PIPELINE_SAMPLE_RATE = 24000;
+
 /**
  * OpenAI 兼容 /audio/speech 合成：请求 wav 直出；端点若忽略 response_format
  * 返回 mp3 等格式，按字节头嗅探后经 ffmpeg 统一转 16-bit PCM 单声道 wav。
@@ -145,7 +148,13 @@ function tryReadWav(audio: Buffer, outPath: string): number | null {
   fs.writeFileSync(outPath, audio);
   try {
     const info = readWavInfo(outPath);
-    if (info.bitsPerSample === 16 && info.channels === 1) {
+    // 采样率也必须与流水线一致（24 kHz）：端点原生 48 kHz（如 VieNeu）若直接落盘，
+    // 与其它 cue 混在 assembleTrack 里会因格式不一致失败，需走 ffmpeg 重采样。
+    if (
+      info.bitsPerSample === 16 &&
+      info.channels === 1 &&
+      info.sampleRate === PIPELINE_SAMPLE_RATE
+    ) {
       return info.durationMs;
     }
   } catch {
