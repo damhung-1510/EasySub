@@ -128,7 +128,14 @@ export default function DubbingCueList({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 64,
     overscan: 8,
+    // 行高缓存按 cue 而非位置：过滤/状态变化后位置对应的 cue 会变，
+    // 默认按下标缓存会沿用旧行高，导致展开的行与相邻行重叠。
+    getItemKey: (position) => visible[position]?.index ?? position,
   });
+  // 过滤条件切换后整体重新测量，避免沿用上一个视图的行高。
+  useEffect(() => {
+    virtualizer.measure();
+  }, [filter, virtualizer]);
 
   // 播放进度 → 当前行高亮（仅有视频进度时）。
   const activePlaybackIndex = useMemo(() => {
