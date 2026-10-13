@@ -75,6 +75,26 @@ export default function VideoProviderForm({
     JSON.stringify(draft) !== JSON.stringify(initial) ||
     !!secret ||
     advanced !== initialAdvanced;
+  const keyGuide =
+    draft.protocol === 'veo-gemini' || draft.protocol === 'gemini-image'
+      ? {
+          intro: 'keyHelpGemini',
+          link: 'keyLinkGemini',
+          url: 'https://aistudio.google.com/apikey',
+        }
+      : draft.protocol === 'seedance-ark'
+        ? {
+            intro: 'keyHelpSeedance',
+            link: 'keyLinkSeedance',
+            url: 'https://ark.volcengine.com/region:cn-beijing/apikey',
+          }
+        : draft.protocol === 'openai-image'
+          ? {
+              intro: 'keyHelpOpenAI',
+              link: 'keyLinkOpenAI',
+              url: 'https://platform.openai.com/api-keys',
+            }
+          : null;
   const save = async () => {
     setBusy(true);
     setError('');
@@ -260,6 +280,20 @@ export default function VideoProviderForm({
                 : 'videoProviders.secretHint',
             )}
           </span>
+          {keyGuide && (
+            <p className="text-xs text-muted-foreground">
+              {t(`videoProviders.${keyGuide.intro}`)}{' '}
+              <a
+                href={keyGuide.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                {t(`videoProviders.${keyGuide.link}`)}
+              </a>
+              {t('videoProviders.keyHelpLocal')}
+            </p>
+          )}
         </div>
       )}
       {input(

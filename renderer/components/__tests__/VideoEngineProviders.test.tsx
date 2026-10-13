@@ -115,3 +115,26 @@ test('new provider can be saved with only the required fields', async () => {
     secret: 'private-key',
   });
 });
+test('API key guidance follows built-in providers and is hidden for custom APIs', () => {
+  render(<VideoProviderForm onSave={jest.fn()} />);
+  expect(
+    screen.getByRole('link', { name: 'videoProviders.keyLinkGemini' }),
+  ).toHaveAttribute('href', 'https://aistudio.google.com/apikey');
+
+  const protocol = screen.getByLabelText('videoProviders.protocol');
+  fireEvent.change(protocol, { target: { value: 'seedance-ark' } });
+  expect(
+    screen.getByRole('link', { name: 'videoProviders.keyLinkSeedance' }),
+  ).toHaveAttribute(
+    'href',
+    'https://ark.volcengine.com/region:cn-beijing/apikey',
+  );
+
+  fireEvent.change(protocol, { target: { value: 'openai-image' } });
+  expect(
+    screen.getByRole('link', { name: 'videoProviders.keyLinkOpenAI' }),
+  ).toHaveAttribute('href', 'https://platform.openai.com/api-keys');
+
+  fireEvent.change(protocol, { target: { value: 'custom-async-json' } });
+  expect(screen.queryByRole('link')).toBeNull();
+});
