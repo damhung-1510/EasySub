@@ -276,7 +276,10 @@ const TtsProviderPanel: React.FC<TtsProviderPanelProps> = ({
       const voices = Array.from(
         new Set([
           ...parseTtsVoices(provider),
-          ...raw.split(/[,，、;；\s]+/).filter(Boolean),
+          ...raw
+            .split(/[,，、;；\n]+/)
+            .map((v) => v.trim())
+            .filter(Boolean),
         ]),
       );
       const updated = { ...provider, voices: voices.join(', ') };
@@ -294,8 +297,9 @@ const TtsProviderPanel: React.FC<TtsProviderPanelProps> = ({
       return;
     }
     const current = currentVoices();
+    // 音色名可含空格（如 VieNeu 的 "Mai Anh"），只按显式分隔符拆分。
     const pieces = raw
-      .split(/[,，、;；\s]+/)
+      .split(/[,，、;；\n]+/)
       .map((v) => v.trim())
       .filter(Boolean)
       .filter((v) => !current.includes(v));
