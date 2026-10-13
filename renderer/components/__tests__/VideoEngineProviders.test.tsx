@@ -16,6 +16,7 @@ const provider: any = {
   baseUrl: 'https://generativelanguage.googleapis.com',
   modelId: 'veo-3.0-generate-preview',
   authMode: 'header',
+  authHeader: 'x-goog-api-key',
   hasCredential: true,
   status: 'unverified',
   timeoutMs: 120000,
@@ -57,4 +58,60 @@ test('failed CAS save retains draft and secret for a deliberate retry', async ()
     'VERSION_CONFLICT',
   );
   expect(screen.getByLabelText('videoProviders.name')).toHaveValue('New name');
+});
+test('new provider shows required fields and keeps technical options collapsed', () => {
+  render(<VideoProviderForm onSave={jest.fn()} />);
+  expect(screen.getByLabelText('videoProviders.name')).toBeRequired();
+  expect(screen.getByLabelText('videoProviders.baseUrl')).toBeRequired();
+  expect(screen.getByLabelText('videoProviders.apiKey')).toBeRequired();
+  expect(screen.getByLabelText('videoProviders.model')).toBeRequired();
+  expect(screen.getByLabelText('videoProviders.model')).toHaveValue(
+    'veo-3.1-generate-preview',
+  );
+  expect(
+    screen.getByText('videoProviders.advanced').closest('details'),
+  ).not.toHaveAttribute('open');
+  expect(
+    screen.getByRole('button', { name: 'videoProviders.save' }),
+  ).toBeDisabled();
+});
+test('saved credential remains optional until switching provider protocol', () => {
+  render(<VideoProviderForm provider={provider} onSave={jest.fn()} />);
+  expect(screen.getByLabelText('videoProviders.apiKey')).not.toBeRequired();
+  fireEvent.change(screen.getByLabelText('videoProviders.protocol'), {
+    target: { value: 'seedance-ark' },
+  });
+  expect(screen.getByLabelText('videoProviders.apiKey')).toBeRequired();
+  expect(screen.getByLabelText('videoProviders.model')).toHaveValue('');
+  expect(
+    screen.getByRole('button', { name: 'videoProviders.save' }),
+  ).toBeDisabled();
+});
+test('character image setup starts with an image model', () => {
+  render(<VideoProviderForm imagesOnly onSave={jest.fn()} />);
+  expect(screen.getByLabelText('videoProviders.protocol')).toHaveValue(
+    'gemini-image',
+  );
+  expect(screen.getByLabelText('videoProviders.model')).toHaveValue(
+    'gemini-2.5-flash-image',
+  );
+  expect(screen.queryByRole('option', { name: /veo-gemini/ })).toBeNull();
+});
+test('new provider can be saved with only the required fields', async () => {
+  const onSave = jest.fn().mockResolvedValue(provider);
+  render(<VideoProviderForm onSave={onSave} />);
+  fireEvent.change(screen.getByLabelText('videoProviders.name'), {
+    target: { value: 'My Veo' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.apiKey'), {
+    target: { value: 'private-key' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'videoProviders.save' }));
+  await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+  expect(onSave.mock.calls[0][0]).toMatchObject({
+    name: 'My Veo',
+    protocol: 'veo-gemini',
+    modelId: 'veo-3.1-generate-preview',
+    secret: 'private-key',
+  });
 });

@@ -156,6 +156,7 @@ export default function VideoProviderPanel({
           <VideoProviderForm
             key={provider?.id ?? 'new'}
             provider={provider}
+            imagesOnly={imagesOnly}
             onSave={async (draft, version) => {
               const result = await api.save(draft, version);
               if (!provider) {
