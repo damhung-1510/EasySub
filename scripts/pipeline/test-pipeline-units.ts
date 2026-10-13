@@ -37,6 +37,7 @@ import {
   TRANSLATION_INCOMPLETE_FOR_COMPOSE,
 } from '../../types';
 import type { SubtitleStyle } from '../../types/subtitleMerge';
+import { replaceDubDisplayText } from '../../main/helpers/pipeline/dubSubtitleText';
 
 let failed = 0;
 
@@ -716,6 +717,41 @@ eq(
     ),
     true,
     'error codes: 翻译失败暂停错误码已定义',
+  );
+}
+
+// ── 交付字幕配音文本替换（replaceDubDisplayText）────────────────────────────
+{
+  const base = 'Vật lộn cả nửa đêm rồi mà cọng rong biển cũng chả thấy, mày';
+  const current = 'Vật lộn cả đêm rồi mà cọng rong biển cũng chả thấy.';
+  eq(
+    replaceDubDisplayText(
+      'Vật lộn cả nửa đêm rồi mà cọng\nrong biển cũng chả thấy, mày',
+      base,
+      current,
+    ),
+    current,
+    'dub text: 纯译文字幕软折行也能整块替换',
+  );
+  eq(
+    replaceDubDisplayText('折腾半碗了\n' + base, base, current),
+    '折腾半碗了\n' + current,
+    'dub text: 双语字幕只替换译文行并保留原文行',
+  );
+  eq(
+    replaceDubDisplayText(base + '\n' + base, base, current),
+    null,
+    'dub text: 译文块出现两次时拒绝（不猜）',
+  );
+  eq(
+    replaceDubDisplayText('完全不同的一句话', base, current),
+    null,
+    'dub text: 对不上的文本拒绝',
+  );
+  eq(
+    replaceDubDisplayText('第一行\n第二行', '第一行\n第二行', '新文本'),
+    '新文本',
+    'dub text: 多行译文整块替换',
   );
 }
 

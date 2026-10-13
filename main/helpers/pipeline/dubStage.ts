@@ -41,6 +41,7 @@ import {
   detectSubtitleFormatFromContent,
 } from '../subtitleFormats';
 import { readProofreadDataFile } from '../proofreadData';
+import { replaceDubDisplayText } from './dubSubtitleText';
 import {
   pickDubTextSource,
   cuesFromSidecarTargets,
@@ -178,19 +179,16 @@ function resolveDubSubtitle(file: IFiles, session: DubbingSession) {
           throw new Error('交付字幕与配音时间轴不一致，请重新校对字幕后再导出');
         if (current.text === base.text) return [current.index, cue.text];
         // Replace a unique block of translation lines, retaining source lines.
-        const lines = cue.text.split('\n').map((line) => line.trim());
-        const oldLines = base.text.split('\n').map((line) => line.trim());
-        const matches = lines.flatMap((_, offset) =>
-          oldLines.every((line, i) => lines[offset + i] === line)
-            ? [offset]
-            : [],
+        const replaced = replaceDubDisplayText(
+          cue.text,
+          base.text,
+          current.text,
         );
-        if (matches.length !== 1)
+        if (replaced === null)
           throw new Error(
             `第 ${index + 1} 行无法安全更新双语字幕，请在校对页统一文本后重试`,
           );
-        lines.splice(matches[0], oldLines.length, current.text);
-        return [current.index, lines.join('\n')];
+        return [current.index, replaced];
       }),
     );
     return { mode, preserveOriginalWindows: true, displayTextByIndex };
