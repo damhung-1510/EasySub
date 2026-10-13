@@ -868,7 +868,13 @@ export function useDubbing(options?: {
       setConfigReady(true);
       setConfigDirty(false);
       setConfigError(null);
-      if (sessionIdRef.current && savedConfigKey.current !== configKey()) {
+      // 未选 engine/声音时 latestConfig 为空，没有可保存的配置；
+      // 此时再触发保存只会因 configSelectionRequired 失败，导致「放弃」也无法离开。
+      if (
+        sessionIdRef.current &&
+        latestConfig.current() &&
+        savedConfigKey.current !== configKey()
+      ) {
         configDirtyRef.current = true;
         setConfigDirty(true);
         configDiscardingRef.current = false;
