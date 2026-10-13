@@ -23,8 +23,14 @@ function isZh(): boolean {
   return (store.get('settings')?.language || 'zh') === 'zh';
 }
 
+function isVi(): boolean {
+  return store.get('settings')?.language === 'vi';
+}
+
 function gateLabel(gate: GateKind): string {
   if (isZh()) return gate === 'subtitle' ? '字幕校对' : '配音确认';
+  if (isVi())
+    return gate === 'subtitle' ? 'hiệu đính phụ đề' : 'xác nhận lồng tiếng';
   return gate === 'subtitle' ? 'subtitle review' : 'dubbing review';
 }
 
@@ -60,10 +66,14 @@ export function notifyGateReview(projectId: string, gate: GateKind): void {
         const notification = new Notification({
           title: isZh()
             ? `等待${gateLabel(gate)}`
-            : `Waiting for ${gateLabel(gate)}`,
+            : isVi()
+              ? `Đang chờ ${gateLabel(gate)}`
+              : `Waiting for ${gateLabel(gate)}`,
           body: isZh()
             ? `「${name}」有 ${count} 个文件等待${gateLabel(gate)}，处理后将自动继续`
-            : `"${name}" has ${count} file(s) waiting for ${gateLabel(gate)}; they continue automatically once released`,
+            : isVi()
+              ? `"${name}" có ${count} tệp đang chờ ${gateLabel(gate)}, sẽ tự động tiếp tục sau khi được duyệt`
+              : `"${name}" has ${count} file(s) waiting for ${gateLabel(gate)}; they continue automatically once released`,
         });
         notification.on('click', focusMainWindow);
         notification.show();

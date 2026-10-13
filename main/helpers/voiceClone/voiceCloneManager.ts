@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -48,7 +49,10 @@ export function saveClonedVoice(voice: ClonedVoice): void {
 
 export function renameClonedVoice(id: string, name: string): ClonedVoice {
   const voice = getClonedVoiceById(id);
-  if (!voice) throw new Error(`克隆音色不存在：${id}`);
+  if (!voice)
+    throw new Error(
+      uiMsg(`克隆音色不存在：${id}`, `Giọng nhân bản không tồn tại: ${id}`),
+    );
   const next = { ...voice, name: name.trim() || voice.name };
   saveClonedVoice(next);
   return next;

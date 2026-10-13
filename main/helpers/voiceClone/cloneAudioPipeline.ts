@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 /**
  * 参考音频编排层：ffmpeg 提取/裁剪/增益/重采样 + VAD 语音段 + 帧分析，
  * 把 referenceAudio.ts 的纯函数串成三个阶段（analyze / inspect / prepare）。
@@ -346,7 +347,10 @@ async function denoiseWavToFile(srcWav: string, outWav: string): Promise<void> {
   };
   /* eslint-enable @typescript-eslint/no-var-requires */
   const model = resolveBundledDenoisePath(getExtraResourcesPath());
-  if (!fs.existsSync(model)) throw new Error('内置降噪模型缺失');
+  if (!fs.existsSync(model))
+    throw new Error(
+      uiMsg(`内置降噪模型缺失`, `Thiếu mô hình khử nhiễu tích hợp`),
+    );
   await getSherpaFunasrRuntime().denoise(srcWav, model, outWav).result;
 }
 
@@ -391,7 +395,12 @@ export async function prepareCloneReference(
   }));
   const keeps = planSilenceCompression(relative, to - from);
   if (keeps.length === 0) {
-    throw new Error('选区内没有可用的语音内容');
+    throw new Error(
+      uiMsg(
+        `选区内没有可用的语音内容`,
+        `Không có nội dung giọng nói khả dụng trong đoạn đã chọn`,
+      ),
+    );
   }
 
   const rangeFrames = sliceFrameAnalysis(session.frames, from, to);

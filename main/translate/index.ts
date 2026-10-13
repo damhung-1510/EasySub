@@ -28,6 +28,7 @@ import {
   convertChineseText,
   removeChineseSubtitlePunctuation,
 } from '../helpers/chineseConvert';
+import { msg } from '../helpers/uiMessages';
 
 /**
  * 解析「中文标点去除」生效值：任务级单开关（issue #330）。
@@ -120,7 +121,10 @@ export default async function translate(
     );
     if (subtitles.length === 0) {
       throw new Error(
-        `无法读取字幕内容，请确认文件包含有效的字幕时间轴: ${srtFile}`,
+        msg(
+          `无法读取字幕内容，请确认文件包含有效的字幕时间轴: ${srtFile}`,
+          `Không thể đọc nội dung phụ đề, hãy kiểm tra tệp có chứa mốc thời gian phụ đề hợp lệ: ${srtFile}`,
+        ),
       );
     }
 
@@ -219,7 +223,9 @@ export default async function translate(
           'message',
           language === 'en'
             ? `${fallback.from.name} is temporarily unavailable. Continuing with ${fallback.to.name}`
-            : `翻译服务「${fallback.from.name}」暂时不可用，已切换到「${fallback.to.name}」继续翻译`,
+            : language === 'vi'
+              ? `Nhà cung cấp dịch "${fallback.from.name}" tạm thời không khả dụng, đã chuyển sang "${fallback.to.name}" để tiếp tục dịch`
+              : `翻译服务「${fallback.from.name}」暂时不可用，已切换到「${fallback.to.name}」继续翻译`,
         );
       },
       formData.subtitleTranslationStyle,

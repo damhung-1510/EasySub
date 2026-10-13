@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 import fs from 'fs';
 import path from 'path';
 import type { PyEngineManifest, PyEngineVariant } from '../../../types/engine';
@@ -190,7 +191,10 @@ export function verifyRuntimeCompatibility(input: {
       variant: 'cpu',
       platform: currentPlatform,
       pkgManifest,
-      error: `所选运行时与当前系统不匹配（包平台：${pkgManifest.platform}，当前系统：${currentPlatform}）`,
+      error: uiMsg(
+        `所选运行时与当前系统不匹配（包平台：${pkgManifest.platform}，当前系统：${currentPlatform}）`,
+        `Runtime đã chọn không khớp với hệ thống hiện tại (nền tảng của gói: ${pkgManifest.platform}, hệ thống hiện tại: ${currentPlatform})`,
+      ),
     };
   }
 
@@ -203,7 +207,10 @@ export function verifyRuntimeCompatibility(input: {
       variant: 'cpu',
       platform: currentPlatform,
       pkgManifest,
-      error: '所选运行时为 macOS/Linux 版本，无法在 Windows 系统上运行',
+      error: uiMsg(
+        `所选运行时为 macOS/Linux 版本，无法在 Windows 系统上运行`,
+        `Runtime đã chọn là bản macOS/Linux, không thể chạy trên Windows`,
+      ),
     };
   }
   if (currentOs !== 'win32' && hasWinExe && !hasUnixBin) {
@@ -212,7 +219,10 @@ export function verifyRuntimeCompatibility(input: {
       variant: 'cpu',
       platform: currentPlatform,
       pkgManifest,
-      error: '所选运行时为 Windows 版本，无法在当前系统上运行',
+      error: uiMsg(
+        `所选运行时为 Windows 版本，无法在当前系统上运行`,
+        `Runtime đã chọn là bản Windows, không thể chạy trên hệ thống hiện tại`,
+      ),
     };
   }
 
@@ -233,7 +243,10 @@ export function verifyRuntimeCompatibility(input: {
         variant: 'cpu',
         platform: currentPlatform,
         pkgManifest,
-        error: `所选运行时架构与当前系统不匹配（包架构：${detectedArch}，当前系统：${currentArch}）`,
+        error: uiMsg(
+          `所选运行时架构与当前系统不匹配（包架构：${detectedArch}，当前系统：${currentArch}）`,
+          `Kiến trúc runtime đã chọn không khớp với hệ thống hiện tại (kiến trúc của gói: ${detectedArch}, hệ thống hiện tại: ${currentArch})`,
+        ),
       };
     }
   }
@@ -251,7 +264,10 @@ export function verifyRuntimeCompatibility(input: {
       variant: 'cpu',
       platform: currentPlatform,
       pkgManifest,
-      error: '无效的运行时包：缺少 Python 解释器、main.py 或 site-packages',
+      error: uiMsg(
+        `无效的运行时包：缺少 Python 解释器、main.py 或 site-packages`,
+        `Gói runtime không hợp lệ: thiếu trình thông dịch Python, main.py hoặc site-packages`,
+      ),
     };
   }
 
@@ -276,7 +292,10 @@ export function verifyRuntimeCompatibility(input: {
       variant,
       platform: currentPlatform,
       pkgManifest,
-      error: `当前操作系统（${currentOs}）不支持 CUDA GPU 运行时，请使用 CPU 运行时`,
+      error: uiMsg(
+        `当前操作系统（${currentOs}）不支持 CUDA GPU 运行时，请使用 CPU 运行时`,
+        `Hệ điều hành hiện tại (${currentOs}) không hỗ trợ runtime CUDA GPU, hãy dùng runtime CPU`,
+      ),
     };
   }
 
@@ -293,7 +312,10 @@ export function verifyRuntimeCompatibility(input: {
       variant,
       platform: currentPlatform,
       pkgManifest,
-      error: `运行时协议版本 (v${effectiveProtocol}) 与当前客户端不兼容，请先升级客户端`,
+      error: uiMsg(
+        `运行时协议版本 (v${effectiveProtocol}) 与当前客户端不兼容，请先升级客户端`,
+        `Phiên bản giao thức của runtime (v${effectiveProtocol}) không tương thích với ứng dụng hiện tại, hãy nâng cấp ứng dụng trước`,
+      ),
     };
   }
 

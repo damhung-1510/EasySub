@@ -1,3 +1,4 @@
+import { msg as uiMsg } from './uiMessages';
 import { TaskActivityReporter } from './taskActivity';
 import { runWithTaskContext } from './taskContext';
 import path from 'path';
@@ -80,7 +81,10 @@ import {
  * 处理任务错误
  */
 function onError(event, file, key, error) {
-  const errorMsg = error?.message || error?.toString() || '未知错误';
+  const errorMsg =
+    error?.message ||
+    error?.toString() ||
+    uiMsg(`未知错误`, `Lỗi không xác định`);
   logMessage(`${key} error: ${errorMsg}`, 'error');
   event.sender.send('taskStatusChange', file, key, 'error');
   event.sender.send('taskErrorChange', file, key, errorMsg);
@@ -877,7 +881,10 @@ async function processFileImpl(
       }
     } else if (!isSubtitleFile && !shouldGenerateSubtitle) {
       // 非字幕文件且不需要生成字幕的情况（只翻译模式下传入了视频文件）
-      const errorMsg = '只翻译模式下不能处理视频文件，请提供字幕文件';
+      const errorMsg = uiMsg(
+        `只翻译模式下不能处理视频文件，请提供字幕文件`,
+        `Chế độ chỉ dịch không xử lý được tệp video, hãy cung cấp tệp phụ đề`,
+      );
       onError(event, file, 'processFile', new Error(errorMsg));
       throw new Error(errorMsg);
     }

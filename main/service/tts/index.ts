@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import {
   TTS_AZURE_SPEECH,
   TTS_EDGE,
@@ -56,7 +57,10 @@ export async function synthesizeSegment(
     request.text.length > caps.maxCharsPerRequest
   ) {
     throw new Error(
-      `单条文本超过该服务商单请求上限（${request.text.length} > ${caps.maxCharsPerRequest} 字符），请拆分该行字幕`,
+      uiMsg(
+        `单条文本超过该服务商单请求上限（${request.text.length} > ${caps.maxCharsPerRequest} 字符），请拆分该行字幕`,
+        `Văn bản vượt giới hạn một yêu cầu của nhà cung cấp (${request.text.length} > ${caps.maxCharsPerRequest} ký tự), hãy tách dòng phụ đề này`,
+      ),
     );
   }
   return synthesizer(provider, request);

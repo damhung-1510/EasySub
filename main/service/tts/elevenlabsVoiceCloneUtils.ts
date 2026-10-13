@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 /**
  * ElevenLabs 即时克隆（IVC）的纯工具（无网络 / fs / electron），
  * test:voice-clone 单测覆盖。Base 规范化复用 elevenlabsTtsUtils。
@@ -58,7 +59,10 @@ export function elevenCloneErrorHint(
 ): string {
   const raw = `（HTTP ${httpStatus}: ${(message || 'unknown').slice(0, 200)}）`;
   if (httpStatus === 401 || httpStatus === 403) {
-    return `ElevenLabs 克隆: API Key 无效或无权限${raw}。请检查 Key 并确认套餐包含即时克隆（Starter 及以上）`;
+    return uiMsg(
+      `ElevenLabs 克隆: API Key 无效或无权限${raw}。请检查 Key 并确认套餐包含即时克隆（Starter 及以上）`,
+      `ElevenLabs nhân bản: khóa API không hợp lệ hoặc không có quyền${raw}. Hãy kiểm tra khóa và xác nhận gói có tính năng nhân bản tức thì (từ Starter trở lên)`,
+    );
   }
   const text = (message || '').toLowerCase();
   if (
@@ -66,10 +70,16 @@ export function elevenCloneErrorHint(
     text.includes('upgrade your plan') ||
     text.includes('can_not_use_instant_voice_cloning')
   ) {
-    return `ElevenLabs 克隆: 当前套餐不含即时克隆${raw}。免费版不支持 IVC，需 Starter（约 $5/月）及以上套餐——升级后无需改配置即可使用`;
+    return uiMsg(
+      `ElevenLabs 克隆: 当前套餐不含即时克隆${raw}。免费版不支持 IVC，需 Starter（约 $5/月）及以上套餐——升级后无需改配置即可使用`,
+      `ElevenLabs nhân bản: gói hiện tại không có nhân bản tức thì${raw}. Gói miễn phí không hỗ trợ IVC, cần gói Starter (khoảng $5/tháng) trở lên — nâng cấp xong là dùng được, không cần đổi cấu hình`,
+    );
   }
   if (text.includes('voice_limit') || text.includes('voice limit')) {
-    return `ElevenLabs 克隆: 音色槽位已满${raw}。请在 ElevenLabs 控制台删除不用的克隆音色，或升级套餐`;
+    return uiMsg(
+      `ElevenLabs 克隆: 音色槽位已满${raw}。请在 ElevenLabs 控制台删除不用的克隆音色，或升级套餐`,
+      `ElevenLabs nhân bản: đã hết chỗ chứa giọng${raw}. Hãy xóa các giọng nhân bản không dùng trong bảng điều khiển ElevenLabs hoặc nâng cấp gói`,
+    );
   }
   if (
     text.includes('sample') ||
@@ -78,7 +88,13 @@ export function elevenCloneErrorHint(
     text.includes('too short') ||
     text.includes('too long')
   ) {
-    return `ElevenLabs 克隆: 参考音频未通过服务端校验${raw}。请更换更清晰、时长 1–2 分钟的素材`;
+    return uiMsg(
+      `ElevenLabs 克隆: 参考音频未通过服务端校验${raw}。请更换更清晰、时长 1–2 分钟的素材`,
+      `ElevenLabs nhân bản: âm thanh tham chiếu không qua được kiểm tra của máy chủ${raw}. Hãy dùng đoạn rõ hơn, dài 1–2 phút`,
+    );
   }
-  return `ElevenLabs 克隆: 请求失败${raw}`;
+  return uiMsg(
+    `ElevenLabs 克隆: 请求失败${raw}`,
+    `ElevenLabs nhân bản: yêu cầu thất bại${raw}`,
+  );
 }

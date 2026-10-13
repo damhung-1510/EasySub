@@ -41,6 +41,7 @@ import {
   logGlossaryMatches,
 } from './glossaryManager';
 import { filterSuspectWordsForBatch } from './subtitleRefine/wordSources';
+import { msg } from './uiMessages';
 
 export interface CorrectionItem {
   id: string;
@@ -430,7 +431,9 @@ ${correctionTerms.map((term) => `- ${term}`).join('\n')}`
             typeof parsedResponse !== 'object' ||
             Array.isArray(parsedResponse)
           ) {
-            throw new Error('无法解析 AI 响应');
+            throw new Error(
+              msg('无法解析 AI 响应', 'Không thể phân tích phản hồi của AI'),
+            );
           }
           batch.forEach((item) => {
             const optimized = Object.prototype.hasOwnProperty.call(
@@ -454,7 +457,10 @@ ${correctionTerms.map((term) => `- ${term}`).join('\n')}`
                 item,
                 item.target ?? '',
                 'skipped',
-                '响应未包含有效的非空字幕文本',
+                msg(
+                  '响应未包含有效的非空字幕文本',
+                  'Phản hồi không chứa văn bản phụ đề hợp lệ, không trống',
+                ),
               );
             }
           });
@@ -558,7 +564,10 @@ ${correctionTerms.map((term) => `- ${term}`).join('\n')}`
                 item,
                 item.source,
                 'skipped',
-                '锚定校验未通过，保留原文',
+                msg(
+                  '锚定校验未通过，保留原文',
+                  'Kiểm tra neo không đạt, giữ nguyên bản gốc',
+                ),
               );
             }
           });

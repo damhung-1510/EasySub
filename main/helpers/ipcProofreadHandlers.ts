@@ -68,6 +68,7 @@ import {
 import { readProofreadDataFile } from './proofreadData';
 import { setProofreadDataRoot } from './proofreadDataStorage';
 import { loadSidecarGlossaryIds } from './sidecarGlossaryIds';
+import { msg } from './uiMessages';
 
 // 校对批量操作（批量 AI 优化 / 重翻失败）取消注册表
 const batchAbortControllers = new Map<string, AbortController>();
@@ -650,7 +651,10 @@ export function setupProofreadHandlers(): void {
         if (!translateProviderId || translateProviderId === '-1') {
           return {
             success: false,
-            error: '请先选择一个 AI 翻译服务',
+            error: msg(
+              '请先选择一个 AI 翻译服务',
+              'Vui lòng chọn một dịch vụ dịch AI trước',
+            ),
           };
         }
 
@@ -663,7 +667,10 @@ export function setupProofreadHandlers(): void {
         if (!provider) {
           return {
             success: false,
-            error: '未找到选择的翻译服务',
+            error: msg(
+              '未找到选择的翻译服务',
+              'Không tìm thấy dịch vụ dịch đã chọn',
+            ),
           };
         }
 
@@ -671,7 +678,10 @@ export function setupProofreadHandlers(): void {
         if (!provider.isAi) {
           return {
             success: false,
-            error: 'AI 优化功能仅支持 AI 翻译服务（如 OpenAI、Ollama 等）',
+            error: msg(
+              'AI 优化功能仅支持 AI 翻译服务（如 OpenAI、Ollama 等）',
+              'Tính năng tối ưu bằng AI chỉ hỗ trợ dịch vụ dịch AI (như OpenAI, Ollama, v.v.)',
+            ),
           };
         }
 
@@ -681,7 +691,10 @@ export function setupProofreadHandlers(): void {
         if (!translator) {
           return {
             success: false,
-            error: `不支持的翻译服务类型: ${provider.type}`,
+            error: msg(
+              `不支持的翻译服务类型: ${provider.type}`,
+              `Loại dịch vụ dịch không được hỗ trợ: ${provider.type}`,
+            ),
           };
         }
 
@@ -824,13 +837,16 @@ Only respond with the translation, nothing else.`;
             .replace(/^["']|["']$/g, '')
             .trim();
           if (!cleanedResult)
-            return { success: false, error: 'AI 优化返回空结果' };
+            return {
+              success: false,
+              error: msg('AI 优化返回空结果', 'AI tối ưu trả về kết quả trống'),
+            };
           logMessage(`Subtitle optimization successful`, 'info');
           return { success: true, data: cleanedResult };
         } else {
           return {
             success: false,
-            error: 'AI 优化返回空结果',
+            error: msg('AI 优化返回空结果', 'AI tối ưu trả về kết quả trống'),
           };
         }
       } catch (error) {
@@ -906,7 +922,10 @@ Only respond with the translation, nothing else.`;
         if (!translateProviderId || translateProviderId === '-1') {
           return {
             success: false,
-            error: '请先选择一个 AI 翻译服务',
+            error: msg(
+              '请先选择一个 AI 翻译服务',
+              'Vui lòng chọn một dịch vụ dịch AI trước',
+            ),
           };
         }
 
@@ -919,14 +938,20 @@ Only respond with the translation, nothing else.`;
         if (!provider) {
           return {
             success: false,
-            error: '未找到选择的翻译服务',
+            error: msg(
+              '未找到选择的翻译服务',
+              'Không tìm thấy dịch vụ dịch đã chọn',
+            ),
           };
         }
 
         if (!provider.isAi) {
           return {
             success: false,
-            error: 'AI 优化功能仅支持 AI 翻译服务',
+            error: msg(
+              'AI 优化功能仅支持 AI 翻译服务',
+              'Tính năng tối ưu bằng AI chỉ hỗ trợ dịch vụ dịch AI',
+            ),
           };
         }
 
@@ -935,7 +960,10 @@ Only respond with the translation, nothing else.`;
         if (!translator) {
           return {
             success: false,
-            error: `不支持的翻译服务类型: ${provider.type}`,
+            error: msg(
+              `不支持的翻译服务类型: ${provider.type}`,
+              `Loại dịch vụ dịch không được hỗ trợ: ${provider.type}`,
+            ),
           };
         }
 
@@ -1112,7 +1140,10 @@ Only respond with the translation, nothing else.`;
         if (!translator) {
           return {
             success: false,
-            error: `不支持的翻译服务类型: ${provider.type}`,
+            error: msg(
+              `不支持的翻译服务类型: ${provider.type}`,
+              `Loại dịch vụ dịch không được hỗ trợ: ${provider.type}`,
+            ),
           };
         }
         const fallbackProviders = resolveProviderFallbacks(providers, provider);

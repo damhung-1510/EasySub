@@ -342,8 +342,13 @@ export function addContextGlossaryEntry(input: {
     ) || collections[0];
   const now = Date.now();
   if (!glossary) {
+    const uiLang = store.get('settings')?.language;
     const label =
-      store.get('settings')?.language === 'en' ? 'Proofread terms' : '校对术语';
+      uiLang === 'en'
+        ? 'Proofread terms'
+        : uiLang === 'vi'
+          ? 'Thuật ngữ hiệu đính'
+          : '校对术语';
     const name = cleaned(
       project ? `${project.name} · ${label}` : label,
       GLOSSARY_LIMITS.name,

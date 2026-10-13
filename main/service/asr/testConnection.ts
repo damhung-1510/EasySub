@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import { randomUUID } from 'crypto';
 import {
   ASR_ALIYUN,
@@ -255,12 +256,24 @@ export async function testAsrConnection(
  * 配置类错误码的可行动提示（design D6：新用户大概率首撞 4003 未开通，
  * 明确文案省一轮排查）；服务端原始 message 追加在后供比对。
  */
-const TENCENT_CODE_HINTS: Record<number, string> = {
-  4002: '鉴权失败：请检查 SecretID / SecretKey 是否正确（系统时间偏差超过 3 分钟也会导致签名失败）',
-  4003: '服务未开通：请先在腾讯云语音识别控制台开通「录音文件识别极速版」',
-  4004: '免费额度已用尽：请在控制台购买资源包或开通后付费',
-  4005: '账号欠费：请充值后重试',
-};
+const TENCENT_CODE_HINTS = (): Record<number, string> => ({
+  4002: uiMsg(
+    '鉴权失败：请检查 SecretID / SecretKey 是否正确（系统时间偏差超过 3 分钟也会导致签名失败）',
+    'Xác thực thất bại: hãy kiểm tra SecretID / SecretKey có đúng không (giờ hệ thống lệch hơn 3 phút cũng làm chữ ký thất bại)',
+  ),
+  4003: uiMsg(
+    '服务未开通：请先在腾讯云语音识别控制台开通「录音文件识别极速版」',
+    'Dịch vụ chưa được bật: hãy bật \"Recording File Recognition Express\" trong bảng điều khiển nhận dạng giọng nói của Tencent Cloud',
+  ),
+  4004: uiMsg(
+    '免费额度已用尽：请在控制台购买资源包或开通后付费',
+    'Đã dùng hết hạn mức miễn phí: hãy mua gói tài nguyên trong bảng điều khiển hoặc bật trả phí sau',
+  ),
+  4005: uiMsg(
+    '账号欠费：请充值后重试',
+    'Tài khoản nợ cước: hãy nạp tiền rồi thử lại',
+  ),
+});
 
 /** 腾讯极速版：1s 静音 WAV 原始字节 + 完整签名真实探测，按响应 code 语义判定。 */
 async function testTencentConnection(
@@ -307,7 +320,7 @@ async function testTencentConnection(
     // 1s 静音 → code 0 空文本即证明凭据可用（开通 + 鉴权 + 额度全通过）。
     if (Number.isFinite(code) && code === 0) return { ok: true };
     const message = String(data?.message ?? '').trim();
-    const hint = TENCENT_CODE_HINTS[code];
+    const hint = TENCENT_CODE_HINTS()[code];
     const detail = hint
       ? `${hint}${message ? `（${message}）` : ''}`
       : message || undefined;
@@ -328,14 +341,20 @@ async function testTencentConnection(
  * 40000010 实测先于 appkey 校验（未开通时无法判断 appkey 正误），单列因极速版
  * 无免费试用、新用户最易撞；40020105/40020106 在商用开通后才可能出现。
  */
-const ALIYUN_STATUS_HINTS: Record<number, string> = {
-  40000010:
+const ALIYUN_STATUS_HINTS = (): Record<number, string> => ({
+  40000010: uiMsg(
     '服务未开通或欠费：录音文件识别极速版仅提供商用版（无免费试用），请先在阿里云智能语音交互控制台开通商用版',
-  40020105:
+    'Dịch vụ chưa bật hoặc nợ cước: bản Express nhận dạng tệp ghi âm chỉ có bản thương mại (không dùng thử miễn phí), hãy bật bản thương mại trong bảng điều khiển Intelligent Speech Interaction của Alibaba Cloud',
+  ),
+  40020105: uiMsg(
     'Appkey 不存在：请在智能语音交互控制台「全部项目」创建项目并复制其 Appkey',
-  40020106:
+    'Appkey không tồn tại: hãy tạo dự án trong \"Tất cả dự án\" của bảng điều khiển Intelligent Speech Interaction và sao chép Appkey',
+  ),
+  40020106: uiMsg(
     'Appkey 与账号不匹配：请使用当前 AccessKey 所属账号下创建的项目 Appkey',
-};
+    'Appkey không khớp tài khoản: hãy dùng Appkey của dự án được tạo trong tài khoản sở hữu AccessKey hiện tại',
+  ),
+});
 
 /**
  * 阿里极速版：两段探测（design D6）——
@@ -364,7 +383,7 @@ async function testAliyunConnection(
         error instanceof Error
           ? error.message.replace(
               /^Aliyun ASR CreateToken failed:\s*/,
-              'AccessKey 校验失败：',
+              uiMsg('AccessKey 校验失败：', 'Xác thực AccessKey thất bại: '),
             )
           : undefined,
     };
@@ -391,7 +410,7 @@ async function testAliyunConnection(
     // 20000000 成功；40270002 vad silent——静音探针被拒识属预期，链路/凭据/开通均已验证。
     if (status === 20000000 || status === 40270002) return { ok: true };
     const message = String(data?.message ?? '').trim();
-    const hint = ALIYUN_STATUS_HINTS[status];
+    const hint = ALIYUN_STATUS_HINTS()[status];
     const detail = hint
       ? `${hint}${message ? `（${message}）` : ''}`
       : message || undefined;
@@ -411,13 +430,24 @@ async function testAliyunConnection(
  * 配置类错误码的可行动提示（design D9，均为 2026-07 实测形态）。
  * 探针无法验证服务开通/余量——那类问题（100007 等）首次真实转写时由 upload 文案兜底。
  */
-const XFYUN_CODE_HINTS: Record<string, string> = {
-  '000002':
+const XFYUN_CODE_HINTS = (): Record<string, string> => ({
+  '000002': uiMsg(
     'APIKey 不存在或已被禁用：请检查控制台「服务接口认证信息」中的 APIKey',
-  '100009': '签名校验失败：请检查 APISecret 是否正确',
-  '100008': '请求时间超限：请检查系统时间是否准确（偏差过大会导致签名失效）',
-  '100007': '权限错误：请确认已在讯飞开放平台开通「录音文件转写大模型」服务',
-};
+    'APIKey không tồn tại hoặc đã bị vô hiệu hóa: hãy kiểm tra APIKey trong \"Thông tin xác thực giao diện dịch vụ\" của bảng điều khiển',
+  ),
+  '100009': uiMsg(
+    '签名校验失败：请检查 APISecret 是否正确',
+    'Xác thực chữ ký thất bại: hãy kiểm tra APISecret có đúng không',
+  ),
+  '100008': uiMsg(
+    '请求时间超限：请检查系统时间是否准确（偏差过大会导致签名失效）',
+    'Thời gian yêu cầu vượt giới hạn: hãy kiểm tra giờ hệ thống có chính xác không (lệch quá nhiều sẽ làm chữ ký vô hiệu)',
+  ),
+  '100007': uiMsg(
+    '权限错误：请确认已在讯飞开放平台开通「录音文件转写大模型」服务',
+    'Lỗi quyền: hãy xác nhận đã bật dịch vụ \"Mô hình chép lời tệp ghi âm\" trên nền tảng mở iFlytek',
+  ),
+});
 
 /**
  * 讯飞大模型转写：假 orderId + 完整签名探测 getResult（design D9，零成本——
@@ -467,7 +497,7 @@ async function testXfyunConnection(
       return { ok: true };
     }
     const message = String(data?.descInfo ?? '').trim();
-    const hint = XFYUN_CODE_HINTS[code];
+    const hint = XFYUN_CODE_HINTS()[code];
     const detail = hint
       ? `${hint}${message ? `（${message}）` : ''}`
       : message || undefined;

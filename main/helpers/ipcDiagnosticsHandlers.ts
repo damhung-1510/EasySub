@@ -155,8 +155,9 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function uiLanguage(): 'zh' | 'en' {
-  return store.get('settings')?.language === 'zh' ? 'zh' : 'en';
+function uiLanguage(): 'zh' | 'en' | 'vi' {
+  const language = store.get('settings')?.language;
+  return language === 'zh' || language === 'vi' ? language : 'en';
 }
 
 function defaultSaveDir(): string {
@@ -223,9 +224,14 @@ export function setupDiagnosticsHandlers(mainWindow: BrowserWindow): void {
     ): Promise<DiagnosticsExportResult> => {
       const includeRawDumps = request?.includeRawDumps === true;
       try {
-        const zh = uiLanguage() === 'zh';
+        const lang = uiLanguage();
         const chosen = await dialog.showSaveDialog(dialogWindow(mainWindow), {
-          title: zh ? '导出诊断包' : 'Export diagnostics bundle',
+          title:
+            lang === 'zh'
+              ? '导出诊断包'
+              : lang === 'vi'
+                ? 'Xuất gói chẩn đoán'
+                : 'Export diagnostics bundle',
           defaultPath: path.join(
             defaultSaveDir(),
             diagnosticsFileName(Date.now()),

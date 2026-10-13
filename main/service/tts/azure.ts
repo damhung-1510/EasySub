@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import fs from 'fs';
 import path from 'path';
 import type {
@@ -37,13 +38,22 @@ function toPositiveNumber(value: unknown, fallback: number): number {
 /** 状态码 → 可行动错误信息（401/403 指向 key 与 region 匹配）。 */
 export function azureErrorHint(status: number, detail: string): string {
   if (status === 401 || status === 403) {
-    return `Azure TTS: HTTP ${status}${detail ? ` - ${detail}` : ''}。请检查 Subscription Key 与 Region 是否匹配（key 必须属于所填 region 的 Speech 资源）`;
+    return uiMsg(
+      `Azure TTS: HTTP ${status}${detail ? ` - ${detail}` : ''}。请检查 Subscription Key 与 Region 是否匹配（key 必须属于所填 region 的 Speech 资源）`,
+      `Azure TTS: HTTP ${status}${detail ? ` - ${detail}` : ''}. Hãy kiểm tra Subscription Key và Region có khớp nhau không (key phải thuộc tài nguyên Speech của region đã nhập)`,
+    );
   }
   if (status === 404) {
-    return `Azure TTS: HTTP 404${detail ? ` - ${detail}` : ''}。合成端点不存在：请确认 Region 与资源所在区域一致，Endpoint 建议留空（自动拼接 https://{region}.tts.speech.microsoft.com）；门户「终结点」域名（*.api.cognitive.*）不是 TTS 端点`;
+    return uiMsg(
+      `Azure TTS: HTTP 404${detail ? ` - ${detail}` : ''}。合成端点不存在：请确认 Region 与资源所在区域一致，Endpoint 建议留空（自动拼接 https://{region}.tts.speech.microsoft.com）；门户「终结点」域名（*.api.cognitive.*）不是 TTS 端点`,
+      `Azure TTS: HTTP 404${detail ? ` - ${detail}` : ''}. Điểm cuối tổng hợp giọng không tồn tại: hãy xác nhận Region trùng với khu vực của tài nguyên, nên để trống Endpoint (tự ghép https://{region}.tts.speech.microsoft.com); tên miền "Endpoint" trên cổng (*.api.cognitive.*) không phải điểm cuối TTS`,
+    );
   }
   if (status === 429) {
-    return `Azure TTS: HTTP 429 请求过于频繁（F0 免费层并发/频率配额低），可调低并发或稍后再试${detail ? ` - ${detail}` : ''}`;
+    return uiMsg(
+      `Azure TTS: HTTP 429 请求过于频繁（F0 免费层并发/频率配额低），可调低并发或稍后再试${detail ? ` - ${detail}` : ''}`,
+      `Azure TTS: HTTP 429 Yêu cầu quá nhiều (hạn mức đồng thời/tần suất của gói miễn phí F0 thấp), hãy giảm số luồng đồng thời hoặc thử lại sau${detail ? ` - ${detail}` : ''}`,
+    );
   }
   return `Azure TTS: HTTP ${status}${detail ? ` - ${detail}` : ''}`;
 }
@@ -80,7 +90,10 @@ export async function synthesizeWithAzure(
     if (request.signal?.aborted) throw new TaskCancelledError();
     const msg = e instanceof Error ? e.message : String(e);
     throw new Error(
-      `Azure TTS: 请求失败（${msg}）。请检查网络、region 与 endpoint 配置`,
+      uiMsg(
+        `Azure TTS: 请求失败（${msg}）。请检查网络、region 与 endpoint 配置`,
+        `Azure TTS: Yêu cầu thất bại (${msg}). Hãy kiểm tra mạng, region và cấu hình endpoint`,
+      ),
     );
   }
   if (!res.ok) {
@@ -154,7 +167,10 @@ export async function listAzureVoices(
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     throw new Error(
-      `Azure TTS: 请求失败（${msg}）。请检查网络、region 与 endpoint 配置`,
+      uiMsg(
+        `Azure TTS: 请求失败（${msg}）。请检查网络、region 与 endpoint 配置`,
+        `Azure TTS: Yêu cầu thất bại (${msg}). Hãy kiểm tra mạng, region và cấu hình endpoint`,
+      ),
     );
   }
   if (!res.ok) {
@@ -168,7 +184,9 @@ export async function listAzureVoices(
   }
   const voices = mapAzureVoices(await res.json());
   if (voices.length === 0) {
-    throw new Error('Azure TTS: 音色清单为空');
+    throw new Error(
+      uiMsg(`Azure TTS: 音色清单为空`, `Azure TTS: Danh sách giọng trống`),
+    );
   }
   return voices;
 }

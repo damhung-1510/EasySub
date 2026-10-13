@@ -499,18 +499,32 @@ function notifyProjectDone(event, projectId?: string) {
     const notification = new Notification(
       reviewCount > 0
         ? {
-            title: lang === 'zh' ? '等待人工校对' : 'Waiting for review',
+            title:
+              lang === 'zh'
+                ? '等待人工校对'
+                : lang === 'vi'
+                  ? 'Đang chờ hiệu đính thủ công'
+                  : 'Waiting for review',
             body:
               lang === 'zh'
                 ? `有 ${reviewCount} 个文件等待校对，处理后将自动继续`
-                : `${reviewCount} file(s) are waiting for review; they continue automatically once released`,
+                : lang === 'vi'
+                  ? `${reviewCount} tệp đang chờ hiệu đính, sẽ tự động tiếp tục sau khi được duyệt`
+                  : `${reviewCount} file(s) are waiting for review; they continue automatically once released`,
           }
         : {
-            title: lang === 'zh' ? '任务全部完成' : 'All tasks completed',
+            title:
+              lang === 'zh'
+                ? '任务全部完成'
+                : lang === 'vi'
+                  ? 'Đã hoàn tất tất cả tác vụ'
+                  : 'All tasks completed',
             body:
               lang === 'zh'
                 ? '字幕任务已处理完毕，点击查看结果'
-                : 'Your subtitle tasks are done — click to view results',
+                : lang === 'vi'
+                  ? 'Các tác vụ phụ đề đã xử lý xong, nhấp để xem kết quả'
+                  : 'Your subtitle tasks are done — click to view results',
           },
     );
     notification.on('click', () => {

@@ -384,7 +384,10 @@ export async function loadBestAddon(
   }
   if (usable.length === 0 && skipped.length > 0) {
     throw buildAllSuppressedError(skipped, {
-      language: store.get('settings')?.language === 'zh' ? 'zh' : 'en',
+      language: (() => {
+        const language = store.get('settings')?.language;
+        return language === 'zh' || language === 'vi' ? language : 'en';
+      })(),
       gpuOnly: ctx.gpuMode === 'gpu-only',
     });
   }

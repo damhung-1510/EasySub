@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 /**
  * 容器内封软字幕扫描与提取服务
  *
@@ -154,13 +155,18 @@ export async function extractEmbeddedSubtitles(
         throw new Error('Subtitle extraction cancelled');
       const stream = streams.find((s) => s.subIndex === idx);
       if (!stream) {
-        errors.push(`未找到轨道 #${idx + 1}`);
+        errors.push(
+          uiMsg(`未找到轨道 #${idx + 1}`, `Không tìm thấy track #${idx + 1}`),
+        );
         continue;
       }
 
       if (!stream.isText) {
         errors.push(
-          `轨道 #${idx + 1} (${stream.codec}) 为位图字幕，不支持提取为纯文本`,
+          uiMsg(
+            `轨道 #${idx + 1} (${stream.codec}) 为位图字幕，不支持提取为纯文本`,
+            `Track #${idx + 1} (${stream.codec}) là phụ đề dạng ảnh, không hỗ trợ trích xuất thành văn bản thuần`,
+          ),
         );
         continue;
       }
@@ -210,7 +216,10 @@ export async function extractEmbeddedSubtitles(
               reject(
                 processError ||
                   new Error(
-                    `提取字幕轨 #${idx + 1} 失败 (exit code ${code}): ${stderr.slice(-150)}`,
+                    uiMsg(
+                      `提取字幕轨 #${idx + 1} 失败 (exit code ${code}): ${stderr.slice(-150)}`,
+                      `Trích xuất track phụ đề #${idx + 1} thất bại (exit code ${code}): ${stderr.slice(-150)}`,
+                    ),
                   ),
               );
             }

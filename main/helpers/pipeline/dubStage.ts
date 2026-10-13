@@ -52,6 +52,7 @@ import {
   withDubbingGlobalSpeakerFallback,
   type DubbingConfig,
 } from '../../../types/dubbing';
+import { msg } from '../uiMessages';
 
 /** 配音阶段全局互斥（跨任务/跨文件串行；行级并发由引擎配置决定） */
 const dubStageMutex = new GroupMutex();
@@ -110,15 +111,26 @@ async function materializeDubSubtitle(
           }))
         : cuesFromSidecarTargets(data?.cues ?? []);
     if (!cues.length || cues.every((c) => !c.text)) {
-      throw new Error('配音文本源为空：校对数据中没有可用译文');
+      throw new Error(
+        msg(
+          '配音文本源为空：校对数据中没有可用译文',
+          'Nguồn văn bản lồng tiếng trống: dữ liệu hiệu đính không có bản dịch khả dụng',
+        ),
+      );
     }
     content = serializeSubtitleCues(cues, 'srt');
     logMessage(`dub stage: rebuilt pure translation from sidecar`, 'info');
   } else {
     throw new Error(
       source.reason === 'bilingual-unresolvable'
-        ? '无法获取纯译文文本（仅有双语交付物且校对数据缺失），请重跑翻译后再试'
-        : '找不到可配音的字幕文件',
+        ? msg(
+            '无法获取纯译文文本（仅有双语交付物且校对数据缺失），请重跑翻译后再试',
+            'Không thể lấy văn bản chỉ có bản dịch (chỉ có phụ đề song ngữ và thiếu dữ liệu hiệu đính), vui lòng dịch lại rồi thử lại',
+          )
+        : msg(
+            '找不到可配音的字幕文件',
+            'Không tìm thấy tệp phụ đề để lồng tiếng',
+          ),
     );
   }
   const outPath = path.join(
@@ -170,13 +182,23 @@ function resolveDubSubtitle(file: IFiles, session: DubbingSession) {
       cues.length !== session.cues.length ||
       original.length !== session.cues.length
     )
-      throw new Error('交付字幕与配音行数不一致，请重新校对字幕后再导出');
+      throw new Error(
+        msg(
+          '交付字幕与配音行数不一致，请重新校对字幕后再导出',
+          'Số dòng phụ đề xuất và lồng tiếng không khớp, vui lòng hiệu đính lại phụ đề rồi xuất',
+        ),
+      );
     const displayTextByIndex = new Map(
       cues.map((cue, index) => {
         const base = original[index];
         const current = session.cues[index];
         if (cue.startMs !== base.startMs || cue.endMs !== base.endMs)
-          throw new Error('交付字幕与配音时间轴不一致，请重新校对字幕后再导出');
+          throw new Error(
+            msg(
+              '交付字幕与配音时间轴不一致，请重新校对字幕后再导出',
+              'Mốc thời gian phụ đề xuất và lồng tiếng không khớp, vui lòng hiệu đính lại phụ đề rồi xuất',
+            ),
+          );
         if (current.text === base.text) return [current.index, cue.text];
         // Replace a unique block of translation lines, retaining source lines.
         const replaced = replaceDubDisplayText(
@@ -186,7 +208,10 @@ function resolveDubSubtitle(file: IFiles, session: DubbingSession) {
         );
         if (replaced === null)
           throw new Error(
-            `第 ${index + 1} 行无法安全更新双语字幕，请在校对页统一文本后重试`,
+            msg(
+              `第 ${index + 1} 行无法安全更新双语字幕，请在校对页统一文本后重试`,
+              `Không thể cập nhật an toàn phụ đề song ngữ ở dòng ${index + 1}, vui lòng thống nhất văn bản ở trang hiệu đính rồi thử lại`,
+            ),
           );
         return [current.index, replaced];
       }),
@@ -231,7 +256,12 @@ async function ensureDubSession(
   if (file.dubbingSessionId) {
     const restored = restoreDubbingSession(file.dubbingSessionId);
     if (restored.kind === 'ok' && restored.session.running)
-      throw new Error('配音会话正在使用中，请等待工作台操作完成后重试');
+      throw new Error(
+        msg(
+          '配音会话正在使用中，请等待工作台操作完成后重试',
+          'Phiên lồng tiếng đang được sử dụng, vui lòng chờ thao tác trên bàn làm việc hoàn tất rồi thử lại',
+        ),
+      );
     if (
       restored.kind === 'ok' &&
       restored.session.subtitleHash ===
@@ -364,7 +394,13 @@ async function rebuildReservedDubTrack(
     return;
   }
   const session = restored.session;
-  if (session.running) throw new Error('配音会话正在使用中，请稍后重试');
+  if (session.running)
+    throw new Error(
+      msg(
+        '配音会话正在使用中，请稍后重试',
+        'Phiên lồng tiếng đang được sử dụng, vui lòng thử lại sau',
+      ),
+    );
   session.subtitleLanguage =
     pipelineDubLanguage(formData) ?? session.subtitleLanguage;
   const signal = getTaskSignal();
@@ -481,7 +517,10 @@ export async function runDubStage(
     }
     if (result.failedIndexes.length > 0) {
       throw new Error(
-        `配音有 ${result.failedIndexes.length} 行合成失败，可重试（已完成行会跳过）`,
+        msg(
+          `配音有 ${result.failedIndexes.length} 行合成失败，可重试（已完成行会跳过）`,
+          `Có ${result.failedIndexes.length} dòng lồng tiếng tổng hợp thất bại, có thể thử lại (các dòng đã xong sẽ được bỏ qua)`,
+        ),
       );
     }
 

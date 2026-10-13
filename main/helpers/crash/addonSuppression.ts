@@ -71,7 +71,7 @@ export class WhisperUnavailableError extends Error {
   }
 }
 
-export type MessageLanguage = 'zh' | 'en';
+export type MessageLanguage = 'zh' | 'en' | 'vi';
 
 function backendNames(skipped: Array<SkippedCandidate<LoaderCandidateLike>>) {
   const names = skipped.map(({ candidate: c }) =>
@@ -97,20 +97,27 @@ export function buildAllSuppressedError(
   const detail = skipped.find(({ suppression }) => suppression.detail)
     ?.suppression.detail;
   const zh = options.language === 'zh';
+  const vi = options.language === 'vi';
 
   let message: string;
   if (isa) {
-    message = zh
-      ? `内置语音识别加速包在这台电脑上崩溃过${detail ? `（${detail}）` : ''}，通常是 CPU 不支持它需要的指令集。为避免应用反复闪退，已自动停用。请改用云端听写或其他语音识别引擎；更换硬件或升级应用后，可在 GPU 加速设置里点「重新尝试被停用的后端」。`
-      : `The built-in speech recognition addon crashed on this computer${detail ? ` (${detail})` : ''}, usually because the CPU lacks an instruction set it needs. It was disabled so the app does not keep crashing. Use cloud transcription or another engine; after changing hardware or upgrading, use "Retry disabled backends" in the GPU acceleration settings.`;
+    message = vi
+      ? `Gói tăng tốc nhận dạng giọng nói tích hợp đã bị lỗi trên máy tính này${detail ? ` (${detail})` : ''}, thường do CPU không hỗ trợ tập lệnh mà nó cần. Gói đã được tự động vô hiệu hóa để ứng dụng không bị đóng đột ngột liên tục. Hãy dùng phiên âm đám mây hoặc một công cụ nhận dạng giọng nói khác; sau khi đổi phần cứng hoặc nâng cấp ứng dụng, có thể nhấn "Thử lại các backend đã bị vô hiệu hóa" trong phần cài đặt tăng tốc GPU.`
+      : zh
+        ? `内置语音识别加速包在这台电脑上崩溃过${detail ? `（${detail}）` : ''}，通常是 CPU 不支持它需要的指令集。为避免应用反复闪退，已自动停用。请改用云端听写或其他语音识别引擎；更换硬件或升级应用后，可在 GPU 加速设置里点「重新尝试被停用的后端」。`
+        : `The built-in speech recognition addon crashed on this computer${detail ? ` (${detail})` : ''}, usually because the CPU lacks an instruction set it needs. It was disabled so the app does not keep crashing. Use cloud transcription or another engine; after changing hardware or upgrading, use "Retry disabled backends" in the GPU acceleration settings.`;
   } else if (options.gpuOnly) {
-    message = zh
-      ? `仅 GPU 模式下没有可用的加速后端：${names} 上次运行时导致应用崩溃，已被自动停用。请切换到「自动」模式使用 CPU，或在 GPU 加速设置里点「重新尝试被停用的后端」。`
-      : `GPU acceleration unavailable in GPU-only mode: ${names} crashed the app during a previous run and was disabled. Switch to Auto mode to use the CPU, or use "Retry disabled backends" in the GPU acceleration settings.`;
+    message = vi
+      ? `Chế độ chỉ GPU không có backend tăng tốc khả dụng: ${names} đã làm ứng dụng bị lỗi ở lần chạy trước và đã bị tự động vô hiệu hóa. Hãy chuyển sang chế độ "Tự động" để dùng CPU, hoặc nhấn "Thử lại các backend đã bị vô hiệu hóa" trong phần cài đặt tăng tốc GPU.`
+      : zh
+        ? `仅 GPU 模式下没有可用的加速后端：${names} 上次运行时导致应用崩溃，已被自动停用。请切换到「自动」模式使用 CPU，或在 GPU 加速设置里点「重新尝试被停用的后端」。`
+        : `GPU acceleration unavailable in GPU-only mode: ${names} crashed the app during a previous run and was disabled. Switch to Auto mode to use the CPU, or use "Retry disabled backends" in the GPU acceleration settings.`;
   } else {
-    message = zh
-      ? `语音识别加速包（${names}）上次运行时导致应用崩溃，已被自动停用，当前没有可用的后端。请改用云端听写，或在 GPU 加速设置里点「重新尝试被停用的后端」。`
-      : `The speech recognition addon (${names}) crashed the app during a previous run and was disabled, so no backend is available. Use cloud transcription, or use "Retry disabled backends" in the GPU acceleration settings.`;
+    message = vi
+      ? `Gói tăng tốc nhận dạng giọng nói (${names}) đã làm ứng dụng bị lỗi ở lần chạy trước và đã bị tự động vô hiệu hóa, hiện không có backend nào khả dụng. Hãy dùng phiên âm đám mây, hoặc nhấn "Thử lại các backend đã bị vô hiệu hóa" trong phần cài đặt tăng tốc GPU.`
+      : zh
+        ? `语音识别加速包（${names}）上次运行时导致应用崩溃，已被自动停用，当前没有可用的后端。请改用云端听写，或在 GPU 加速设置里点「重新尝试被停用的后端」。`
+        : `The speech recognition addon (${names}) crashed the app during a previous run and was disabled, so no backend is available. Use cloud transcription, or use "Retry disabled backends" in the GPU acceleration settings.`;
   }
   return new WhisperUnavailableError(message, isa ? 'isa' : 'crash');
 }

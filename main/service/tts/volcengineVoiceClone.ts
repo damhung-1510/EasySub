@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import type { TtsProvider } from '../../../types/ttsProvider';
@@ -29,7 +30,10 @@ function cloneCredentials(provider: TtsProvider): {
   const accessToken = String(provider.accessToken ?? '').trim();
   if (!appId || !accessToken) {
     throw new Error(
-      '豆包声音复刻: 缺少训练凭据。请在「配音服务」页豆包实例中填写 APP ID 与 Access Token',
+      uiMsg(
+        `豆包声音复刻: 缺少训练凭据。请在「配音服务」页豆包实例中填写 APP ID 与 Access Token`,
+        `Nhân bản giọng Doubao: thiếu thông tin xác thực huấn luyện. Hãy nhập APP ID và Access Token trong phiên bản Doubao ở trang Dịch vụ lồng tiếng`,
+      ),
     );
   }
   return { appId, accessToken };
@@ -97,7 +101,10 @@ export async function trainVolcCloneVoice(
   const stat = fs.statSync(req.refWavPath);
   if (stat.size > VOLC_CLONE_MAX_AUDIO_BYTES) {
     throw new Error(
-      `豆包声音复刻: 参考音频超过 10MB 上限（${Math.round(stat.size / 1024 / 1024)}MB），请缩短选区`,
+      uiMsg(
+        `豆包声音复刻: 参考音频超过 10MB 上限（${Math.round(stat.size / 1024 / 1024)}MB），请缩短选区`,
+        `Nhân bản giọng Doubao: âm thanh tham chiếu vượt giới hạn 10MB (${Math.round(stat.size / 1024 / 1024)}MB), hãy rút ngắn đoạn chọn`,
+      ),
     );
   }
   const audioBase64 = fs.readFileSync(req.refWavPath).toString('base64');
@@ -192,6 +199,9 @@ export async function queryVolcCloneStatus(
   const parsed = parseVolcCloneStatus(v1.payload);
   if (parsed.found) return parsed;
   throw new Error(
-    `豆包声音复刻: 状态响应无法识别（V3: ${v3Snippet || 'n/a'} / V1: ${v1.rawText.slice(0, 300)}）`,
+    uiMsg(
+      `豆包声音复刻: 状态响应无法识别（V3: ${v3Snippet || 'n/a'} / V1: ${v1.rawText.slice(0, 300)}）`,
+      `Nhân bản giọng Doubao: không nhận dạng được phản hồi trạng thái (V3: ${v3Snippet || 'n/a'} / V1: ${v1.rawText.slice(0, 300)})`,
+    ),
   );
 }

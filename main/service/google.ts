@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../helpers/uiMessages';
 import axios from 'axios';
 import { convertLanguageCode } from '../helpers/utils';
 import { TRANSLATION_REQUEST_TIMEOUT } from '../translate/constants';
@@ -55,7 +56,9 @@ export default async function google(
     throwIfSignalCancelled(options?.signal);
 
     if (!response?.data?.data?.translations) {
-      throw new Error(response?.data?.error?.message || '翻译失败');
+      throw new Error(
+        response?.data?.error?.message || uiMsg(`翻译失败`, `Dịch thất bại`),
+      );
     }
 
     const translations = response.data.data.translations.map(
@@ -72,14 +75,16 @@ export default async function google(
     console.log(error, 'google error');
     if (error.response) {
       // API 返回错误
-      const errorMsg = error.response.data?.error?.message || '翻译请求失败';
+      const errorMsg =
+        error.response.data?.error?.message ||
+        uiMsg(`翻译请求失败`, `Yêu cầu dịch thất bại`);
       throw new Error(errorMsg);
     } else if (error.request) {
       // 网络错误
       throw new Error('网络连接失败');
     } else {
       // 其他错误
-      throw new Error(error.message || '未知错误');
+      throw new Error(error.message || uiMsg(`未知错误`, `Lỗi không xác định`));
     }
   }
 }

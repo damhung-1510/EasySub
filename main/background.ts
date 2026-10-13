@@ -138,10 +138,16 @@ app.on('before-quit', (event) => {
     flushWorkItemStore();
   } catch (error) {
     event.preventDefault();
-    const zh = store.get('settings')?.language === 'zh';
+    const lang = store.get('settings')?.language;
+    const zh = lang === 'zh';
+    const vi = lang === 'vi';
     dialog.showErrorBox(
-      zh ? '任务状态保存失败' : 'Task state could not be saved',
-      `${zh ? '退出已取消。请检查磁盘空间和目录权限后重试。' : 'Quit was cancelled. Check disk space and directory permissions, then retry.'}\n${String(error)}`,
+      zh
+        ? '任务状态保存失败'
+        : vi
+          ? 'Không thể lưu trạng thái tác vụ'
+          : 'Task state could not be saved',
+      `${zh ? '退出已取消。请检查磁盘空间和目录权限后重试。' : vi ? 'Đã hủy thoát. Hãy kiểm tra dung lượng đĩa và quyền truy cập thư mục rồi thử lại.' : 'Quit was cancelled. Check disk space and directory permissions, then retry.'}\n${String(error)}`,
     );
     return;
   }

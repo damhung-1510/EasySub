@@ -28,6 +28,7 @@ import { runAiCorrection } from './subtitleRefine/correctionRunner';
 import { isProviderConfigured } from '../../types/provider';
 import type { Provider } from '../translate/types';
 import type { IFiles } from '../../types';
+import { msg } from './uiMessages';
 
 /** 精修服务商字段的「跟随翻译服务」哨兵值（D9 默认）。 */
 export const FOLLOW_TRANSLATION_PROVIDER = 'follow-translation';
@@ -78,21 +79,30 @@ export function resolveRefineProvider(
       return {
         provider: null,
         source: 'follow',
-        reason: '任务未选择翻译服务商，「跟随翻译服务」无法解析',
+        reason: msg(
+          '任务未选择翻译服务商，「跟随翻译服务」无法解析',
+          'Tác vụ chưa chọn nhà cung cấp dịch, không thể xác định "Theo dịch vụ dịch"',
+        ),
       };
     }
     if (!provider.isAi) {
       return {
         provider: null,
         source: 'follow',
-        reason: `翻译服务商 ${provider.name} 非 AI 类型，「跟随翻译服务」无法解析`,
+        reason: msg(
+          `翻译服务商 ${provider.name} 非 AI 类型，「跟随翻译服务」无法解析`,
+          `Nhà cung cấp dịch ${provider.name} không phải loại AI, không thể xác định "Theo dịch vụ dịch"`,
+        ),
       };
     }
     if (!isProviderConfigured(provider as any)) {
       return {
         provider: null,
         source: 'follow',
-        reason: `翻译服务商 ${provider.name} 未完成配置，「跟随翻译服务」无法解析`,
+        reason: msg(
+          `翻译服务商 ${provider.name} 未完成配置，「跟随翻译服务」无法解析`,
+          `Nhà cung cấp dịch ${provider.name} chưa cấu hình xong, không thể xác định "Theo dịch vụ dịch"`,
+        ),
       };
     }
     return { provider, source: 'follow' };
@@ -102,21 +112,30 @@ export function resolveRefineProvider(
     return {
       provider: null,
       source: 'explicit',
-      reason: `精修服务商 ${setting} 不存在（可能已被删除）`,
+      reason: msg(
+        `精修服务商 ${setting} 不存在（可能已被删除）`,
+        `Nhà cung cấp tinh chỉnh ${setting} không tồn tại (có thể đã bị xóa)`,
+      ),
     };
   }
   if (!provider.isAi) {
     return {
       provider: null,
       source: 'explicit',
-      reason: `精修服务商 ${provider.name} 非 AI 类型`,
+      reason: msg(
+        `精修服务商 ${provider.name} 非 AI 类型`,
+        `Nhà cung cấp tinh chỉnh ${provider.name} không phải loại AI`,
+      ),
     };
   }
   if (!isProviderConfigured(provider as any)) {
     return {
       provider: null,
       source: 'explicit',
-      reason: `精修服务商 ${provider.name} 未完成配置`,
+      reason: msg(
+        `精修服务商 ${provider.name} 未完成配置`,
+        `Nhà cung cấp tinh chỉnh ${provider.name} chưa cấu hình xong`,
+      ),
     };
   }
   return { provider, source: 'explicit' };

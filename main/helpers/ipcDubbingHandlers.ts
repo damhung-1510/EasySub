@@ -64,6 +64,7 @@ import { getTtsProviderById } from './ttsProviderManager';
 import { saveWorkItem, getWorkItemById, getWorkItems } from './workItemStore';
 import type { WorkItem } from '../../types/workItem';
 import type { DubbingConfig, DubbingProgressEvent } from '../../types/dubbing';
+import { msg } from './uiMessages';
 
 interface DubbingResponse<T = unknown> {
   success: boolean;
@@ -359,7 +360,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
   handleOwned('dubbing:setMedia', async (_event, { sessionId, videoPath }) => {
     const session = getDubbingSession(sessionId);
     if (!session)
-      return { success: false, error: '会话不存在，请重新加载字幕' };
+      return {
+        success: false,
+        error: msg(
+          '会话不存在，请重新加载字幕',
+          'Phiên không tồn tại, vui lòng tải lại phụ đề',
+        ),
+      };
     try {
       await setDubbingMedia(session, videoPath || undefined);
       return { success: true, data: sessionView(session) };
@@ -376,7 +383,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
         saveDubbingConfig(session, config);
         return { success: true, data: sessionView(session) };
@@ -597,18 +610,27 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
           if (!subtitlePath) {
             return {
               success: false,
-              error: '配音会话不存在或已被清理，请回到任务重新发起',
+              error: msg(
+                '配音会话不存在或已被清理，请回到任务重新发起',
+                'Phiên lồng tiếng không tồn tại hoặc đã bị dọn dẹp, vui lòng quay lại tác vụ và bắt đầu lại',
+              ),
             };
           }
         }
 
         if (!subtitlePath || !fs.existsSync(subtitlePath)) {
           if (existingId) ownership.release(existingId, owner, leaseId);
-          return { success: false, error: '字幕文件不存在' };
+          return {
+            success: false,
+            error: msg('字幕文件不存在', 'Tệp phụ đề không tồn tại'),
+          };
         }
         if (videoPath && !fs.existsSync(videoPath)) {
           if (existingId) ownership.release(existingId, owner, leaseId);
-          return { success: false, error: '视频文件不存在' };
+          return {
+            success: false,
+            error: msg('视频文件不存在', 'Tệp video không tồn tại'),
+          };
         }
         const session = await createDubbingSession(
           subtitlePath,
@@ -693,7 +715,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       let powerSaveAcquired = false;
       try {
         acquireTaskPowerSaveBlocker(DUBBING_POWER_SAVE_REASON);
@@ -773,9 +801,21 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
-        if (session.running) throw new Error('配音正在进行中，请稍后修改音色');
+        if (session.running)
+          throw new Error(
+            msg(
+              '配音正在进行中，请稍后修改音色',
+              'Đang lồng tiếng, vui lòng đổi giọng đọc sau',
+            ),
+          );
         const result = setSpeakerVoiceMapping(
           session,
           speakerId,
@@ -803,7 +843,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     async (_event, { sessionId, speakerId, settings, config }) => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
         setSpeakerSettings(session, speakerId, settings, config);
         return {
@@ -848,7 +894,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
         const cue = await resynthesizeCue(
           session,
@@ -876,7 +928,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
         const cue = setCueVoiceOverride(session, index, voiceId);
         return { success: true, data: cueView(cue) };
@@ -899,7 +957,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       try {
         const cue = borrowFollowingSilence(session, index, config);
         return { success: true, data: cueView(cue) };
@@ -919,7 +983,10 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
       const session = getDubbingSession(sessionId);
       const cue = session?.cues.find((c) => c.index === index);
       if (!cue?.wavPath || !fs.existsSync(cue.wavPath)) {
-        return { success: false, error: '该行还没有合成结果' };
+        return {
+          success: false,
+          error: msg('该行还没有合成结果', 'Dòng này chưa có kết quả tổng hợp'),
+        };
       }
       return { success: true, data: cue.wavPath };
     },
@@ -1026,7 +1093,13 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
     ): Promise<DubbingResponse> => {
       const session = getDubbingSession(sessionId);
       if (!session)
-        return { success: false, error: '会话不存在，请重新加载字幕' };
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
       let powerSaveAcquired = false;
       try {
         acquireTaskPowerSaveBlocker(DUBBING_POWER_SAVE_REASON);

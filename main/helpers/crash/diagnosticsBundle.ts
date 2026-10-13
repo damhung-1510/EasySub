@@ -648,11 +648,12 @@ function clip(text: string, max: number): string {
  */
 export function buildIssueUrl(
   summary: IssueSummary,
-  language: 'zh' | 'en',
+  language: 'zh' | 'en' | 'vi',
 ): string {
   const zh = language === 'zh';
+  const vi = language === 'vi';
   const lines = [
-    zh ? '**环境**' : '**Environment**',
+    zh ? '**环境**' : vi ? '**Môi trường**' : '**Environment**',
     `- SmartSub: ${clip(summary.appVersion, 32)}`,
     `- OS: ${clip(summary.os, 80)}`,
     `- CPU: ${clip(summary.cpuModel ?? 'unknown', 120)}`,
@@ -661,18 +662,27 @@ export function buildIssueUrl(
       : []),
     ...(summary.latestCrash
       ? [
-          `- ${zh ? '最近一次崩溃' : 'Latest crash'}: ${clip(summary.latestCrash, 120)}`,
+          `- ${zh ? '最近一次崩溃' : vi ? 'Sự cố gần nhất' : 'Latest crash'}: ${clip(summary.latestCrash, 120)}`,
         ]
       : []),
     '',
-    zh ? '**发生了什么**' : '**What happened**',
+    zh
+      ? '**发生了什么**'
+      : vi
+        ? '**Đã xảy ra chuyện gì**'
+        : '**What happened**',
     zh
       ? '（请描述操作步骤和现象，并把导出的诊断包 zip 拖进来上传）'
-      : '(Describe the steps and what you saw, then drag the exported diagnostics zip here)',
+      : vi
+        ? '(Hãy mô tả các bước thực hiện và hiện tượng gặp phải, rồi kéo tệp zip gói chẩn đoán đã xuất vào đây)'
+        : '(Describe the steps and what you saw, then drag the exported diagnostics zip here)',
     '',
   ];
   const url = new URL(ISSUE_URL_BASE);
-  url.searchParams.set('title', zh ? '闪退反馈' : 'Crash report');
+  url.searchParams.set(
+    'title',
+    zh ? '闪退反馈' : vi ? 'Báo cáo sự cố treo ứng dụng' : 'Crash report',
+  );
   url.searchParams.set('body', lines.join('\n'));
   return url.toString();
 }

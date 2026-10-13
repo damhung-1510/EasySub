@@ -42,6 +42,7 @@ import type {
   HwAccelInfo,
   UserStylePreset,
 } from '../../types/subtitleMerge';
+import { msg } from './uiMessages';
 
 function readStylePresets(): UserStylePreset[] {
   const list = store.get('mergeStylePresets');
@@ -122,13 +123,28 @@ export function setupSubtitleMergeHandlers(
     async (event, { videoPath }): Promise<SubtitleMergeResponse<VideoInfo>> => {
       try {
         if (!fs.existsSync(videoPath)) {
-          return { success: false, error: '视频文件不存在' };
+          return {
+            success: false,
+            error: msg('视频文件不存在', 'Tệp video không tồn tại'),
+          };
         }
         const info = await getVideoInfo(videoPath);
         return { success: true, data: info };
       } catch (error) {
-        logMessage(`获取视频信息失败: ${error}`, 'error');
-        return { success: false, error: `获取视频信息失败: ${error}` };
+        logMessage(
+          msg(
+            `获取视频信息失败: ${error}`,
+            `Lấy thông tin video thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `获取视频信息失败: ${error}`,
+            `Lấy thông tin video thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -142,7 +158,10 @@ export function setupSubtitleMergeHandlers(
     ): Promise<SubtitleMergeResponse<SubtitleInfo>> => {
       try {
         if (!fs.existsSync(subtitlePath)) {
-          return { success: false, error: '字幕文件不存在' };
+          return {
+            success: false,
+            error: msg('字幕文件不存在', 'Tệp phụ đề không tồn tại'),
+          };
         }
 
         const count = await countSubtitles(subtitlePath);
@@ -158,8 +177,20 @@ export function setupSubtitleMergeHandlers(
           },
         };
       } catch (error) {
-        logMessage(`获取字幕信息失败: ${error}`, 'error');
-        return { success: false, error: `获取字幕信息失败: ${error}` };
+        logMessage(
+          msg(
+            `获取字幕信息失败: ${error}`,
+            `Lấy thông tin phụ đề thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `获取字幕信息失败: ${error}`,
+            `Lấy thông tin phụ đề thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -173,13 +204,25 @@ export function setupSubtitleMergeHandlers(
     ): Promise<SubtitleMergeResponse<string>> => {
       try {
         if (!fs.existsSync(config.videoPath)) {
-          return { success: false, error: '视频文件不存在' };
+          return {
+            success: false,
+            error: msg('视频文件不存在', 'Tệp video không tồn tại'),
+          };
         }
         if (!fs.existsSync(config.subtitlePath)) {
-          return { success: false, error: '字幕文件不存在' };
+          return {
+            success: false,
+            error: msg('字幕文件不存在', 'Tệp phụ đề không tồn tại'),
+          };
         }
         if (config.audioTrack && !fs.existsSync(config.audioTrack.trackPath)) {
-          return { success: false, error: '配音音轨文件不存在' };
+          return {
+            success: false,
+            error: msg(
+              '配音音轨文件不存在',
+              'Tệp track lồng tiếng không tồn tại',
+            ),
+          };
         }
 
         // 如果没有指定输出路径，自动生成
@@ -214,11 +257,26 @@ export function setupSubtitleMergeHandlers(
         if (result.success && result.outputPath) {
           return { success: true, data: result.outputPath };
         }
-        logMessage(`合并失败: ${result.error}`, 'error');
-        return { success: false, error: `合并失败: ${result.error}` };
+        logMessage(
+          msg(`合并失败: ${result.error}`, `Gộp thất bại: ${result.error}`),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `合并失败: ${result.error}`,
+            `Gộp thất bại: ${result.error}`,
+          ),
+        };
       } catch (error) {
-        logMessage(`合并失败: ${error}`, 'error');
-        return { success: false, error: `合并失败: ${error}` };
+        logMessage(
+          msg(`合并失败: ${error}`, `Gộp thất bại: ${error}`),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(`合并失败: ${error}`, `Gộp thất bại: ${error}`),
+        };
       }
     },
   );
@@ -254,8 +312,20 @@ export function setupSubtitleMergeHandlers(
         const info = await getHwAccelInfo();
         return { success: true, data: info };
       } catch (error) {
-        logMessage(`获取硬件加速信息失败: ${error}`, 'error');
-        return { success: false, error: `获取硬件加速信息失败: ${error}` };
+        logMessage(
+          msg(
+            `获取硬件加速信息失败: ${error}`,
+            `Lấy thông tin tăng tốc phần cứng thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `获取硬件加速信息失败: ${error}`,
+            `Lấy thông tin tăng tốc phần cứng thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -297,7 +367,13 @@ export function setupSubtitleMergeHandlers(
     ): Promise<SubtitleMergeResponse<UserStylePreset>> => {
       const name = payload?.name?.trim();
       if (!name || !payload?.style) {
-        return { success: false, error: '样式名称与内容不能为空' };
+        return {
+          success: false,
+          error: msg(
+            '样式名称与内容不能为空',
+            'Tên và nội dung kiểu không được để trống',
+          ),
+        };
       }
       if (
         payload.id !== undefined &&
@@ -343,7 +419,7 @@ export function setupSubtitleMergeHandlers(
     async (event, { defaultPath }): Promise<SubtitleMergeResponse<string>> => {
       try {
         const result = await dialog.showSaveDialog(dialogWindow(mainWindow), {
-          title: '选择保存位置',
+          title: msg('选择保存位置', 'Chọn vị trí lưu'),
           defaultPath: defaultPath || undefined,
           filters: [
             { name: 'Video Files', extensions: ['mp4', 'mkv', 'avi', 'mov'] },
@@ -356,8 +432,20 @@ export function setupSubtitleMergeHandlers(
 
         return { success: true, data: result.filePath };
       } catch (error) {
-        logMessage(`选择输出路径失败: ${error}`, 'error');
-        return { success: false, error: `选择输出路径失败: ${error}` };
+        logMessage(
+          msg(
+            `选择输出路径失败: ${error}`,
+            `Chọn đường dẫn đầu ra thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `选择输出路径失败: ${error}`,
+            `Chọn đường dẫn đầu ra thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -373,7 +461,13 @@ export function setupSubtitleMergeHandlers(
         const outputPath = generateOutputPath(videoPath, suffix);
         return { success: true, data: outputPath };
       } catch (error) {
-        return { success: false, error: `生成输出路径失败: ${error}` };
+        return {
+          success: false,
+          error: msg(
+            `生成输出路径失败: ${error}`,
+            `Tạo đường dẫn đầu ra thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -428,8 +522,20 @@ export function setupSubtitleMergeHandlers(
           fontSubstituted: boolean;
         };
       } catch (error) {
-        logMessage(`生成预览 ASS 失败: ${error}`, 'error');
-        return { success: false, error: `生成预览 ASS 失败: ${error}` };
+        logMessage(
+          msg(
+            `生成预览 ASS 失败: ${error}`,
+            `Tạo ASS xem trước thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `生成预览 ASS 失败: ${error}`,
+            `Tạo ASS xem trước thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -467,7 +573,10 @@ export function setupSubtitleMergeHandlers(
         if (!resolved) {
           return {
             success: false,
-            error: `无法定位字体文件: ${fontName}`,
+            error: msg(
+              `无法定位字体文件: ${fontName}`,
+              `Không thể định vị tệp phông chữ: ${fontName}`,
+            ),
           };
         }
         return {
@@ -481,8 +590,20 @@ export function setupSubtitleMergeHandlers(
           },
         };
       } catch (error) {
-        logMessage(`读取字体数据失败: ${error}`, 'error');
-        return { success: false, error: `读取字体数据失败: ${error}` };
+        logMessage(
+          msg(
+            `读取字体数据失败: ${error}`,
+            `Đọc dữ liệu phông chữ thất bại: ${error}`,
+          ),
+          'error',
+        );
+        return {
+          success: false,
+          error: msg(
+            `读取字体数据失败: ${error}`,
+            `Đọc dữ liệu phông chữ thất bại: ${error}`,
+          ),
+        };
       }
     },
   );
@@ -495,7 +616,10 @@ export function setupSubtitleMergeHandlers(
         shell.showItemInFolder(filePath);
         return { success: true, data: true };
       } catch (error) {
-        return { success: false, error: `打开目录失败: ${error}` };
+        return {
+          success: false,
+          error: msg(`打开目录失败: ${error}`, `Mở thư mục thất bại: ${error}`),
+        };
       }
     },
   );

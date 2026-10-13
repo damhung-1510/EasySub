@@ -9,6 +9,7 @@ import { BrowserWindow, dialog, systemPreferences } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logMessage } from './storeManager';
+import { msg } from './uiMessages';
 import { ensureTempDir } from './fileUtils';
 import { TaskCancelledError } from './taskContext';
 import { parseSubtitleCues, detectSubtitleFormat } from './subtitleFormats';
@@ -119,10 +120,20 @@ async function synthesizeSampleFor(voice: ClonedVoice): Promise<string> {
 function requireElevenCloneProvider(providerId: string | undefined) {
   const provider = getTtsProviderById(providerId);
   if (!provider || provider.type !== TTS_ELEVENLABS) {
-    throw new Error('请先在「配音服务」页配置 ElevenLabs 实例');
+    throw new Error(
+      msg(
+        '请先在「配音服务」页配置 ElevenLabs 实例',
+        'Hãy cấu hình phiên bản ElevenLabs trong trang "Dịch vụ lồng tiếng" trước',
+      ),
+    );
   }
   if (!isTtsProviderConfigured(provider)) {
-    throw new Error('ElevenLabs 实例未配置完整，请先补齐 API Key');
+    throw new Error(
+      msg(
+        'ElevenLabs 实例未配置完整，请先补齐 API Key',
+        'Phiên bản ElevenLabs chưa được cấu hình đầy đủ, hãy bổ sung API Key trước',
+      ),
+    );
   }
   return provider;
 }
@@ -131,17 +142,30 @@ function requireElevenCloneProvider(providerId: string | undefined) {
 function requireVolcCloneProvider(providerId: string | undefined) {
   const provider = getTtsProviderById(providerId);
   if (!provider || provider.type !== TTS_VOLCENGINE) {
-    throw new Error('请先在「配音服务」页配置火山引擎豆包实例');
+    throw new Error(
+      msg(
+        '请先在「配音服务」页配置火山引擎豆包实例',
+        'Hãy cấu hình phiên bản Volcengine Doubao trong trang "Dịch vụ lồng tiếng" trước',
+      ),
+    );
   }
   if (!String(provider.apiKey ?? '').trim()) {
-    throw new Error('豆包实例缺少合成 API Key，请先完成配置');
+    throw new Error(
+      msg(
+        '豆包实例缺少合成 API Key，请先完成配置',
+        'Phiên bản Doubao thiếu API Key tổng hợp giọng, hãy hoàn tất cấu hình trước',
+      ),
+    );
   }
   if (
     !String(provider.appId ?? '').trim() ||
     !String(provider.accessToken ?? '').trim()
   ) {
     throw new Error(
-      '豆包声音复刻: 缺少训练凭据。请在「配音服务」页豆包实例中填写 APP ID 与 Access Token',
+      msg(
+        '豆包声音复刻: 缺少训练凭据。请在「配音服务」页豆包实例中填写 APP ID 与 Access Token',
+        'Nhân bản giọng Doubao: thiếu thông tin xác thực huấn luyện. Hãy nhập APP ID và Access Token trong phiên bản Doubao ở trang "Dịch vụ lồng tiếng"',
+      ),
     );
   }
   return provider;
@@ -225,7 +249,13 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       try {
         if (!buffer || buffer.byteLength === 0) {
-          return { success: false, error: '录音数据为空，请重试' };
+          return {
+            success: false,
+            error: msg(
+              '录音数据为空，请重试',
+              'Dữ liệu ghi âm trống, vui lòng thử lại',
+            ),
+          };
         }
         // 主进程侧硬顶：录音时长上限（5 分钟）在渲染层计时器控制，
         // 这里按 webm/opus 码率上界折算字节顶（约 64kbps × 300s ≈ 2.4MB，
@@ -234,7 +264,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
         if (buffer.byteLength > MAX_RECORDING_BYTES) {
           return {
             success: false,
-            error: '录音数据超出大小上限，请缩短录音时长后重试',
+            error: msg(
+              '录音数据超出大小上限，请缩短录音时长后重试',
+              'Dữ liệu ghi âm vượt quá giới hạn dung lượng, hãy rút ngắn thời lượng ghi âm rồi thử lại',
+            ),
           };
         }
         const dir = path.join(ensureTempDir(), 'voice-clone');
@@ -261,7 +294,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       try {
         if (!sourcePath || !fs.existsSync(sourcePath)) {
-          return { success: false, error: '素材文件不存在' };
+          return {
+            success: false,
+            error: msg('素材文件不存在', 'Tệp tư liệu không tồn tại'),
+          };
         }
         const session = await analyzeCloneSource(sourcePath, engine, {
           tempDir: path.join(ensureTempDir(), 'voice-clone'),
@@ -296,7 +332,13 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       const session = getCloneAnalysisSession(analysisId);
       if (!session) {
-        return { success: false, error: '分析会话已失效，请重新选择素材' };
+        return {
+          success: false,
+          error: msg(
+            '分析会话已失效，请重新选择素材',
+            'Phiên phân tích đã hết hiệu lực, hãy chọn lại tư liệu',
+          ),
+        };
       }
       try {
         const report = inspectCloneRange(
@@ -325,7 +367,13 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       const session = getCloneAnalysisSession(analysisId);
       if (!session) {
-        return { success: false, error: '分析会话已失效，请重新选择素材' };
+        return {
+          success: false,
+          error: msg(
+            '分析会话已失效，请重新选择素材',
+            'Phiên phân tích đã hết hiệu lực, hãy chọn lại tư liệu',
+          ),
+        };
       }
       try {
         const r = await denoiseRangePreview(session, startMs, endMs);
@@ -359,7 +407,13 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       const session = getCloneAnalysisSession(analysisId);
       if (!session) {
-        return { success: false, error: '分析会话已失效，请重新选择素材' };
+        return {
+          success: false,
+          error: msg(
+            '分析会话已失效，请重新选择素材',
+            'Phiên phân tích đã hết hiệu lực, hãy chọn lại tư liệu',
+          ),
+        };
       }
       // 同会话重识别：先中止上一轮，避免僵尸请求。
       rangeTranscribeAborts.get(analysisId)?.abort();
@@ -397,7 +451,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       try {
         if (!subtitlePath || !fs.existsSync(subtitlePath)) {
-          return { success: false, error: '字幕文件不存在' };
+          return {
+            success: false,
+            error: msg('字幕文件不存在', 'Tệp phụ đề không tồn tại'),
+          };
         }
         const content = fs.readFileSync(subtitlePath, 'utf-8');
         const cues = parseSubtitleCues(
@@ -428,7 +485,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       try {
         if (!subtitlePath || !fs.existsSync(subtitlePath)) {
-          return { success: false, error: '字幕文件不存在' };
+          return {
+            success: false,
+            error: msg('字幕文件不存在', 'Tệp phụ đề không tồn tại'),
+          };
         }
         const content = fs.readFileSync(subtitlePath, 'utf-8');
         const cues = parseSubtitleCues(
@@ -491,16 +551,31 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     ): Promise<VoiceCloneResponse> => {
       const session = getCloneAnalysisSession(analysisId);
       if (!session) {
-        return { success: false, error: '分析会话已失效，请重新选择素材' };
+        return {
+          success: false,
+          error: msg(
+            '分析会话已失效，请重新选择素材',
+            'Phiên phân tích đã hết hiệu lực, hãy chọn lại tư liệu',
+          ),
+        };
       }
       if (engine === 'zipvoice' && !refText?.trim()) {
-        return { success: false, error: '请填写参考文本（与录音内容一致）' };
+        return {
+          success: false,
+          error: msg(
+            '请填写参考文本（与录音内容一致）',
+            'Hãy nhập văn bản tham chiếu (khớp với nội dung ghi âm)',
+          ),
+        };
       }
       if (engine === 'volcengine') {
         if (!volc?.speakerId?.trim().startsWith('S_')) {
           return {
             success: false,
-            error: '请填写有效的音色槽位 ID（S_ 开头，控制台购买后可见）',
+            error: msg(
+              '请填写有效的音色槽位 ID（S_ 开头，控制台购买后可见）',
+              'Hãy nhập ID vị trí giọng hợp lệ (bắt đầu bằng S_, hiển thị sau khi mua trên bảng điều khiển)',
+            ),
           };
         }
       }
@@ -532,13 +607,21 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
           fs.rmSync(dir, { recursive: true, force: true });
           return {
             success: false,
-            error: '选区内没有足够的清晰语音，请调整选区',
+            error: msg(
+              '选区内没有足够的清晰语音，请调整选区',
+              'Vùng chọn không có đủ giọng nói rõ ràng, hãy điều chỉnh vùng chọn',
+            ),
           };
         }
 
         const voice: ClonedVoice = {
           id,
-          name: name?.trim() || `我的音色 ${getClonedVoices().length + 1}`,
+          name:
+            name?.trim() ||
+            msg(
+              `我的音色 ${getClonedVoices().length + 1}`,
+              `Giọng của tôi ${getClonedVoices().length + 1}`,
+            ),
           engine,
           // zipvoice：参考文本即参考音频的转写，语言以其为准（跨语言
           // speed 补偿依赖该字段，比用户下拉更可靠）；火山沿用显式选择。
@@ -573,7 +656,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
             voice.volcTrainingTimesLeft = trainingTimesLeft;
           }
           if (state === 'failed') {
-            voice.trainError = '服务端训练失败，请更换素材或开启降噪后重试';
+            voice.trainError = msg(
+              '服务端训练失败，请更换素材或开启降噪后重试',
+              'Huấn luyện trên máy chủ thất bại, hãy đổi tư liệu hoặc bật khử nhiễu rồi thử lại',
+            );
           }
         }
 
@@ -620,7 +706,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     async (_event, { id }: { id: string }): Promise<VoiceCloneResponse> => {
       const voice = getClonedVoiceById(id);
       if (!voice || voice.engine !== 'volcengine' || !voice.speakerId) {
-        return { success: false, error: '克隆音色不存在' };
+        return {
+          success: false,
+          error: msg('克隆音色不存在', 'Giọng nhân bản không tồn tại'),
+        };
       }
       try {
         const provider = requireVolcCloneProvider(voice.providerId);
@@ -636,7 +725,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
             : {}),
           trainError:
             state === 'failed'
-              ? '服务端训练失败，请更换素材或开启降噪后重试'
+              ? msg(
+                  '服务端训练失败，请更换素材或开启降噪后重试',
+                  'Huấn luyện trên máy chủ thất bại, hãy đổi tư liệu hoặc bật khử nhiễu rồi thử lại',
+                )
               : undefined,
         };
         if (state === 'ready' && !updated.sampleWavPath) {
@@ -669,7 +761,13 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
         !voice.refWavPath ||
         !fs.existsSync(voice.refWavPath)
       ) {
-        return { success: false, error: '克隆音色不存在或参考音频缺失' };
+        return {
+          success: false,
+          error: msg(
+            '克隆音色不存在或参考音频缺失',
+            'Giọng nhân bản không tồn tại hoặc thiếu âm thanh tham chiếu',
+          ),
+        };
       }
       try {
         const provider = requireVolcCloneProvider(voice.providerId);
@@ -691,7 +789,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
             : {}),
           trainError:
             state === 'failed'
-              ? '服务端训练失败，请更换素材或开启降噪后重试'
+              ? msg(
+                  '服务端训练失败，请更换素材或开启降噪后重试',
+                  'Huấn luyện trên máy chủ thất bại, hãy đổi tư liệu hoặc bật khử nhiễu rồi thử lại',
+                )
               : undefined,
         };
         if (state === 'ready' && !updated.sampleWavPath) {
@@ -801,7 +902,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
       try {
         const cloudId = String(speakerId ?? '').trim();
         if (!cloudId) {
-          return { success: false, error: '请填写云端音色 ID' };
+          return {
+            success: false,
+            error: msg('请填写云端音色 ID', 'Hãy nhập ID giọng trên đám mây'),
+          };
         }
         const dup = getClonedVoices().find(
           (v) => v.engine === engine && v.speakerId === cloudId,
@@ -809,7 +913,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
         if (dup) {
           return {
             success: false,
-            error: `该云端音色已在本地列表中（${dup.name}）`,
+            error: msg(
+              `该云端音色已在本地列表中（${dup.name}）`,
+              `Giọng đám mây này đã có trong danh sách cục bộ (${dup.name})`,
+            ),
           };
         }
 
@@ -830,7 +937,10 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
           if (!cloudId.startsWith('S_')) {
             return {
               success: false,
-              error: '请填写有效的音色槽位 ID（S_ 开头）',
+              error: msg(
+                '请填写有效的音色槽位 ID（S_ 开头）',
+                'Hãy nhập ID vị trí giọng hợp lệ (bắt đầu bằng S_)',
+              ),
             };
           }
           const provider = requireVolcCloneProvider(providerId);
@@ -867,7 +977,11 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
     'voiceClone:regenerateSample',
     async (_event, { id }: { id: string }): Promise<VoiceCloneResponse> => {
       const voice = getClonedVoiceById(id);
-      if (!voice) return { success: false, error: '克隆音色不存在' };
+      if (!voice)
+        return {
+          success: false,
+          error: msg('克隆音色不存在', 'Giọng nhân bản không tồn tại'),
+        };
       try {
         const updated = {
           ...voice,
@@ -904,7 +1018,11 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
       { id, outputPath }: { id: string; outputPath?: string },
     ): Promise<VoiceCloneResponse> => {
       const voice = getClonedVoiceById(id);
-      if (!voice) return { success: false, error: '克隆音色不存在' };
+      if (!voice)
+        return {
+          success: false,
+          error: msg('克隆音色不存在', 'Giọng nhân bản không tồn tại'),
+        };
       try {
         const result = outputPath
           ? { canceled: false, filePath: outputPath }
@@ -959,14 +1077,20 @@ export function setupVoiceCloneHandlers(mainWindow: BrowserWindow) {
         } catch {
           return {
             success: false,
-            error: '文件不是有效的音色包（JSON 解析失败）',
+            error: msg(
+              '文件不是有效的音色包（JSON 解析失败）',
+              'Tệp không phải gói giọng hợp lệ (phân tích JSON thất bại)',
+            ),
           };
         }
         const parsed = parseSvoicePackage(payload);
         if (!parsed.ok || !parsed.pkg) {
           return {
             success: false,
-            error: `音色包校验失败（${parsed.error ?? 'unknown'}）`,
+            error: msg(
+              `音色包校验失败（${parsed.error ?? 'unknown'}）`,
+              `Kiểm tra gói giọng thất bại (${parsed.error ?? 'unknown'})`,
+            ),
           };
         }
         const pkg = parsed.pkg;

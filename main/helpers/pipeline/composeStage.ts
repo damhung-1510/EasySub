@@ -17,6 +17,7 @@ import {
   resolveComposeRunOptions,
 } from './deriveComposeConfig';
 import type { IFiles, IFormData } from '../../../types';
+import { msg } from '../uiMessages';
 
 const STAGE_KEY = 'composeVideo';
 
@@ -25,12 +26,20 @@ function emitError(event: any, file: IFiles, message: string) {
   event.sender.send('taskErrorChange', file, STAGE_KEY, message);
 }
 
-const DERIVE_ERROR_MESSAGES: Record<string, string> = {
-  'no-subtitle': '找不到可合成的字幕文件（txt 格式不支持烧录）',
-  'none-without-dub': '合成配置为不含字幕，但该文件没有配音轨，无事可做',
-  'video-input-required':
+const deriveErrorMessages = (): Record<string, string> => ({
+  'no-subtitle': msg(
+    '找不到可合成的字幕文件（txt 格式不支持烧录）',
+    'Không tìm thấy tệp phụ đề để ghép (định dạng txt không hỗ trợ ghi cứng)',
+  ),
+  'none-without-dub': msg(
+    '合成配置为不含字幕，但该文件没有配音轨，无事可做',
+    'Cấu hình ghép không có phụ đề, nhưng tệp này không có track lồng tiếng nên không có gì để làm',
+  ),
+  'video-input-required': msg(
     '成品视频合成需要包含视频流的输入；纯音频文件请取消成品视频或改用视频文件',
-};
+    'Ghép video thành phẩm cần đầu vào có luồng video; với tệp chỉ có âm thanh, hãy bỏ video thành phẩm hoặc dùng tệp video',
+  ),
+});
 
 /**
  * 执行合成阶段。成功回填 file.finalVideoPath；失败置阶段 error 并抛出。
@@ -75,7 +84,7 @@ export async function runComposeStage(
     });
     if (!derived.ok) {
       const reason = (derived as { reason: string }).reason;
-      throw new Error(DERIVE_ERROR_MESSAGES[reason] || reason);
+      throw new Error(deriveErrorMessages()[reason] || reason);
     }
 
     signal?.addEventListener('abort', onAbort, { once: true });
@@ -102,7 +111,7 @@ export async function runComposeStage(
       throw new TaskCancelledError();
     }
     if (!result.success || !result.outputPath) {
-      throw new Error(result.error || '合成失败');
+      throw new Error(result.error || msg('合成失败', 'Ghép thất bại'));
     }
 
     file.finalVideoPath = result.outputPath;

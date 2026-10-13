@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 /**
  * 火山「声音复刻 2.0」（ICL）训练/状态接口的纯工具（无网络 / fs / electron），
  * test:voice-clone 单测覆盖。
@@ -196,7 +197,10 @@ export function volcCloneErrorHint(
 ): string {
   const raw = `（HTTP ${httpStatus}${code !== null ? `, code ${code}` : ''}: ${message || 'unknown'}）`;
   if (httpStatus === 401 || httpStatus === 403) {
-    return `豆包声音复刻: 训练凭据无效${raw}。请检查 APP ID 与 Access Token（旧版控制台「语音技术」应用凭据），并确认已开通声音复刻服务`;
+    return uiMsg(
+      `豆包声音复刻: 训练凭据无效${raw}。请检查 APP ID 与 Access Token（旧版控制台「语音技术」应用凭据），并确认已开通声音复刻服务`,
+      `Nhân bản giọng Doubao: thông tin xác thực huấn luyện không hợp lệ${raw}. Hãy kiểm tra APP ID và Access Token (thông tin ứng dụng "Speech Technology" của bảng điều khiển bản cũ) và xác nhận đã bật dịch vụ nhân bản giọng`,
+    );
   }
   const text = `${message || ''}`.toLowerCase();
   if (
@@ -205,14 +209,20 @@ export function volcCloneErrorHint(
     text.includes('not exist') ||
     text.includes('deleted')
   ) {
-    return `豆包声音复刻: 音色槽位不存在${raw}。请确认 speaker_id 正确（S_ 开头，控制台「声音复刻」页购买后可见）且未被删除`;
+    return uiMsg(
+      `豆包声音复刻: 音色槽位不存在${raw}。请确认 speaker_id 正确（S_ 开头，控制台「声音复刻」页购买后可见）且未被删除`,
+      `Nhân bản giọng Doubao: chỗ chứa giọng không tồn tại${raw}. Hãy xác nhận speaker_id đúng (bắt đầu bằng S_, hiển thị sau khi mua ở trang "Voice Cloning" của bảng điều khiển) và chưa bị xóa`,
+    );
   }
   if (
     text.includes('limit') ||
     text.includes('exceed') ||
     text.includes('quota')
   ) {
-    return `豆包声音复刻: 该槽位训练次数已达上限${raw}。请更换还有训练次数的 speaker_id`;
+    return uiMsg(
+      `豆包声音复刻: 该槽位训练次数已达上限${raw}。请更换还有训练次数的 speaker_id`,
+      `Nhân bản giọng Doubao: chỗ chứa này đã hết lượt huấn luyện${raw}. Hãy đổi sang speaker_id còn lượt huấn luyện`,
+    );
   }
   if (
     text.includes('wer') ||
@@ -222,7 +232,13 @@ export function volcCloneErrorHint(
   ) {
     // 注意不可用裸 'audio' 匹配：参数错误类 message 也含该词
     // （真机踩坑："add unmapped key audios ..."）。
-    return `豆包声音复刻: 参考音频未通过服务端质检${raw}。请更换更清晰的素材，或在创建时开启服务端降噪`;
+    return uiMsg(
+      `豆包声音复刻: 参考音频未通过服务端质检${raw}。请更换更清晰的素材，或在创建时开启服务端降噪`,
+      `Nhân bản giọng Doubao: âm thanh tham chiếu không qua kiểm tra chất lượng của máy chủ${raw}. Hãy dùng đoạn rõ hơn hoặc bật khử nhiễu phía máy chủ khi tạo`,
+    );
   }
-  return `豆包声音复刻: 请求失败${raw}`;
+  return uiMsg(
+    `豆包声音复刻: 请求失败${raw}`,
+    `Nhân bản giọng Doubao: yêu cầu thất bại${raw}`,
+  );
 }

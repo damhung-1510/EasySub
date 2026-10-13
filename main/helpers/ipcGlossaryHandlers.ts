@@ -110,7 +110,12 @@ export function setupGlossaryHandlers(mainWindow: BrowserWindow): void {
         const result = sourcePath
           ? { canceled: false, filePaths: [sourcePath] }
           : await dialog.showOpenDialog(dialogWindow(mainWindow), {
-              title: language === 'zh' ? '导入词条' : 'Import glossary entries',
+              title:
+                language === 'zh'
+                  ? '导入词条'
+                  : language === 'vi'
+                    ? 'Nhập mục thuật ngữ'
+                    : 'Import glossary entries',
               filters: [
                 { name: 'CSV / TXT', extensions: ['csv', 'txt'] },
                 { name: 'CSV', extensions: ['csv'] },
@@ -169,7 +174,12 @@ export function setupGlossaryHandlers(mainWindow: BrowserWindow): void {
         const result = outputPath
           ? { canceled: false, filePath: outputPath }
           : await dialog.showSaveDialog(dialogWindow(mainWindow), {
-              title: language === 'zh' ? '导出词库' : 'Export glossary',
+              title:
+                language === 'zh'
+                  ? '导出词库'
+                  : language === 'vi'
+                    ? 'Xuất bảng thuật ngữ'
+                    : 'Export glossary',
               defaultPath: `${safeFileName(glossary.name)}.${normalizedFormat}`,
               filters: [
                 {
@@ -209,7 +219,9 @@ export function setupGlossaryHandlers(mainWindow: BrowserWindow): void {
         title:
           language === 'zh'
             ? '导出词库导入模板'
-            : 'Export glossary import template',
+            : language === 'vi'
+              ? 'Xuất mẫu nhập bảng thuật ngữ'
+              : 'Export glossary import template',
         defaultPath: 'glossary-import-template.csv',
         filters: [{ name: 'CSV', extensions: ['csv'] }],
       });

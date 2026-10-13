@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, shell } from 'electron';
 import { store } from './store';
 import { APP_DISPLAY_NAME } from './appBranding';
 
-type MenuLanguage = 'zh' | 'en';
+type MenuLanguage = 'zh' | 'en' | 'vi';
 
 /**
  * 应用菜单本地化字典。
@@ -69,6 +69,36 @@ const LABELS: Record<MenuLanguage, Record<string, string>> = {
     github: 'GitHub Repository',
     reportIssue: 'Report an Issue',
   },
+  vi: {
+    about: 'Giới thiệu %s',
+    hide: 'Ẩn %s',
+    hideOthers: 'Ẩn các ứng dụng khác',
+    unhide: 'Hiện tất cả',
+    quit: 'Thoát %s',
+    file: 'Tệp',
+    edit: 'Chỉnh sửa',
+    undo: 'Hoàn tác',
+    redo: 'Làm lại',
+    cut: 'Cắt',
+    copy: 'Sao chép',
+    paste: 'Dán',
+    selectAll: 'Chọn tất cả',
+    view: 'Hiển thị',
+    reload: 'Tải lại',
+    toggleDevTools: 'Công cụ nhà phát triển',
+    resetZoom: 'Kích thước thực',
+    zoomIn: 'Phóng to',
+    zoomOut: 'Thu nhỏ',
+    togglefullscreen: 'Bật/tắt toàn màn hình',
+    window: 'Cửa sổ',
+    minimize: 'Thu nhỏ cửa sổ',
+    close: 'Đóng cửa sổ',
+    help: 'Trợ giúp',
+    checkUpdates: 'Kiểm tra cập nhật…',
+    openLogs: 'Xem nhật ký',
+    github: 'Kho GitHub',
+    reportIssue: 'Báo lỗi',
+  },
 };
 
 const REPO_URL = 'https://github.com/buxuku/SmartSub';
@@ -77,7 +107,11 @@ let mainWindowRef: BrowserWindow | null = null;
 
 function resolveLanguage(): MenuLanguage {
   const settings = store.get('settings') as { language?: string } | undefined;
-  if (settings?.language === 'zh' || settings?.language === 'en') {
+  if (
+    settings?.language === 'zh' ||
+    settings?.language === 'en' ||
+    settings?.language === 'vi'
+  ) {
     return settings.language;
   }
   return app.getLocale().toLowerCase().startsWith('zh') ? 'zh' : 'en';
@@ -190,6 +224,8 @@ export function setupAppMenu(mainWindow: BrowserWindow) {
 /** 语言切换后重建菜单（由 setSettings 拦截调用） */
 export function rebuildAppMenu(language?: string) {
   buildAppMenu(
-    language === 'zh' || language === 'en' ? language : resolveLanguage(),
+    language === 'zh' || language === 'en' || language === 'vi'
+      ? language
+      : resolveLanguage(),
   );
 }

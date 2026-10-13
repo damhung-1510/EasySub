@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 import { app, BrowserWindow } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -287,7 +288,13 @@ export class PyEngineDownloader {
     const stagingDir = getPyEngineStagingDir(this.engineId);
     try {
       if (!fs.existsSync(sourcePath)) {
-        return { success: false, error: `路径不存在: ${sourcePath}` };
+        return {
+          success: false,
+          error: uiMsg(
+            `路径不存在: ${sourcePath}`,
+            `Đường dẫn không tồn tại: ${sourcePath}`,
+          ),
+        };
       }
 
       if (fs.existsSync(stagingDir)) {
@@ -331,7 +338,13 @@ export class PyEngineDownloader {
         currentOs: process.platform,
       });
       if (!compat.ok) {
-        throw new Error(compat.error || '运行时兼容性校验失败');
+        throw new Error(
+          compat.error ||
+            uiMsg(
+              `运行时兼容性校验失败`,
+              `Kiểm tra tương thích của runtime thất bại`,
+            ),
+        );
       }
 
       // Unix 权限保障

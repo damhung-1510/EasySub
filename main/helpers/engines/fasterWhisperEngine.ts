@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../uiMessages';
 import fs from 'fs';
 import type { EngineStatus, PyEngineManifest } from '../../../types/engine';
 import {
@@ -65,7 +66,10 @@ function isCudaRuntimeError(error: unknown): boolean {
  */
 function formatCudaRuntimeHint(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error ?? '');
-  return `faster-whisper GPU(CUDA) 加速所需的运行库（cuBLAS/cuDNN）缺失或无法加载，无法使用 CUDA。请在「资源中心 → 引擎 → faster-whisper」将「计算设备」改为 CPU，或改用其他转写引擎。原始错误：${raw}`;
+  return uiMsg(
+    `faster-whisper GPU(CUDA) 加速所需的运行库（cuBLAS/cuDNN）缺失或无法加载，无法使用 CUDA。请在「资源中心 → 引擎 → faster-whisper」将「计算设备」改为 CPU，或改用其他转写引擎。原始错误：${raw}`,
+    `Thiếu hoặc không tải được thư viện runtime (cuBLAS/cuDNN) mà faster-whisper cần để tăng tốc GPU (CUDA), không thể dùng CUDA. Hãy đổi "Thiết bị tính toán" sang CPU trong "Trung tâm tài nguyên → Engine → faster-whisper", hoặc dùng engine phiên âm khác. Lỗi gốc: ${raw}`,
+  );
 }
 
 /** 在途转写 id 集合：任务级并发下可能同时存在多个（排队+执行），取消须精确到 id。 */

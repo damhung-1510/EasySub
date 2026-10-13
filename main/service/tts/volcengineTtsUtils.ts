@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 /**
  * 火山引擎豆包「语音合成大模型」（V3 单向流式 HTTP，`/api/v3/tts/unidirectional`）
  * 的纯工具（无网络 / fs / electron），test:dubbing 单测覆盖。
@@ -297,19 +298,37 @@ export function volcTtsErrorHint(
   const msg = (message ?? '').toLowerCase();
 
   if (httpStatus === 401 || httpStatus === 403) {
-    return `豆包 TTS: HTTP ${httpStatus}${suffix}。请检查 API Key：需为「豆包语音」控制台签发（火山方舟/大模型推理的 Key 不通用），并确认账号已开通语音合成大模型服务`;
+    return uiMsg(
+      `豆包 TTS: HTTP ${httpStatus}${suffix}。请检查 API Key：需为「豆包语音」控制台签发（火山方舟/大模型推理的 Key 不通用），并确认账号已开通语音合成大模型服务`,
+      `Doubao TTS: HTTP ${httpStatus}${suffix}. Hãy kiểm tra khóa API: phải được cấp từ bảng điều khiển "Doubao Speech" (khóa của Volcano Ark/suy luận mô hình lớn không dùng chung), và xác nhận tài khoản đã bật dịch vụ mô hình tổng hợp giọng nói`,
+    );
   }
   if (httpStatus === 429 || /concurrency|quota/.test(msg)) {
-    return `豆包 TTS: 并发/配额受限${suffix}。请调低该实例的并发（默认 2）或稍后重试；免费赠额与字符版的并发上限有限`;
+    return uiMsg(
+      `豆包 TTS: 并发/配额受限${suffix}。请调低该实例的并发（默认 2）或稍后重试；免费赠额与字符版的并发上限有限`,
+      `Doubao TTS: bị giới hạn đồng thời/hạn mức${suffix}. Hãy giảm số luồng đồng thời của phiên bản này (mặc định 2) hoặc thử lại sau; hạn mức đồng thời của gói tặng miễn phí và gói theo ký tự có giới hạn`,
+    );
   }
   if (code === 45000000 && /speaker|permission/.test(msg)) {
-    return `豆包 TTS: 音色不可用${suffix}。请检查音色 id 拼写是否正确、账号是否已开通该音色对应的商品；克隆音色（S_ 开头）需确认训练已完成且属于当前账号`;
+    return uiMsg(
+      `豆包 TTS: 音色不可用${suffix}。请检查音色 id 拼写是否正确、账号是否已开通该音色对应的商品；克隆音色（S_ 开头）需确认训练已完成且属于当前账号`,
+      `Doubao TTS: giọng không khả dụng${suffix}. Hãy kiểm tra id giọng có đúng chính tả không và tài khoản đã mở sản phẩm tương ứng chưa; với giọng nhân bản (bắt đầu bằng S_), hãy xác nhận đã huấn luyện xong và thuộc tài khoản hiện tại`,
+    );
   }
   if (code === 55000000 && /mismatch/.test(msg)) {
-    return `豆包 TTS: 音色 id 有误或与资源版本不匹配${suffix}。请检查音色 id 拼写；2.0 音色（*_uranus_bigtts 等）需选 seed-tts-2.0，1.0 音色（*_mars/moon_bigtts 等）需选 seed-tts-1.0`;
+    return uiMsg(
+      `豆包 TTS: 音色 id 有误或与资源版本不匹配${suffix}。请检查音色 id 拼写；2.0 音色（*_uranus_bigtts 等）需选 seed-tts-2.0，1.0 音色（*_mars/moon_bigtts 等）需选 seed-tts-1.0`,
+      `Doubao TTS: id giọng sai hoặc không khớp phiên bản tài nguyên${suffix}. Hãy kiểm tra chính tả id giọng; giọng 2.0 (*_uranus_bigtts, ...) cần chọn seed-tts-2.0, giọng 1.0 (*_mars/moon_bigtts, ...) cần chọn seed-tts-1.0`,
+    );
   }
   if (code === 40402003) {
-    return `豆包 TTS: 单请求文本超长${suffix}。请拆分该行字幕`;
+    return uiMsg(
+      `豆包 TTS: 单请求文本超长${suffix}。请拆分该行字幕`,
+      `Doubao TTS: văn bản của một yêu cầu quá dài${suffix}. Hãy tách dòng phụ đề này`,
+    );
   }
-  return `豆包 TTS: 合成失败（HTTP ${httpStatus}${suffix}）`;
+  return uiMsg(
+    `豆包 TTS: 合成失败（HTTP ${httpStatus}${suffix}）`,
+    `Doubao TTS: tổng hợp giọng thất bại (HTTP ${httpStatus}${suffix})`,
+  );
 }

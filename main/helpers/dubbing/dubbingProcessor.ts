@@ -115,6 +115,7 @@ import {
   type DubbingSpeaker,
   type DubbingSpeakerVoiceMap,
 } from '../../../types/dubbing';
+import { msg } from '../uiMessages';
 
 /**
  * 批量合成里每个请求都会给同一个 signal 挂监听（AbortSignal.any / 取消联动），
@@ -355,7 +356,12 @@ export async function createDubbingSession(
   const format = detectSubtitleFormat(subtitlePath);
   const parsed = parseSubtitleCues(content, format);
   if (parsed.length === 0) {
-    throw new Error('字幕文件为空或无法解析');
+    throw new Error(
+      msg(
+        '字幕文件为空或无法解析',
+        'Tệp phụ đề trống hoặc không thể phân tích',
+      ),
+    );
   }
   const mediaDurationMs = videoPath ? await probeMediaDurationMs(videoPath) : 0;
   const sidecar = findDubbingProofreadDataFile(subtitlePath, proofreadDataFile);
@@ -730,10 +736,19 @@ function buildEngineAdapter(
   if (engine.kind === 'local') {
     const modelId = engine.modelId as TtsModelId;
     const spec = TTS_MODELS[modelId];
-    if (!spec) throw new Error(`未知本地 TTS 模型：${engine.modelId}`);
+    if (!spec)
+      throw new Error(
+        msg(
+          `未知本地 TTS 模型：${engine.modelId}`,
+          `Mô hình TTS cục bộ không xác định: ${engine.modelId}`,
+        ),
+      );
     if (!isTtsModelInstalled(modelId)) {
       throw new Error(
-        `本地模型 ${spec.displayName} 未安装，请先在「配音服务」页下载`,
+        msg(
+          `本地模型 ${spec.displayName} 未安装，请先在「配音服务」页下载`,
+          `Mô hình cục bộ ${spec.displayName} chưa được cài đặt, vui lòng tải xuống ở trang "Dịch vụ lồng tiếng"`,
+        ),
       );
     }
     const model = getTtsModelRequest(modelId);
@@ -784,15 +799,26 @@ function buildEngineAdapter(
         ) => {
           if (localTtsLanguageError(modelId, language))
             throw new Error(
-              `${spec.displayName} 不支持配音语言 ${language}，请选择支持该语言的引擎`,
+              msg(
+                `${spec.displayName} 不支持配音语言 ${language}，请选择支持该语言的引擎`,
+                `${spec.displayName} không hỗ trợ ngôn ngữ lồng tiếng ${language}, vui lòng chọn engine hỗ trợ ngôn ngữ này`,
+              ),
             );
           const voice = getClonedVoiceById(voiceId);
           if (!voice || voice.engine !== 'zipvoice') {
-            throw new Error('克隆音色不存在或已删除，请重新选择音色');
+            throw new Error(
+              msg(
+                '克隆音色不存在或已删除，请重新选择音色',
+                'Giọng nhân bản không tồn tại hoặc đã bị xóa, vui lòng chọn lại giọng đọc',
+              ),
+            );
           }
           if (!voice.refWavPath || !fs.existsSync(voice.refWavPath)) {
             throw new Error(
-              `克隆音色「${voice.name}」的参考音频缺失，请删除后重新创建`,
+              msg(
+                `克隆音色「${voice.name}」的参考音频缺失，请删除后重新创建`,
+                `Thiếu âm thanh tham chiếu của giọng nhân bản "${voice.name}", vui lòng xóa và tạo lại`,
+              ),
             );
           }
           const r = await runSynthesize(
@@ -850,7 +876,10 @@ function buildEngineAdapter(
       ) => {
         if (localTtsLanguageError(modelId, language))
           throw new Error(
-            `${spec.displayName} 不支持配音语言 ${language}，请选择支持该语言的引擎`,
+            msg(
+              `${spec.displayName} 不支持配音语言 ${language}，请选择支持该语言的引擎`,
+              `${spec.displayName} không hỗ trợ ngôn ngữ lồng tiếng ${language}, vui lòng chọn engine hỗ trợ ngôn ngữ này`,
+            ),
           );
         return runSynthesize(
           {
@@ -874,7 +903,12 @@ function buildEngineAdapter(
 
   const provider = getTtsProviderById(engine.providerId);
   if (!provider)
-    throw new Error('所选云端配音服务商不存在，请先在「引擎与模型」页配置');
+    throw new Error(
+      msg(
+        '所选云端配音服务商不存在，请先在「引擎与模型」页配置',
+        'Nhà cung cấp lồng tiếng đám mây đã chọn không tồn tại, vui lòng cấu hình ở trang "Engine và mô hình"',
+      ),
+    );
   const caps = getTtsCapabilities(provider.type);
   const concurrency = Math.max(
     1,
@@ -1101,14 +1135,24 @@ export async function runDubbingBatch(
   opts?: { force?: boolean; staleOnly?: boolean; speakerId?: number },
 ): Promise<BatchResult> {
   if (session.running || session.disposed)
-    throw new Error('该会话已有合成任务进行中或已关闭');
+    throw new Error(
+      msg(
+        '该会话已有合成任务进行中或已关闭',
+        'Phiên này đang có tác vụ tổng hợp chạy hoặc đã đóng',
+      ),
+    );
   assertSpeakerConflictsResolved(session);
   const missingSpeakers = missingDubbingSpeakerVoiceIds(
     session.speakers,
     session.speakerVoiceMap,
   );
   if (missingSpeakers.length) {
-    throw new Error(`还有 ${missingSpeakers.length} 个角色未选择音色`);
+    throw new Error(
+      msg(
+        `还有 ${missingSpeakers.length} 个角色未选择音色`,
+        `Còn ${missingSpeakers.length} nhân vật chưa chọn giọng đọc`,
+      ),
+    );
   }
   syncDubbingVoiceStaleness(session, config);
   const adapter = buildEngineAdapter(config.engine, {
@@ -1281,7 +1325,8 @@ export async function resynthesizeCue(
 ): Promise<SessionCue> {
   assertSpeakerConflictsResolved(session);
   const cue = session.cues.find((c) => c.index === index);
-  if (!cue) throw new Error(`行不存在：${index}`);
+  if (!cue)
+    throw new Error(msg(`行不存在：${index}`, `Dòng không tồn tại: ${index}`));
   if (session.running || session.disposed)
     throw new Error('Dubbing session is busy or unavailable');
   if (
@@ -1290,7 +1335,12 @@ export async function resynthesizeCue(
       ([key, value]) => cue[key] !== value,
     )
   )
-    throw new Error('配音行已在其他窗口变化，请重新缩写');
+    throw new Error(
+      msg(
+        '配音行已在其他窗口变化，请重新缩写',
+        'Dòng lồng tiếng đã thay đổi ở cửa sổ khác, vui lòng rút gọn lại',
+      ),
+    );
   const hadPreviousArtifact = Boolean(cue.wavPath);
 
   const adapter = buildEngineAdapter(config.engine, {
@@ -1377,7 +1427,8 @@ export function setCueVoiceOverride(
     throw new Error('Dubbing session is busy or unavailable');
   if (typeof voiceId !== 'string') throw new Error('Invalid voice ID');
   const cue = session.cues.find((c) => c.index === index);
-  if (!cue) throw new Error(`行不存在：${index}`);
+  if (!cue)
+    throw new Error(msg(`行不存在：${index}`, `Dòng không tồn tại: ${index}`));
   commitSpeakerChange(session, session.lastConfig, () => {
     cue.voiceId = voiceId || undefined;
     if (cue.wavPath) cue.needsUpdate = true;
@@ -1395,10 +1446,14 @@ export function setSpeakerVoiceMapping(
   if (session.running || session.disposed)
     throw new Error('Dubbing session is busy or unavailable');
   if (!session.speakers.some((speaker) => speaker.id === speakerId)) {
-    throw new Error(`角色不存在：${speakerId}`);
+    throw new Error(
+      msg(`角色不存在：${speakerId}`, `Nhân vật không tồn tại: ${speakerId}`),
+    );
   }
   if (typeof voiceId !== 'string' || !voiceId.trim())
-    throw new Error('角色音色不能为空');
+    throw new Error(
+      msg('角色音色不能为空', 'Giọng đọc của nhân vật không được để trống'),
+    );
   commitSpeakerChange(session, config, () => {
     session.speakerVoiceMap = {
       ...session.speakerVoiceMap,
@@ -1540,11 +1595,16 @@ export async function setDubbingMedia(
   const previousCues = session.cues.map((cue) => ({ ...cue }));
   try {
     if (videoPath && !fs.statSync(videoPath).isFile())
-      throw new Error('媒体路径不是文件');
+      throw new Error(
+        msg('媒体路径不是文件', 'Đường dẫn phương tiện không phải là tệp'),
+      );
     const mediaDurationMs = videoPath
       ? await probeMediaDurationMs(videoPath)
       : 0;
-    if (videoPath && mediaDurationMs <= 0) throw new Error('无法读取媒体时长');
+    if (videoPath && mediaDurationMs <= 0)
+      throw new Error(
+        msg('无法读取媒体时长', 'Không thể đọc thời lượng phương tiện'),
+      );
     if (session.disposed || sessions.get(session.id) !== session)
       throw new Error('Dubbing session is unavailable');
     session.videoPath = videoPath;
@@ -1589,7 +1649,13 @@ function assertSpeakerConflictsResolved(session: DubbingSession): void {
       (session.speakerVoiceConflicts[String(speaker.id)]?.length || 0) > 1 ||
       (session.speakerSettingsConflicts?.[String(speaker.id)]?.length || 0) > 1,
   );
-  if (unresolved) throw new Error('请先确认合并角色的音色和语速/音高设置');
+  if (unresolved)
+    throw new Error(
+      msg(
+        '请先确认合并角色的音色和语速/音高设置',
+        'Vui lòng xác nhận giọng đọc và cài đặt tốc độ/cao độ của nhân vật đã gộp trước',
+      ),
+    );
 }
 
 /** Keep the complete WAV, extending only this cue into verified following silence. */
@@ -1603,10 +1669,22 @@ export function borrowFollowingSilence(
   assertSpeakerConflictsResolved(session);
   syncDubbingVoiceStaleness(session, config);
   const cue = session.cues.find((c) => c.index === index);
-  if (!cue) throw new Error(`行不存在：${index}`);
-  if (cue.needsUpdate) throw new Error('请先重新生成已变化的配音');
+  if (!cue)
+    throw new Error(msg(`行不存在：${index}`, `Dòng không tồn tại: ${index}`));
+  if (cue.needsUpdate)
+    throw new Error(
+      msg(
+        '请先重新生成已变化的配音',
+        'Vui lòng tạo lại bản lồng tiếng đã thay đổi trước',
+      ),
+    );
   if (cue.status !== 'overlong' || !cue.wavPath) {
-    throw new Error('该行不是待处理的过长行');
+    throw new Error(
+      msg(
+        '该行不是待处理的过长行',
+        'Dòng này không phải là dòng quá dài đang chờ xử lý',
+      ),
+    );
   }
   const slots = computeSlots(session.cues, {
     mediaDurationMs: session.mediaDurationMs || undefined,
@@ -1616,7 +1694,10 @@ export function borrowFollowingSilence(
   const needed = measured - slot.slotMs;
   if (needed <= 0 || needed > slot.availableGapMs)
     throw new Error(
-      '后续空白不足，无法在不覆盖其他字幕或超出媒体结尾的前提下延长',
+      msg(
+        '后续空白不足，无法在不覆盖其他字幕或超出媒体结尾的前提下延长',
+        'Khoảng trống phía sau không đủ, không thể kéo dài mà không đè lên phụ đề khác hoặc vượt quá cuối phương tiện',
+      ),
     );
   const previous = { ...cue };
   try {
@@ -1687,7 +1768,12 @@ export async function buildDubTrack(
     session.disposed ||
     (session.running && (!opts.signal || session.abort?.signal !== opts.signal))
   )
-    throw new Error('配音会话正在使用中或已关闭，请稍后重试');
+    throw new Error(
+      msg(
+        '配音会话正在使用中或已关闭，请稍后重试',
+        'Phiên lồng tiếng đang được sử dụng hoặc đã đóng, vui lòng thử lại sau',
+      ),
+    );
   const ownsLock = !session.running;
   const controller = ownsLock ? createBatchAbortController() : session.abort!;
   const onAbort = () => controller.abort();
@@ -1749,7 +1835,10 @@ async function buildDubTrackUnlocked(
   if (staleCount > 0) {
     flushDubbingSession(session);
     throw new Error(
-      `还有 ${staleCount} 条配音的语言、文本或合成设置已变化，请先重新生成`,
+      msg(
+        `还有 ${staleCount} 条配音的语言、文本或合成设置已变化，请先重新生成`,
+        `Còn ${staleCount} bản lồng tiếng có ngôn ngữ, văn bản hoặc cài đặt tổng hợp đã thay đổi, vui lòng tạo lại trước`,
+      ),
     );
   }
   const slots = computeSlots(session.cues, {
@@ -1766,11 +1855,19 @@ async function buildDubTrackUnlocked(
   });
   if (unresolved.length)
     throw new Error(
-      `还有 ${unresolved.length} 条配音未生成、失败或超限，请先处理后再导出`,
+      msg(
+        `还有 ${unresolved.length} 条配音未生成、失败或超限，请先处理后再导出`,
+        `Còn ${unresolved.length} bản lồng tiếng chưa tạo, thất bại hoặc vượt giới hạn, vui lòng xử lý trước khi xuất`,
+      ),
     );
   const withWav = session.cues.filter((c) => c.wavPath && c.finalMs);
   if (withWav.length === 0) {
-    throw new Error('没有可导出的配音行，请先开始配音');
+    throw new Error(
+      msg(
+        '没有可导出的配音行，请先开始配音',
+        'Không có dòng lồng tiếng nào để xuất, vui lòng bắt đầu lồng tiếng trước',
+      ),
+    );
   }
   const overflow = opts.overflow ?? 'truncate';
   // Borrowing must not move any later cue, including pre-existing overlapping dialogue.
@@ -1895,13 +1992,28 @@ export async function exportDubbing(
   ) => void,
 ): Promise<ExportResult> {
   if (session.running || session.disposed)
-    throw new Error('合成进行中或会话已关闭，请先等待或取消');
+    throw new Error(
+      msg(
+        '合成进行中或会话已关闭，请先等待或取消',
+        'Đang tổng hợp hoặc phiên đã đóng, vui lòng chờ hoặc hủy trước',
+      ),
+    );
   const withWav = session.cues.filter((c) => c.wavPath && c.finalMs);
   if (withWav.length === 0) {
-    throw new Error('没有可导出的配音行，请先开始配音');
+    throw new Error(
+      msg(
+        '没有可导出的配音行，请先开始配音',
+        'Không có dòng lồng tiếng nào để xuất, vui lòng bắt đầu lồng tiếng trước',
+      ),
+    );
   }
   if (!session.videoPath && config.output !== 'audioOnly') {
-    throw new Error('未提供视频文件，只能导出纯音频');
+    throw new Error(
+      msg(
+        '未提供视频文件，只能导出纯音频',
+        'Chưa cung cấp tệp video, chỉ có thể xuất âm thanh',
+      ),
+    );
   }
 
   session.running = true;
@@ -1983,7 +2095,10 @@ export async function exportDubbing(
           throw new TaskCancelledError();
         }
         if (!composeResult.success || !composeResult.outputPath) {
-          throw new Error(composeResult.error || '合成音轨封装失败');
+          throw new Error(
+            composeResult.error ||
+              msg('合成音轨封装失败', 'Đóng gói track âm thanh ghép thất bại'),
+          );
         }
         if (composeResult.outputPath !== output.staged)
           await fs.promises.copyFile(composeResult.outputPath, output.staged);

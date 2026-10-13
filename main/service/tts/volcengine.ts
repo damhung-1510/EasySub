@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   TtsProvider,
@@ -53,7 +54,12 @@ export async function synthesizeWithVolcengine(
   } catch (e) {
     if (request.signal?.aborted) throw new TaskCancelledError();
     const msg = e instanceof Error ? e.message : String(e);
-    throw new Error(`豆包 TTS: 请求失败（${msg}）。请检查网络连接`);
+    throw new Error(
+      uiMsg(
+        `豆包 TTS: 请求失败（${msg}）。请检查网络连接`,
+        `Doubao TTS: Yêu cầu thất bại (${msg}). Hãy kiểm tra kết nối mạng`,
+      ),
+    );
   }
 
   if (!res.ok) {

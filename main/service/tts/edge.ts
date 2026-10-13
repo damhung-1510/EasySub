@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import fs from 'fs';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import type {
@@ -30,8 +31,11 @@ export function speedToEdgeRate(speed: number | undefined): string {
 }
 
 /** 断供类错误的引导文案（拼在原始错误后，UI 直接展示）。 */
-const EDGE_OUTAGE_HINT =
-  'Edge TTS 免费通道不可用（逆向接口可能已变更或被限制）。该通道不承诺可用性，建议切换本地模型或 OpenAI 兼容服务商。';
+const EDGE_OUTAGE_HINT = () =>
+  uiMsg(
+    'Edge TTS 免费通道不可用（逆向接口可能已变更或被限制）。该通道不承诺可用性，建议切换本地模型或 OpenAI 兼容服务商。',
+    'Kênh miễn phí của Edge TTS không khả dụng (giao diện không chính thức có thể đã thay đổi hoặc bị hạn chế). Kênh này không đảm bảo hoạt động, nên chuyển sang mô hình cục bộ hoặc nhà cung cấp tương thích OpenAI.',
+  );
 
 function toPositiveNumber(value: unknown, fallback: number): number {
   const n = Number(value);
@@ -108,7 +112,10 @@ function synthesizeEdgeMp3(
         finish(() =>
           reject(
             new Error(
-              `Edge TTS 请求超时（${timeoutMs / 1000}s）。${EDGE_OUTAGE_HINT}`,
+              uiMsg(
+                `Edge TTS 请求超时（${timeoutMs / 1000}s）。${EDGE_OUTAGE_HINT()}`,
+                `Edge TTS hết thời gian chờ (${timeoutMs / 1000}s). ${EDGE_OUTAGE_HINT()}`,
+              ),
             ),
           ),
         ),
@@ -148,7 +155,14 @@ function synthesizeEdgeMp3(
         finish(() => {
           const buf = Buffer.concat(chunks);
           if (buf.length === 0) {
-            reject(new Error(`Edge TTS 返回空音频。${EDGE_OUTAGE_HINT}`));
+            reject(
+              new Error(
+                uiMsg(
+                  `Edge TTS 返回空音频。${EDGE_OUTAGE_HINT()}`,
+                  `Edge TTS trả về âm thanh trống. ${EDGE_OUTAGE_HINT()}`,
+                ),
+              ),
+            );
           } else {
             resolve(buf);
           }
@@ -157,7 +171,12 @@ function synthesizeEdgeMp3(
       audioStream.on('error', (e: Error) =>
         finish(() =>
           reject(
-            new Error(`Edge TTS 流错误：${e.message}。${EDGE_OUTAGE_HINT}`),
+            new Error(
+              uiMsg(
+                `Edge TTS 流错误：${e.message}。${EDGE_OUTAGE_HINT()}`,
+                `Edge TTS lỗi luồng dữ liệu: ${e.message}. ${EDGE_OUTAGE_HINT()}`,
+              ),
+            ),
           ),
         ),
       );
@@ -165,7 +184,10 @@ function synthesizeEdgeMp3(
       finish(() =>
         reject(
           new Error(
-            `Edge TTS 连接失败：${e instanceof Error ? e.message : String(e)}。${EDGE_OUTAGE_HINT}`,
+            uiMsg(
+              `Edge TTS 连接失败：${e instanceof Error ? e.message : String(e)}。${EDGE_OUTAGE_HINT()}`,
+              `Edge TTS kết nối thất bại: ${e instanceof Error ? e.message : String(e)}. ${EDGE_OUTAGE_HINT()}`,
+            ),
           ),
         ),
       ),

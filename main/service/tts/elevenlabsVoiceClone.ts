@@ -1,3 +1,4 @@
+import { msg as uiMsg } from '../../helpers/uiMessages';
 import fs from 'fs';
 import path from 'path';
 import type { TtsProvider } from '../../../types/ttsProvider';
@@ -22,7 +23,12 @@ import {
 function apiKeyOf(provider: TtsProvider): string {
   const key = String(provider.apiKey ?? '').trim();
   if (!key)
-    throw new Error('ElevenLabs 克隆: 请先在「配音服务」页配置 API Key');
+    throw new Error(
+      uiMsg(
+        `ElevenLabs 克隆: 请先在「配音服务」页配置 API Key`,
+        `ElevenLabs nhân bản: hãy cấu hình khóa API trong trang Dịch vụ lồng tiếng trước`,
+      ),
+    );
   return key;
 }
 
@@ -77,7 +83,12 @@ export async function addElevenVoice(
   }
   const voiceId = extractElevenVoiceId(await res.json().catch(() => null));
   if (!voiceId) {
-    throw new Error('ElevenLabs 克隆: 响应缺少 voice_id');
+    throw new Error(
+      uiMsg(
+        `ElevenLabs 克隆: 响应缺少 voice_id`,
+        `ElevenLabs nhân bản: phản hồi thiếu voice_id`,
+      ),
+    );
   }
   return voiceId;
 }
@@ -100,7 +111,10 @@ export async function listElevenClonedVoices(
     const detail = await readErrorMessage(res);
     if (res.status === 401 && /missing the permission/i.test(detail)) {
       throw new Error(
-        `ElevenLabs 克隆: 该 Key 缺少 Voices 读取权限（HTTP 401）。请到 dashboard ▸ API Keys 勾选 Voices read 后重试`,
+        uiMsg(
+          `ElevenLabs 克隆: 该 Key 缺少 Voices 读取权限（HTTP 401）。请到 dashboard ▸ API Keys 勾选 Voices read 后重试`,
+          `ElevenLabs nhân bản: khóa này thiếu quyền đọc Voices (HTTP 401). Hãy vào dashboard ▸ API Keys, bật Voices read rồi thử lại`,
+        ),
       );
     }
     throw new Error(elevenCloneErrorHint(res.status, detail));

@@ -3,7 +3,7 @@ import { store } from './store';
 import { getTranscriptionBusyCount } from './taskProcessor';
 import { decideCloseIntent, type CloseAction } from './windowCloseDecision';
 
-type DialogLanguage = 'zh' | 'en';
+type DialogLanguage = 'zh' | 'en' | 'vi';
 
 /** Cmd+Q / 菜单退出 / 我们主动退出时置位：区分「关窗」与「真退出」 */
 let isQuitting = false;
@@ -18,18 +18,28 @@ export function confirmUnsavedWindows(): boolean {
 }
 
 function confirmUnsaved(win: BrowserWindow): boolean {
-  const zh = resolveLanguage() === 'zh';
+  const language = resolveLanguage();
+  const zh = language === 'zh';
+  const vi = language === 'vi';
   return (
     dialog.showMessageBoxSync(win, {
       type: 'warning',
-      title: zh ? '未保存的修改' : 'Unsaved changes',
+      title: zh ? '未保存的修改' : vi ? 'Thay đổi chưa lưu' : 'Unsaved changes',
       message: zh
         ? '当前工作尚未保存。确定离开吗？'
-        : 'Your work has unsaved changes. Leave anyway?',
+        : vi
+          ? 'Công việc hiện tại chưa được lưu. Bạn vẫn muốn rời đi?'
+          : 'Your work has unsaved changes. Leave anyway?',
       detail: zh
         ? '未保存内容已尽可能保留为恢复草稿。'
-        : 'Unsaved work is retained as a recovery draft when storage is available.',
-      buttons: zh ? ['离开', '继续编辑'] : ['Leave', 'Keep editing'],
+        : vi
+          ? 'Nội dung chưa lưu sẽ được giữ lại dưới dạng bản nháp khôi phục nếu có thể.'
+          : 'Unsaved work is retained as a recovery draft when storage is available.',
+      buttons: zh
+        ? ['离开', '继续编辑']
+        : vi
+          ? ['Rời đi', 'Tiếp tục chỉnh sửa']
+          : ['Leave', 'Keep editing'],
       defaultId: 1,
       cancelId: 1,
       noLink: true,
@@ -75,11 +85,30 @@ const LABELS: Record<DialogLanguage, Record<string, string>> = {
     quitConfirm: 'Quit',
     cancel: 'Cancel',
   },
+  vi: {
+    bgTitle: 'Ứng dụng vẫn chạy nền',
+    bgDetailBusy:
+      'Vẫn đang xử lý %d tác vụ ở chế độ nền. Để thoát hoàn toàn, hãy dùng Cmd+Q hoặc nhấp chuột phải vào biểu tượng Dock → Thoát.',
+    bgDetailIdle:
+      'Ứng dụng sẽ tiếp tục chạy nền. Để thoát hoàn toàn, hãy dùng Cmd+Q hoặc nhấp chuột phải vào biểu tượng Dock → Thoát.',
+    bgBackground: 'Chạy nền',
+    bgQuitNow: 'Thoát ngay',
+    dontShowAgain: 'Không hiện lại',
+    quitTitle: 'Vẫn còn tác vụ đang chạy',
+    quitDetailBusy:
+      'Còn %d tác vụ đang xử lý, thoát sẽ làm gián đoạn chúng. Bạn vẫn muốn thoát?',
+    quitConfirm: 'Thoát',
+    cancel: 'Hủy',
+  },
 };
 
 function resolveLanguage(): DialogLanguage {
   const settings = store.get('settings') as { language?: string } | undefined;
-  if (settings?.language === 'zh' || settings?.language === 'en') {
+  if (
+    settings?.language === 'zh' ||
+    settings?.language === 'en' ||
+    settings?.language === 'vi'
+  ) {
     return settings.language;
   }
   return app.getLocale().toLowerCase().startsWith('zh') ? 'zh' : 'en';
