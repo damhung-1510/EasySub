@@ -1,3 +1,4 @@
+import { setMaxListeners } from 'events';
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -114,6 +115,17 @@ import {
   type DubbingSpeaker,
   type DubbingSpeakerVoiceMap,
 } from '../../../types/dubbing';
+
+/**
+ * 批量合成里每个请求都会给同一个 signal 挂监听（AbortSignal.any / 取消联动），
+ * 几十行字幕必然超过 Node 默认的 10 个上限而刷 MaxListenersExceededWarning；
+ * 数量受批量大小约束、请求结束即回收，不是泄漏，取消上限即可。
+ */
+function createBatchAbortController(): AbortController {
+  const controller = new AbortController();
+  setMaxListeners(0, controller.signal);
+  return controller;
+}
 
 // ===========================================================================
 // 配音会话与管线编排：解析字幕 → 逐条合成（本地串行 / 云端并发闸）→ 对齐复测
@@ -1104,7 +1116,7 @@ export async function runDubbingBatch(
     localConcurrency: config.localConcurrency,
   });
   session.running = true;
-  session.abort = new AbortController();
+  session.abort = createBatchAbortController();
   session.lastConfig = config;
   const signal = session.abort.signal;
 
@@ -1300,7 +1312,7 @@ export async function resynthesizeCue(
   );
   const slot = slots.find((s) => s.index === index)!;
 
-  session.abort = new AbortController();
+  session.abort = createBatchAbortController();
   session.running = true;
   cue.status = 'synthesizing';
   try {
@@ -1677,7 +1689,7 @@ export async function buildDubTrack(
   )
     throw new Error('配音会话正在使用中或已关闭，请稍后重试');
   const ownsLock = !session.running;
-  const controller = ownsLock ? new AbortController() : session.abort!;
+  const controller = ownsLock ? createBatchAbortController() : session.abort!;
   const onAbort = () => controller.abort();
   if (ownsLock) {
     session.running = true;
@@ -1893,7 +1905,7 @@ export async function exportDubbing(
   }
 
   session.running = true;
-  session.abort = new AbortController();
+  session.abort = createBatchAbortController();
   session.lastConfig = config;
   const signal = session.abort.signal;
   const emit = (stage: DubbingStage, percent: number) =>
