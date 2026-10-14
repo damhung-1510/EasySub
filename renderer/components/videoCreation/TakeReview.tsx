@@ -119,7 +119,7 @@ export default function TakeReview({
   attempts: {
     id: string;
     state: string;
-    error?: { message: string };
+    error?: { code: string; message: string };
     [key: string]: unknown;
   }[];
   onAction: VideoAction;
@@ -138,7 +138,16 @@ export default function TakeReview({
             <span className="font-mono">{a.id.slice(0, 8)}</span>
             <span>{t(`status.${a.state}`)}</span>
           </div>
-          {a.error && <p role="alert">{a.error.message}</p>}
+          {a.error && (
+            <p role="alert">
+              <span className="font-mono">{a.error.code}</span>:{' '}
+              {a.error.code === 'RATE_LIMIT'
+                ? t('generation.rateLimited')
+                : a.error.code === 'AUTH_FAILED'
+                  ? t('generation.authFailed')
+                  : a.error.message}
+            </p>
+          )}
           {a.state === 'unknown' && (
             <ReconcileForm attemptId={a.id} busy={busy} onAction={onAction} />
           )}

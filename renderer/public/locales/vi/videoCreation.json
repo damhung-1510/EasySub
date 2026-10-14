@@ -126,12 +126,15 @@
     "hint": "Kiểm tra nhận diện, camera, ánh sáng, thời lượng và nối cảnh. Sửa đầu vào đã duyệt khiến footage cũ cần kiểm tra lại."
   },
   "generation": {
+    "rateLimited": "API trả HTTP 429: đã chạm giới hạn tốc độ, quota hoặc ngân sách của dự án. Kiểm tra hạn mức và thanh toán của dịch vụ trước khi thử lại.",
+    "authFailed": "API từ chối key hoặc quyền truy cập. Kiểm tra API key và quyền dùng model trong mục Engine.",
     "hint": "Chọn shot, lấy báo giá và duyệt ngân sách batch trước khi gửi yêu cầu mất phí. Yêu cầu chưa rõ kết quả phải được đối soát.",
     "quote": "Lấy báo giá batch",
     "costTitle": "Duyệt batch này",
     "budget": "Hạn mức chi phí",
     "currency": "Đơn vị tiền",
-    "unknownCost": "Chưa biết giá dịch vụ — cần đặt hạn mức rõ ràng",
+    "unknownCost": "Chưa có báo giá từ dịch vụ. Kiểm tra bảng giá của nhà cung cấp trước khi duyệt.",
+    "budgetHint": "Hạn mức trong app kiểm soát yêu cầu được gửi, nhưng không giới hạn số tiền nhà cung cấp có thể tính sau khi nhận yêu cầu.",
     "consent": "Tôi duyệt chi phí dịch vụ trong hạn mức này",
     "approveCost": "Duyệt chi phí và bắt đầu batch",
     "stale": "Đầu vào đã đổi — cần duyệt lại",

@@ -32,6 +32,9 @@ export default function CostApprovalDialog({
             }).format(toMajor(quote.maxMinor, quote.currency))}{' '}
         · {quote.confidence}
       </p>
+      <p className="text-xs text-muted-foreground">
+        {t('generation.budgetHint')}
+      </p>
       {quote.components.map((c, i) => (
         <p key={i} className="text-xs text-muted-foreground">
           {c.label}

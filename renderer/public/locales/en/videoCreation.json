@@ -126,12 +126,15 @@
     "hint": "Review identity, camera, lighting, timing and continuity. Editing approved inputs marks existing footage for review."
   },
   "generation": {
+    "rateLimited": "The API returned HTTP 429: this project reached a rate, quota, or spending limit. Check the provider's limits and billing before retrying.",
+    "authFailed": "The API rejected the key or access permissions. Check the API key and model access in Engine settings.",
     "hint": "Select shots, request a quote and approve the batch budget before any paid submission. Unknown submissions require reconciliation.",
     "quote": "Get batch quote",
     "costTitle": "Approve this batch",
     "budget": "Spending ceiling",
     "currency": "Currency",
-    "unknownCost": "Provider price is unknown — set an explicit ceiling",
+    "unknownCost": "No provider quote is available. Check the provider's pricing before approval.",
+    "budgetHint": "The app's cap controls submitted requests but cannot limit what the provider charges after accepting them.",
     "consent": "I approve the provider charges within this ceiling",
     "approveCost": "Approve cost and start batch",
     "stale": "Inputs changed — review required",

@@ -110,6 +110,34 @@ test('unknown POST preserves reservation and restart never submits again', async
   }).resume();
   assert.equal(submits, 1);
 });
+test('known HTTP 429 failure exposes quota diagnosis and releases reservation', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'video-jobs-'));
+  const store = createJobStore(root);
+  const ledger = createBudgetLedger(root);
+  const runner = createJobRunner({
+    store,
+    ledger,
+    getAdapter: () =>
+      adapter({
+        submit: async () => {
+          throw new ProviderError('RATE_LIMIT', 'Provider returned HTTP 429');
+        },
+      }),
+    downloadDestination: () => path.join(root, 'clip.mp4'),
+  });
+  const [id] = await runner.start({
+    projectId: 'project',
+    provider: config,
+    approval,
+    requests: [request],
+  });
+  const job = await store.get(id);
+  assert.equal(job.state, 'failed');
+  assert.equal(job.error?.code, 'RATE_LIMIT');
+  assert.match(job.error?.message || '', /HTTP 429/);
+  assert.equal((await ledger.list())[0].state, 'released');
+  await runner.shutdown();
+});
 test('crash submitting state becomes unknown; queued known IDs resume reads', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'video-jobs-'));
   const store = createJobStore(root);

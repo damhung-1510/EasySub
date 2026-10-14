@@ -271,7 +271,12 @@ export function createJobRunner(deps: JobRunnerDeps) {
                 error instanceof ProviderError ? error.code : 'SUBMIT_UNKNOWN',
               message: unknown
                 ? 'Submission may have been accepted; reconcile before retrying'
-                : 'Provider rejected the request',
+                : error instanceof ProviderError && error.code === 'RATE_LIMIT'
+                  ? 'Provider returned HTTP 429: rate limit or quota exhausted'
+                  : error instanceof ProviderError &&
+                      error.code === 'AUTH_FAILED'
+                    ? 'Provider rejected the configured API credentials (HTTP 401/403)'
+                    : 'Provider rejected the request',
             },
           });
           if (!unknown && queued.reservationId)
