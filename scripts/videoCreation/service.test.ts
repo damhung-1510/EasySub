@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createFakeVideoAdapter } from '../../main/videoCreation/providers/fakeVideo';
 
 async function setup() {
   const mod = await import('../../main/videoCreation/service').catch(
@@ -98,6 +99,98 @@ test('service rejects unknown commands and unapproved video production', async (
       }),
       /BRIEF_REQUIRED|SCRIPT_REQUIRED/,
     );
+  } finally {
+    await service.shutdown();
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test('prompt-only video test prepares a reviewable shot and quote without a writing API', async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'video-prompt-shot-'));
+  const fake = createFakeVideoAdapter({
+    fixturePath: path.join(root, 'unused.mp4'),
+  });
+  let llmCalls = 0;
+  const service = await (
+    await import('../../main/videoCreation/service')
+  ).createVideoCreationService({
+    root,
+    llm: () => {
+      llmCalls++;
+      throw new Error('WRITING_API_UNEXPECTED');
+    },
+    listLlmProviders: () => [],
+    providerSettings: {
+      get: async () => ({
+        id: 'fake-video',
+        kind: 'video',
+        revisionId: 'fixture-revision',
+        modelId: 'fixture-model',
+        pricing: { currency: 'USD' },
+      }),
+    },
+    getVideoAdapter: async () => fake,
+  });
+  try {
+    let project = await service.command({
+      command: 'create',
+      payload: { name: 'Video test', kind: 'single' },
+    });
+    const capabilities = await service.command({
+      command: 'videoCapabilities',
+      payload: { videoProviderId: 'fake-video' },
+    });
+    assert.ok(capabilities.durationsMs.includes(4000));
+    const episodeId = project.episodes[0].id;
+    const prepare = (prompt: string, durationMs = 4000) =>
+      service.command({
+        command: 'preparePromptShot',
+        payload: {
+          projectId: project.id,
+          episodeId,
+          expectedVersion: project.version,
+          videoProviderId: 'fake-video',
+          prompt,
+          durationMs,
+          aspectRatio: '16:9',
+          resolution: '720p',
+        },
+      });
+    await assert.rejects(prepare('A sunrise', 1234), /UNSUPPORTED_DURATION/);
+    project = await prepare('A sunrise over the ocean');
+    assert.equal(project.episodes[0].shots.length, 1);
+    assert.equal(project.episodes[0].shots[0].snapshot.approvedAt, undefined);
+    assert.equal(llmCalls, 0);
+    await assert.rejects(
+      service.command({
+        command: 'quote',
+        payload: {
+          projectId: project.id,
+          episodeId,
+          videoProviderId: 'fake-video',
+        },
+      }),
+      /SHOT_APPROVAL_REQUIRED/,
+    );
+    await assert.rejects(prepare('Another prompt'), /EPISODE_ALREADY_PREPARED/);
+    project = await service.command({
+      command: 'approveShots',
+      payload: {
+        projectId: project.id,
+        episodeId,
+        expectedVersion: project.version,
+      },
+    });
+    const quote = await service.command({
+      command: 'quote',
+      payload: {
+        projectId: project.id,
+        episodeId,
+        videoProviderId: 'fake-video',
+      },
+    });
+    assert.equal(quote.shotCount, 1);
+    assert.equal(fake.submitCalls, 0);
   } finally {
     await service.shutdown();
     await fs.rm(root, { recursive: true, force: true });

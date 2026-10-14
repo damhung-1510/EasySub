@@ -40,6 +40,15 @@
     "usedRequests": "Đã dùng {{used}}/{{limit}} lượt gọi",
     "authorizeLlm": "Chọn dịch vụ viết và duyệt ngân sách phiên trước."
   },
+  "quick": {
+    "title": "Thử tạo video từ prompt",
+    "hint": "Tạm ẩn phần viết kịch bản. Nhập prompt để chuẩn bị một shot thử không có nhân vật hoặc lời thoại. Sau đó duyệt shot, lấy báo giá và xác nhận chi phí trước khi gọi API tạo video.",
+    "prompt": "Mô tả video",
+    "resolution": "Độ phân giải",
+    "selectProvider": "Chọn dịch vụ tạo video ở phía trên để xem thời lượng và định dạng được hỗ trợ.",
+    "prepare": "Chuẩn bị shot thử",
+    "prepared": "Shot đã được chuẩn bị. Mở Storyboard để kiểm tra và duyệt shot, rồi sang Tạo cảnh để lấy báo giá."
+  },
   "discovery": {
     "title": "Làm rõ ý tưởng",
     "start": "Bắt đầu làm rõ",
@@ -166,6 +175,7 @@
     "done": "Đã xuất video"
   },
   "tabs": {
+    "quick": "Thử tạo video",
     "idea": "Ý tưởng & làm rõ",
     "brief": "Brief",
     "script": "Kịch bản",

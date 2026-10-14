@@ -47,6 +47,7 @@ const commands = new Set([
   'importReference',
   'approveReference',
   'buildStoryboard',
+  'preparePromptShot',
   'refreshShotBindings',
   'approveShots',
   'quote',
@@ -61,6 +62,7 @@ const commands = new Set([
   'importBackup',
   'assetPreview',
   'listProviders',
+  'videoCapabilities',
   'saveProvider',
   'deleteProvider',
   'testProvider',
@@ -256,6 +258,18 @@ export async function createVideoCreationService(
         );
       case 'listProviders':
         return deps.providerSettings?.list() ?? [];
+      case 'videoCapabilities': {
+        if (!deps.providerSettings || !deps.getVideoAdapter)
+          throw new Error('ENGINE_UNAVAILABLE');
+        const provider = await deps.providerSettings.get(
+          str(p, 'videoProviderId'),
+        );
+        if (provider.kind !== 'video')
+          throw new Error('VIDEO_PROVIDER_REQUIRED');
+        return (
+          await deps.getVideoAdapter(provider.id, provider.revisionId)
+        ).capabilities();
+      }
       case 'saveProvider': {
         if (!deps.providerSettings) throw new Error('ENGINE_UNAVAILABLE');
         return deps.providerSettings.save(
@@ -289,6 +303,139 @@ export async function createVideoCreationService(
                   language: project.episodes[0]?.language,
                 }),
               );
+              return project;
+            },
+          ),
+        );
+      }
+      case 'preparePromptShot': {
+        if (!deps.providerSettings || !deps.getVideoAdapter)
+          throw new Error('ENGINE_UNAVAILABLE');
+        const prompt = z.string().trim().min(1).max(10000).parse(p.prompt);
+        const durationMs = z.number().int().positive().parse(p.durationMs);
+        const aspectRatio = str(p, 'aspectRatio');
+        const resolution = str(p, 'resolution');
+        const provider = await deps.providerSettings.get(
+          str(p, 'videoProviderId'),
+        );
+        if (provider.kind !== 'video')
+          throw new Error('VIDEO_PROVIDER_REQUIRED');
+        const adapter = await deps.getVideoAdapter(
+          provider.id,
+          provider.revisionId,
+        );
+        const capabilities = adapter.capabilities();
+        if (!capabilities.text) throw new Error('TEXT_INPUT_UNSUPPORTED');
+        if (!capabilities.durationsMs.includes(durationMs))
+          throw new Error('UNSUPPORTED_DURATION');
+        if (!capabilities.aspectRatios.includes(aspectRatio))
+          throw new Error('UNSUPPORTED_ASPECT_RATIO');
+        if (!capabilities.resolutions.includes(resolution))
+          throw new Error('UNSUPPORTED_RESOLUTION');
+        return emit(
+          await store.update(
+            str(p, 'projectId'),
+            num(p, 'expectedVersion'),
+            (project) => {
+              const episode = requireEpisode(
+                project.episodes.find((e) => e.id === p.episodeId),
+              );
+              if (episode.brief || episode.script || episode.shots.length)
+                throw new Error('EPISODE_ALREADY_PREPARED');
+              const now = new Date().toISOString();
+              const sceneId = randomUUID();
+              const location = {
+                id: randomUUID(),
+                revisionId: randomUUID(),
+                createdAt: now,
+                approvedAt: now,
+                name: 'Prompt scene',
+                description: 'Scene as described in the prompt',
+              };
+              const style = {
+                id: randomUUID(),
+                revisionId: randomUUID(),
+                createdAt: now,
+                approvedAt: now,
+                name: episode.style,
+                description: episode.style,
+              };
+              const brief = {
+                revisionId: randomUUID(),
+                createdAt: now,
+                approvedAt: now,
+                objective: prompt,
+                audience: '',
+                premise: prompt,
+                conflict: '',
+                characters: '',
+                relationships: '',
+                world: '',
+                locations: location.description,
+                language: episode.language,
+                dialogueTone: '',
+                ending: '',
+                style: episode.style,
+                targetDurationMs: durationMs,
+                audioMode: 'narration' as const,
+                assumptions: [],
+                unresolvedIssues: [],
+              };
+              const script = {
+                id: randomUUID(),
+                revisionId: randomUUID(),
+                createdAt: now,
+                approvedAt: now,
+                scenes: [
+                  {
+                    id: sceneId,
+                    location: location.name,
+                    locationId: location.id,
+                    time: '',
+                    characterIds: [],
+                    action: prompt,
+                    dialogues: [],
+                    narration: '',
+                    sound: '',
+                    durationMs,
+                  },
+                ],
+              };
+              const snapshot = {
+                id: randomUUID(),
+                revisionId: randomUUID(),
+                createdAt: now,
+                briefRevisionId: brief.revisionId,
+                scriptRevisionId: script.revisionId,
+                sceneId,
+                characterBindings: [],
+                locationRevisionId: location.revisionId,
+                styleRevisionId: style.revisionId,
+                prompt,
+                durationMs,
+                audioMode: 'narration' as const,
+                aspectRatio,
+                resolution,
+                dialogues: [],
+                narration: '',
+              };
+              episode.idea = prompt;
+              episode.targetDurationMs = durationMs;
+              episode.aspectRatio = aspectRatio;
+              episode.audioMode = 'narration';
+              episode.brief = brief;
+              episode.script = script;
+              episode.status = 'approved';
+              episode.shots.push({
+                id: snapshot.id,
+                order: 1,
+                snapshot,
+                snapshots: [clone(snapshot)],
+                attempts: [],
+              });
+              project.confirmedBriefRevisions.push(clone(brief));
+              project.locations.push(location);
+              project.styles.push(style);
               return project;
             },
           ),

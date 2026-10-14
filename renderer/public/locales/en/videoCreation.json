@@ -40,6 +40,15 @@
     "usedRequests": "{{used}}/{{limit}} requests used",
     "authorizeLlm": "Select a writing provider and authorize its session budget first."
   },
+  "quick": {
+    "title": "Test video generation from a prompt",
+    "hint": "Script writing is temporarily hidden. Enter a prompt to prepare one test shot without characters or dialogue. Review and approve the shot, then request a quote and approve the cost before calling the video API.",
+    "prompt": "Video description",
+    "resolution": "Resolution",
+    "selectProvider": "Select a video provider above to see supported durations and formats.",
+    "prepare": "Prepare test shot",
+    "prepared": "The shot is ready. Review and approve it in Storyboard, then request a quote under Generation."
+  },
   "discovery": {
     "title": "Clarify the idea",
     "start": "Start clarification",
@@ -166,6 +175,7 @@
     "done": "Video exported"
   },
   "tabs": {
+    "quick": "Test video",
     "idea": "Idea & clarification",
     "brief": "Brief",
     "script": "Script",

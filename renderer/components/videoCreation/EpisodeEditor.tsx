@@ -14,8 +14,11 @@ import GenerationPanel from './GenerationPanel';
 import ExportPanel from './ExportPanel';
 import BriefEditor from './BriefEditor';
 import EpisodeSettings from './EpisodeSettings';
+import PromptShotPanel from './PromptShotPanel';
 import { videoCreationClient } from '../../lib/videoCreationClient';
+const SCRIPT_WRITING_ENABLED = false;
 const tabs = [
+  'quick',
   'idea',
   'brief',
   'script',
@@ -42,7 +45,7 @@ export default function EpisodeEditor({
   busy: boolean;
 }) {
   const { t } = useTranslation('videoCreation');
-  const [tab, setTab] = useState<(typeof tabs)[number]>('idea');
+  const [tab, setTab] = useState<(typeof tabs)[number]>('quick');
   const [idea, setIdea] = useState(episode.idea);
   const [videoProviderId, setVideoProviderId] = useState('');
   const [imageProviderId, setImageProviderId] = useState('');
@@ -182,7 +185,8 @@ export default function EpisodeEditor({
     <div className="space-y-4">
       <section className="space-y-3 rounded-lg border p-3">
         <div className="grid gap-3 md:grid-cols-3">
-          {selector('llm', llmProviderId, setLlmProviderId, llmProviders)}
+          {SCRIPT_WRITING_ENABLED &&
+            selector('llm', llmProviderId, setLlmProviderId, llmProviders)}
           {selector(
             'video',
             videoProviderId,
@@ -197,12 +201,14 @@ export default function EpisodeEditor({
           )}
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <Link
-            className="text-primary underline"
-            href={`/${locale}/translation`}
-          >
-            {t('providers.configureLlm')}
-          </Link>
+          {SCRIPT_WRITING_ENABLED && (
+            <Link
+              className="text-primary underline"
+              href={`/${locale}/translation`}
+            >
+              {t('providers.configureLlm')}
+            </Link>
+          )}
           <Link
             className="text-primary underline"
             href={`/${locale}/engines?view=video:overview`}
@@ -210,7 +216,7 @@ export default function EpisodeEditor({
             {t('providers.configureMedia')}
           </Link>
         </div>
-        {llmProviders.length === 0 && (
+        {SCRIPT_WRITING_ENABLED && llmProviders.length === 0 && (
           <p className="text-sm text-muted-foreground">
             {t('providers.emptyLlm')}{' '}
             <a
@@ -223,66 +229,74 @@ export default function EpisodeEditor({
             </a>
           </p>
         )}
-        <div className="flex flex-wrap items-center gap-3 text-xs">
-          <label className="flex gap-2">
-            <input
-              type="checkbox"
-              checked={llmConsent}
-              onChange={(e) => setLlmConsent(e.target.checked)}
-            />
-            {t('providers.llmConsent')}
-          </label>
-          <label>
-            {t('providers.llmBudget')}
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={llmCap}
-              onChange={(e) => setLlmCap(e.target.value)}
-              className="ml-2 w-20 rounded border bg-background p-1"
-            />
-          </label>
-          <label>
-            {t('providers.maxRequests')}
-            <input
-              type="number"
-              min="1"
-              max="12"
-              value={maxRequests}
-              onChange={(e) => setMaxRequests(e.target.value)}
-              className="ml-2 w-16 rounded border bg-background p-1"
-            />
-          </label>
-          <label className="flex gap-2">
-            <input
-              type="checkbox"
-              checked={newCreativeBudget}
-              onChange={(event) => setNewCreativeBudget(event.target.checked)}
-            />
-            {t('providers.newCreativeBudget')}
-          </label>
-          {creativeUsage && (
-            <span>
-              {t('providers.usedRequests', {
-                used: creativeUsage.requests,
-                limit: creativeUsage.maxRequests,
-              })}
-            </span>
-          )}
-        </div>
+        {SCRIPT_WRITING_ENABLED && (
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            <label className="flex gap-2">
+              <input
+                type="checkbox"
+                checked={llmConsent}
+                onChange={(e) => setLlmConsent(e.target.checked)}
+              />
+              {t('providers.llmConsent')}
+            </label>
+            <label>
+              {t('providers.llmBudget')}
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={llmCap}
+                onChange={(e) => setLlmCap(e.target.value)}
+                className="ml-2 w-20 rounded border bg-background p-1"
+              />
+            </label>
+            <label>
+              {t('providers.maxRequests')}
+              <input
+                type="number"
+                min="1"
+                max="12"
+                value={maxRequests}
+                onChange={(e) => setMaxRequests(e.target.value)}
+                className="ml-2 w-16 rounded border bg-background p-1"
+              />
+            </label>
+            <label className="flex gap-2">
+              <input
+                type="checkbox"
+                checked={newCreativeBudget}
+                onChange={(event) => setNewCreativeBudget(event.target.checked)}
+              />
+              {t('providers.newCreativeBudget')}
+            </label>
+            {creativeUsage && (
+              <span>
+                {t('providers.usedRequests', {
+                  used: creativeUsage.requests,
+                  limit: creativeUsage.maxRequests,
+                })}
+              </span>
+            )}
+          </div>
+        )}
       </section>
       <nav aria-label={t('workflow')} className="flex flex-wrap gap-1">
-        {tabs.map((id) => (
-          <Button
-            key={id}
-            size="sm"
-            variant={tab === id ? 'default' : 'outline'}
-            onClick={() => setTab(id)}
-          >
-            {t(`tabs.${id}`)}
-          </Button>
-        ))}
+        {tabs
+          .filter(
+            (id) =>
+              SCRIPT_WRITING_ENABLED ||
+              !['idea', 'brief', 'script'].includes(id),
+          )
+          .map((id) => (
+            <Button
+              key={id}
+              size="sm"
+              variant={tab === id ? 'default' : 'outline'}
+              onClick={() => setTab(id)}
+            >
+              {t(`tabs.${id}`)}
+            </Button>
+          ))}
       </nav>
       {error && (
         <p
@@ -297,7 +311,16 @@ export default function EpisodeEditor({
           {t('working')}
         </p>
       )}
-      {tab === 'idea' && (
+      {tab === 'quick' && (
+        <PromptShotPanel
+          episode={episode}
+          provider={videoProvider}
+          busy={busy}
+          onAction={action}
+          onPrepared={() => setTab('storyboard')}
+        />
+      )}
+      {SCRIPT_WRITING_ENABLED && tab === 'idea' && (
         <section className="space-y-3">
           <EpisodeSettings episode={episode} onAction={fire} busy={busy} />
           <label className="block text-sm">
@@ -340,7 +363,8 @@ export default function EpisodeEditor({
           />
         </section>
       )}
-      {tab === 'brief' &&
+      {SCRIPT_WRITING_ENABLED &&
+        tab === 'brief' &&
         (brief ? (
           <BriefEditor
             key={brief.revisionId}
@@ -351,7 +375,7 @@ export default function EpisodeEditor({
         ) : (
           <p>{t('brief.empty')}</p>
         ))}
-      {tab === 'script' && (
+      {SCRIPT_WRITING_ENABLED && tab === 'script' && (
         <section className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -412,6 +436,7 @@ export default function EpisodeEditor({
           imageProvider={imageProvider}
           busy={busy}
           onAction={fire}
+          showExtract={SCRIPT_WRITING_ENABLED}
         />
       )}{' '}
       {tab === 'storyboard' && (
@@ -424,6 +449,7 @@ export default function EpisodeEditor({
             !!episode.script?.approvedAt &&
             castReady
           }
+          showBuild={SCRIPT_WRITING_ENABLED}
           onAction={fire}
         />
       )}{' '}

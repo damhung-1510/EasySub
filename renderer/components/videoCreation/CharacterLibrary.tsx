@@ -204,23 +204,27 @@ export default function CharacterLibrary({
   imageProvider,
   onAction,
   busy,
+  showExtract = true,
 }: {
   project: VideoProject;
   imageProvider?: ProviderPublicConfig;
   onAction: VideoAction;
   busy: boolean;
+  showExtract?: boolean;
 }) {
   const { t } = useTranslation('videoCreation');
   const { engineOptions } = useTtsEngineOptions();
   return (
     <section className="space-y-3">
       <p className="text-sm text-muted-foreground">{t('cast.sharedHint')}</p>
-      <Button
-        disabled={busy}
-        onClick={() => void onAction('extractEntities', {})}
-      >
-        {t('cast.extract')}
-      </Button>
+      {showExtract && (
+        <Button
+          disabled={busy}
+          onClick={() => void onAction('extractEntities', {})}
+        >
+          {t('cast.extract')}
+        </Button>
+      )}
       <div className="grid gap-3 lg:grid-cols-2">
         {project.characters.map((c) => (
           <CharacterCard

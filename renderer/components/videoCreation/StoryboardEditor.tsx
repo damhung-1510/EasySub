@@ -94,22 +94,26 @@ export default function StoryboardEditor({
   onAction,
   busy,
   canBuild,
+  showBuild = true,
 }: {
   episode: Episode;
   onAction: VideoAction;
   busy: boolean;
   canBuild: boolean;
+  showBuild?: boolean;
 }) {
   const { t } = useTranslation('videoCreation');
   return (
     <section className="space-y-3">
       <div className="flex gap-2">
-        <Button
-          disabled={busy || !canBuild}
-          onClick={() => void onAction('buildStoryboard', {})}
-        >
-          {t('storyboard.build')}
-        </Button>
+        {showBuild && (
+          <Button
+            disabled={busy || !canBuild}
+            onClick={() => void onAction('buildStoryboard', {})}
+          >
+            {t('storyboard.build')}
+          </Button>
+        )}
         <Button
           variant="outline"
           disabled={busy || !episode.shots.length}
