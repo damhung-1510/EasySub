@@ -5,6 +5,7 @@ import VideoProviderForm from './VideoProviderForm';
 import type { VideoProviderHook } from '../../../../hooks/useVideoProviders';
 import { videoProviderDraft } from '../../../../lib/videoProviderDraft';
 import { videoCreationClient } from '../../../../lib/videoCreationClient';
+import type { ProviderConnectionResult } from '../../../../../types/videoProvider';
 export default function VideoProviderPanel({
   selectedProviderId,
   onSelect,
@@ -19,7 +20,9 @@ export default function VideoProviderPanel({
   const { t } = useTranslation('resources');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
-  const [testResult, setTestResult] = useState('');
+  const [testResult, setTestResult] = useState<ProviderConnectionResult | null>(
+    null,
+  );
   const [importText, setImportText] = useState('');
   const [exportText, setExportText] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -147,7 +150,7 @@ export default function VideoProviderPanel({
             onClick={() => {
               setCreating(false);
               onSelect();
-              setTestResult('');
+              setTestResult(null);
               setConfirmDelete(false);
             }}
           >
@@ -172,11 +175,12 @@ export default function VideoProviderPanel({
                 variant="outline"
                 onClick={() =>
                   void action(async () => {
+                    setTestResult(null);
                     const result = await videoCreationClient.call(
                       'testProvider',
                       { providerId: provider.id },
                     );
-                    setTestResult(JSON.stringify(result));
+                    setTestResult(result as ProviderConnectionResult);
                   })
                 }
               >
@@ -217,8 +221,11 @@ export default function VideoProviderPanel({
             </div>
           )}
           {testResult && (
-            <p role="status" className="text-sm">
-              {testResult}
+            <p
+              role="status"
+              className={`text-sm ${testResult.status === 'failed' ? 'text-destructive' : 'text-muted-foreground'}`}
+            >
+              {t(`videoProviders.connection.${testResult.code}`)}
             </p>
           )}
           {confirmDelete && provider && (

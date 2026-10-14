@@ -600,6 +600,17 @@
     "unverified": "Chưa kiểm chứng",
     "back": "Về tổng quan",
     "test": "Kiểm tra kết nối chỉ đọc",
+    "connection": {
+      "READ_ONLY_CONNECTION_OK": "API key và endpoint phản hồi thành công. Chưa kiểm tra quyền truy cập model hoặc khả năng tạo video/ảnh; bước đó chỉ thực hiện khi bạn duyệt chi phí.",
+      "CREDENTIAL_REQUIRED": "Chưa có API key. Hãy nhập và lưu key trước khi kiểm tra.",
+      "NO_SAFE_READ_ONLY_CHECK": "API tùy chỉnh chưa có cách kiểm tra chỉ đọc. Kết nối sẽ được xác nhận khi bạn chạy tác vụ đã duyệt.",
+      "INVALID_GEMINI_BASE_URL": "Base URL Gemini phải là URL gốc hoặc kết thúc bằng /v1beta. Hãy sửa và lưu lại dịch vụ trước khi kiểm tra.",
+      "AUTH_FAILED": "Dịch vụ từ chối API key (HTTP 401/403). Hãy kiểm tra key, quyền truy cập và endpoint.",
+      "ENDPOINT_NOT_FOUND": "Không tìm thấy API endpoint (HTTP 404). Hãy kiểm tra Base URL.",
+      "RATE_LIMIT": "Dịch vụ đang giới hạn yêu cầu. Hãy thử lại sau.",
+      "UNEXPECTED_RESPONSE": "Endpoint phản hồi nhưng dữ liệu không đúng định dạng mong đợi; chưa thể xác nhận kết nối.",
+      "CONNECTION_UNAVAILABLE": "Chưa thể xác nhận kết nối. Hãy kiểm tra mạng, proxy và Base URL rồi thử lại."
+    },
     "clone": "Nhân bản không kèm credential",
     "remove": "Xóa dịch vụ",
     "removeHint": "Dịch vụ được tác vụ đang chạy sử dụng sẽ được lưu trữ để tiếp tục đối soát và tải kết quả.",

@@ -101,7 +101,12 @@ export function createTransport(
   httpClient: HttpClient = nodeHttpClient,
 ): ProviderTransport {
   const base = validateNetworkUrl(config.baseUrl, config.allowLocalHttp);
-  const rootUrl = base.toString().replace(/\/$/, '') + '/';
+  const gemini =
+    config.protocol === 'veo-gemini' || config.protocol === 'gemini-image';
+  const rootUrl =
+    gemini && base.pathname === '/'
+      ? base.origin + '/v1beta/'
+      : base.toString().replace(/\/$/, '') + '/';
   const allowed = new Set([base.origin, ...(config.allowedAssetOrigins || [])]);
   async function run(
     urlText: string,

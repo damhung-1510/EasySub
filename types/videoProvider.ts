@@ -84,6 +84,20 @@ export interface ProviderPublicConfig extends ProviderConfig {
   hasCredential: boolean;
   credentialPersistence: 'encrypted' | 'session' | 'none';
 }
+export interface ProviderConnectionResult {
+  providerId: string;
+  status: 'ok' | 'failed' | 'inconclusive';
+  code:
+    | 'READ_ONLY_CONNECTION_OK'
+    | 'CREDENTIAL_REQUIRED'
+    | 'NO_SAFE_READ_ONLY_CHECK'
+    | 'INVALID_GEMINI_BASE_URL'
+    | 'AUTH_FAILED'
+    | 'ENDPOINT_NOT_FOUND'
+    | 'RATE_LIMIT'
+    | 'UNEXPECTED_RESPONSE'
+    | 'CONNECTION_UNAVAILABLE';
+}
 export interface ReferenceInput {
   assetId: string;
   mimeType: string;

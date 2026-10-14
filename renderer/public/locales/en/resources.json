@@ -600,6 +600,17 @@
     "unverified": "Unverified",
     "back": "Back to overview",
     "test": "Read-only connection test",
+    "connection": {
+      "READ_ONLY_CONNECTION_OK": "The API key and endpoint responded successfully. Model access and video/image generation remain untested; generation only runs after cost approval.",
+      "CREDENTIAL_REQUIRED": "No API key is stored. Enter and save a key before testing.",
+      "NO_SAFE_READ_ONLY_CHECK": "This custom API has no read-only test. Its connection will be confirmed when you run an approved job.",
+      "INVALID_GEMINI_BASE_URL": "The Gemini Base URL must be the root URL or end in /v1beta. Update and save the provider before testing.",
+      "AUTH_FAILED": "The provider rejected the API key (HTTP 401/403). Check the key, permissions and endpoint.",
+      "ENDPOINT_NOT_FOUND": "The API endpoint was not found (HTTP 404). Check the Base URL.",
+      "RATE_LIMIT": "The provider is rate limiting requests. Try again later.",
+      "UNEXPECTED_RESPONSE": "The endpoint responded with unexpected data; the connection could not be confirmed.",
+      "CONNECTION_UNAVAILABLE": "The connection could not be confirmed. Check the network, proxy and Base URL, then retry."
+    },
     "clone": "Clone without credential",
     "remove": "Remove provider",
     "removeHint": "Providers pinned by active jobs are archived to preserve polling and downloads.",

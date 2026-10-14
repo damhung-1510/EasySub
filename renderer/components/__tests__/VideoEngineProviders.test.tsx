@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import VideoProviderForm from '../resources/engines/panels/VideoProviderForm';
+import VideoProviderPanel from '../resources/engines/panels/VideoProviderPanel';
 import { isEngineViewId } from '../../lib/engineViews';
 jest.mock('next-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -137,4 +138,25 @@ test('API key guidance follows built-in providers and is hidden for custom APIs'
 
   fireEvent.change(protocol, { target: { value: 'custom-async-json' } });
   expect(screen.queryByRole('link')).toBeNull();
+});
+test('connection check displays a clear read-only result instead of raw JSON', async () => {
+  window.ipc = {
+    invoke: jest.fn().mockResolvedValue({
+      providerId: 'p1',
+      status: 'ok',
+      code: 'READ_ONLY_CONNECTION_OK',
+    }),
+  } as any;
+  render(
+    <VideoProviderPanel
+      selectedProviderId="p1"
+      onSelect={jest.fn()}
+      api={{ providers: [provider] } as any}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'videoProviders.test' }));
+  expect(await screen.findByRole('status')).toHaveTextContent(
+    'videoProviders.connection.READ_ONLY_CONNECTION_OK',
+  );
+  expect(screen.queryByText(/\{"providerId"/)).toBeNull();
 });

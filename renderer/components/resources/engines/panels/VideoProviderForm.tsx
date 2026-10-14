@@ -30,7 +30,7 @@ export default function VideoProviderForm({
         name: '',
         kind: imagesOnly ? 'image' : 'video',
         protocol: imagesOnly ? 'gemini-image' : 'veo-gemini',
-        baseUrl: 'https://generativelanguage.googleapis.com',
+        baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         modelId: imagesOnly
           ? 'gemini-2.5-flash-image'
           : 'veo-3.1-generate-preview',
@@ -163,7 +163,7 @@ export default function VideoProviderForm({
       protocol === 'veo-gemini'
         ? {
             kind: 'video',
-            baseUrl: 'https://generativelanguage.googleapis.com',
+            baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
             modelId: 'veo-3.1-generate-preview',
             authMode: 'header',
             authHeader: 'x-goog-api-key',
@@ -178,7 +178,7 @@ export default function VideoProviderForm({
           : protocol === 'gemini-image'
             ? {
                 kind: 'image',
-                baseUrl: 'https://generativelanguage.googleapis.com',
+                baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
                 modelId: 'gemini-2.5-flash-image',
                 authMode: 'header',
                 authHeader: 'x-goog-api-key',

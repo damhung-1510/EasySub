@@ -26,6 +26,7 @@ import type {
   VideoRequest,
   CostApproval,
 } from '../../types/videoProvider';
+import { testProviderConnection } from './providerConnectionTest';
 
 const commands = new Set([
   'list',
@@ -265,12 +266,11 @@ export async function createVideoCreationService(
       case 'deleteProvider':
         return deps.providerSettings.delete(str(p, 'providerId'));
       case 'testProvider': {
+        if (!deps.providerSettings) throw new Error('ENGINE_UNAVAILABLE');
         const config = await deps.providerSettings.get(str(p, 'providerId'));
-        return {
-          verified: false,
-          message: 'CONNECTION_TEST_REQUIRES_APPROVED_GENERATION',
-          providerId: config.id,
-        };
+        return testProviderConnection(config, () =>
+          deps.providerSettings.getSecret(config.id, config.revisionId),
+        );
       }
       case 'addEpisode': {
         return emit(

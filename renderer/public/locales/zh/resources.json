@@ -600,6 +600,17 @@
     "unverified": "未验证",
     "back": "返回总览",
     "test": "只读连接测试",
+    "connection": {
+      "READ_ONLY_CONNECTION_OK": "API 密钥和端点已成功响应。尚未验证模型权限或视频/图片生成能力；生成任务仅在费用获批后运行。",
+      "CREDENTIAL_REQUIRED": "尚未保存 API 密钥。请先输入并保存密钥。",
+      "NO_SAFE_READ_ONLY_CHECK": "此自定义 API 没有只读测试方式。连接将在运行已批准的任务时确认。",
+      "INVALID_GEMINI_BASE_URL": "Gemini 基础 URL 必须是根地址或以 /v1beta 结尾。请修改并保存服务后再测试。",
+      "AUTH_FAILED": "服务拒绝了 API 密钥（HTTP 401/403）。请检查密钥、权限和端点。",
+      "ENDPOINT_NOT_FOUND": "未找到 API 端点（HTTP 404）。请检查基础 URL。",
+      "RATE_LIMIT": "服务正在限制请求频率，请稍后重试。",
+      "UNEXPECTED_RESPONSE": "端点返回了非预期数据，暂时无法确认连接。",
+      "CONNECTION_UNAVAILABLE": "暂时无法确认连接。请检查网络、代理和基础 URL 后重试。"
+    },
     "clone": "复制（不含凭据）",
     "remove": "移除服务",
     "removeHint": "正在运行任务所使用的服务会归档，以保留状态查询和下载能力。",
