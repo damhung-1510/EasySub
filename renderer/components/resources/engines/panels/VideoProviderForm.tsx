@@ -9,7 +9,59 @@ import type {
   ProviderDraft,
   ProviderPublicConfig,
   ProviderProtocol,
+  VideoCapabilities,
 } from '../../../../../types/videoProvider';
+import type { ProviderProtocolProfile } from '../../../../../types/videoProviderProfile';
+
+const defaultCustomProfile: ProviderProtocolProfile = {
+  id: 'custom-async-video',
+  revision: 1,
+  submit: {
+    method: 'POST',
+    path: 'tasks',
+    body: {
+      model: '{{model}}',
+      prompt: '{{prompt}}',
+      duration: '{{durationSeconds}}',
+    },
+  },
+  poll: { method: 'GET', path: 'tasks/{{remoteJobId}}' },
+  mapping: {
+    jobId: 'id',
+    status: 'status',
+    resultUrl: 'output.url',
+    states: {
+      queued: 'queued',
+      running: 'running',
+      completed: 'completed',
+      failed: 'failed',
+    },
+  },
+};
+const defaultCustomCapabilities: VideoCapabilities = {
+  text: true,
+  image: false,
+  references: false,
+  maxReferences: 0,
+  durationsMs: [5000],
+  aspectRatios: ['16:9'],
+  resolutions: ['720p'],
+  audio: false,
+  seed: false,
+  cancel: false,
+  concurrency: 1,
+};
+const csv = (value: string) =>
+  value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+const bodyText = (profile?: ProviderProtocolProfile) =>
+  JSON.stringify(
+    profile?.submit.body ?? defaultCustomProfile.submit.body,
+    null,
+    2,
+  );
 export type ProviderSaveDraft = ProviderDraft & { secret?: string };
 export default function VideoProviderForm({
   provider,
@@ -41,17 +93,22 @@ export default function VideoProviderForm({
       };
   const [draft, setDraft] = useState<ProviderDraft>(initial);
   const [secret, setSecret] = useState('');
-  const initialAdvanced = JSON.stringify(
-    {
-      capabilities: initial.capabilities,
-      pricing: initial.pricing,
-      profile: initial.profile,
-      parameters: initial.parameters,
-    },
-    null,
-    2,
-  );
-  const [advanced, setAdvanced] = useState(initialAdvanced);
+  const initialCustomBody = bodyText(initial.profile);
+  const initialDurations = (
+    initial.capabilities?.durationsMs ?? defaultCustomCapabilities.durationsMs
+  )
+    .map((value) => value / 1000)
+    .join(', ');
+  const initialRatios = (
+    initial.capabilities?.aspectRatios ?? defaultCustomCapabilities.aspectRatios
+  ).join(', ');
+  const initialResolutions = (
+    initial.capabilities?.resolutions ?? defaultCustomCapabilities.resolutions
+  ).join(', ');
+  const [customBody, setCustomBody] = useState(initialCustomBody);
+  const [durations, setDurations] = useState(initialDurations);
+  const [ratios, setRatios] = useState(initialRatios);
+  const [resolutions, setResolutions] = useState(initialResolutions);
   const [showSecret, setShowSecret] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -70,11 +127,29 @@ export default function VideoProviderForm({
     !!draft.baseUrl.trim() &&
     !!draft.modelId.trim() &&
     (draft.authMode !== 'header' || !!draft.authHeader?.trim()) &&
-    (!secretRequired || !!secret.trim());
+    (!secretRequired || !!secret.trim()) &&
+    (draft.protocol !== 'custom-async-json' ||
+      (!!draft.profile?.submit.path.trim() &&
+        !!draft.profile?.poll.path.trim() &&
+        !!draft.profile?.mapping.jobId.trim() &&
+        !!draft.profile?.mapping.status.trim() &&
+        !!draft.profile?.mapping.resultUrl.trim() &&
+        Object.values(draft.profile?.mapping.states ?? {}).includes(
+          'completed',
+        ) &&
+        Object.values(draft.profile?.mapping.states ?? {}).includes('failed') &&
+        !!customBody.trim() &&
+        !!durations.trim() &&
+        !!ratios.trim() &&
+        !!resolutions.trim()));
   const dirty =
     JSON.stringify(draft) !== JSON.stringify(initial) ||
     !!secret ||
-    advanced !== initialAdvanced;
+    (draft.protocol === 'custom-async-json' &&
+      (customBody !== initialCustomBody ||
+        durations !== initialDurations ||
+        ratios !== initialRatios ||
+        resolutions !== initialResolutions));
   const keyGuide =
     draft.protocol === 'veo-gemini' || draft.protocol === 'gemini-image'
       ? {
@@ -100,12 +175,38 @@ export default function VideoProviderForm({
     setError('');
     try {
       if (!requiredComplete) throw new Error(t('videoProviders.requiredHint'));
-      const extra = JSON.parse(advanced);
-      for (const k of Object.keys(extra))
-        if (!['capabilities', 'pricing', 'profile', 'parameters'].includes(k))
-          throw new Error('INVALID_PROVIDER_OPTIONS');
+      let payload = draft;
+      if (draft.protocol === 'custom-async-json') {
+        let body: unknown;
+        try {
+          body = JSON.parse(customBody);
+        } catch {
+          throw new Error(t('videoProviders.custom.invalidBody'));
+        }
+        if (!body || typeof body !== 'object' || Array.isArray(body))
+          throw new Error(t('videoProviders.custom.invalidBody'));
+        const seconds = csv(durations).map(Number);
+        if (seconds.some((value) => !Number.isInteger(value) || value <= 0))
+          throw new Error(t('videoProviders.custom.invalidDurations'));
+        payload = {
+          ...draft,
+          profile: {
+            ...draft.profile!,
+            submit: {
+              ...draft.profile!.submit,
+              body: body as ProviderProtocolProfile['submit']['body'],
+            },
+          },
+          capabilities: {
+            ...draft.capabilities!,
+            durationsMs: seconds.map((value) => value * 1000),
+            aspectRatios: csv(ratios),
+            resolutions: csv(resolutions),
+          },
+        };
+      }
       await onSave(
-        { ...draft, ...extra, ...(secret ? { secret } : {}) },
+        { ...payload, ...(secret ? { secret } : {}) },
         provider?.version ?? 0,
       );
       setSecret('');
@@ -124,7 +225,10 @@ export default function VideoProviderForm({
     onDiscard: () => {
       setDraft(initial);
       setSecret('');
-      setAdvanced(initialAdvanced);
+      setCustomBody(initialCustomBody);
+      setDurations(initialDurations);
+      setRatios(initialRatios);
+      setResolutions(initialResolutions);
     },
   });
   const input = (
@@ -158,6 +262,41 @@ export default function VideoProviderForm({
       )}
     </label>
   );
+  const changeProfile = (
+    update: (profile: ProviderProtocolProfile) => ProviderProtocolProfile,
+  ) => {
+    setDraft((current) => ({
+      ...current,
+      profile: update(current.profile ?? defaultCustomProfile),
+    }));
+    setSaved(false);
+  };
+  const changeCapabilities = (
+    update: (capabilities: VideoCapabilities) => VideoCapabilities,
+  ) => {
+    setDraft((current) => ({
+      ...current,
+      capabilities: update(current.capabilities ?? defaultCustomCapabilities),
+    }));
+    setSaved(false);
+  };
+  const statusCode = (state: 'queued' | 'running' | 'completed' | 'failed') =>
+    Object.entries(
+      draft.profile?.mapping.states ?? defaultCustomProfile.mapping.states,
+    ).find(([, value]) => value === state)?.[0] ?? '';
+  const changeStatusCode = (
+    state: 'queued' | 'running' | 'completed' | 'failed',
+    value: string,
+  ) =>
+    changeProfile((profile) => {
+      const states = { ...profile.mapping.states };
+      const previous = Object.entries(states).find(
+        ([, item]) => item === state,
+      )?.[0];
+      if (previous) delete states[previous];
+      if (value) states[value] = state;
+      return { ...profile, mapping: { ...profile.mapping, states } };
+    });
   const chooseProtocol = (protocol: ProviderProtocol) => {
     const defaults: Partial<ProviderDraft> =
       protocol === 'veo-gemini'
@@ -191,7 +330,25 @@ export default function VideoProviderForm({
                   authMode: 'bearer',
                 }
               : { kind: 'video', baseUrl: '', modelId: '', authMode: 'bearer' };
-    setDraft((d) => ({ ...d, ...defaults, protocol }));
+    setDraft((d) => ({
+      ...d,
+      ...defaults,
+      protocol,
+      profile:
+        protocol === 'custom-async-json' ? defaultCustomProfile : undefined,
+      capabilities:
+        protocol === 'custom-async-json'
+          ? defaultCustomCapabilities
+          : undefined,
+      pricing: undefined,
+      parameters: undefined,
+    }));
+    if (protocol === 'custom-async-json') {
+      setCustomBody(bodyText(defaultCustomProfile));
+      setDurations('5');
+      setRatios('16:9');
+      setResolutions('720p');
+    }
     setSaved(false);
   };
   return (
@@ -358,18 +515,178 @@ export default function VideoProviderForm({
             />
             {t('videoProviders.localHttp')}
           </label>
-          <p className="text-xs text-muted-foreground">
-            {t('videoProviders.advancedHint')}
-          </p>
-          <textarea
-            aria-label={t('videoProviders.advanced')}
-            value={advanced}
-            onChange={(e) => {
-              setAdvanced(e.target.value);
-              setSaved(false);
-            }}
-            className="min-h-48 w-full rounded border bg-background p-2 font-mono text-xs"
-          />
+          {draft.protocol === 'custom-async-json' && (
+            <div className="space-y-4 border-t pt-3">
+              <p className="text-xs text-muted-foreground">
+                {t('videoProviders.custom.intro')}
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1.5 text-sm">
+                  <span>{t('videoProviders.custom.submitPath')} *</span>
+                  <Input
+                    aria-label={t('videoProviders.custom.submitPath')}
+                    value={draft.profile?.submit.path ?? ''}
+                    onChange={(event) =>
+                      changeProfile((profile) => ({
+                        ...profile,
+                        submit: { ...profile.submit, path: event.target.value },
+                      }))
+                    }
+                  />
+                </label>
+                <label className="block space-y-1.5 text-sm">
+                  <span>{t('videoProviders.custom.pollPath')} *</span>
+                  <Input
+                    aria-label={t('videoProviders.custom.pollPath')}
+                    value={draft.profile?.poll.path ?? ''}
+                    onChange={(event) =>
+                      changeProfile((profile) => ({
+                        ...profile,
+                        poll: { ...profile.poll, path: event.target.value },
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('videoProviders.custom.pathHint')}
+              </p>
+              <label className="block space-y-1.5 text-sm">
+                <span>{t('videoProviders.custom.requestBody')} *</span>
+                <textarea
+                  aria-label={t('videoProviders.custom.requestBody')}
+                  value={customBody}
+                  onChange={(event) => {
+                    setCustomBody(event.target.value);
+                    setSaved(false);
+                  }}
+                  className="min-h-32 w-full rounded border bg-background p-2 font-mono text-xs"
+                />
+                <span className="block text-xs text-muted-foreground">
+                  {t('videoProviders.custom.requestBodyHint')}
+                </span>
+              </label>
+              <div className="space-y-2 border-t pt-3">
+                <h4 className="text-sm font-medium">
+                  {t('videoProviders.custom.responseTitle')}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t('videoProviders.custom.responseHint')}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {(
+                    [
+                      ['jobId', 'jobId'],
+                      ['status', 'statusField'],
+                      ['resultUrl', 'resultUrl'],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <label className="block space-y-1.5 text-sm" key={key}>
+                      <span>{t(`videoProviders.custom.${label}`)} *</span>
+                      <Input
+                        aria-label={t(`videoProviders.custom.${label}`)}
+                        value={draft.profile?.mapping[key] ?? ''}
+                        onChange={(event) =>
+                          changeProfile((profile) => ({
+                            ...profile,
+                            mapping: {
+                              ...profile.mapping,
+                              [key]: event.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('videoProviders.custom.statusHint')}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {(['queued', 'running', 'completed', 'failed'] as const).map(
+                    (state) => (
+                      <label className="block space-y-1.5 text-sm" key={state}>
+                        <span>
+                          {t(`videoProviders.custom.states.${state}`)} *
+                        </span>
+                        <Input
+                          aria-label={t(
+                            `videoProviders.custom.states.${state}`,
+                          )}
+                          value={statusCode(state)}
+                          onChange={(event) =>
+                            changeStatusCode(state, event.target.value)
+                          }
+                        />
+                      </label>
+                    ),
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2 border-t pt-3">
+                <h4 className="text-sm font-medium">
+                  {t('videoProviders.custom.capabilitiesTitle')}
+                </h4>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {(
+                    [
+                      ['durations', durations, setDurations, 'durationsHint'],
+                      ['ratios', ratios, setRatios, 'ratiosHint'],
+                      [
+                        'resolutions',
+                        resolutions,
+                        setResolutions,
+                        'resolutionsHint',
+                      ],
+                    ] as const
+                  ).map(([label, value, setter, hint]) => (
+                    <label className="block space-y-1.5 text-sm" key={label}>
+                      <span>{t(`videoProviders.custom.${label}`)} *</span>
+                      <Input
+                        aria-label={t(`videoProviders.custom.${label}`)}
+                        value={value}
+                        onChange={(event) => {
+                          setter(event.target.value);
+                          setSaved(false);
+                        }}
+                      />
+                      <span className="block text-xs text-muted-foreground">
+                        {t(`videoProviders.custom.${hint}`)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <label className="flex gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!draft.capabilities?.references}
+                    onChange={(event) =>
+                      changeCapabilities((capabilities) => ({
+                        ...capabilities,
+                        image: event.target.checked,
+                        references: event.target.checked,
+                        maxReferences: event.target.checked ? 1 : 0,
+                      }))
+                    }
+                  />
+                  {t('videoProviders.custom.references')}
+                </label>
+                <label className="flex gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!draft.capabilities?.audio}
+                    onChange={(event) =>
+                      changeCapabilities((capabilities) => ({
+                        ...capabilities,
+                        audio: event.target.checked,
+                      }))
+                    }
+                  />
+                  {t('videoProviders.custom.audio')}
+                </label>
+              </div>
+            </div>
+          )}
         </div>
       </details>
       {error && (

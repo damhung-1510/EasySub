@@ -160,3 +160,87 @@ test('connection check displays a clear read-only result instead of raw JSON', a
   );
   expect(screen.queryByText(/\{"providerId"/)).toBeNull();
 });
+test('built-in providers do not ask for protocol JSON; custom API has a guided template', async () => {
+  const onSave = jest.fn().mockImplementation(async (draft) => {
+    const {
+      validateProviderDraft,
+    } = require('../../../main/videoCreation/providerSettings');
+    const { secret: _secret, ...config } = draft;
+    validateProviderDraft(config);
+    return provider;
+  });
+  render(<VideoProviderForm onSave={onSave} />);
+  expect(
+    screen.queryByLabelText('videoProviders.custom.requestBody'),
+  ).toBeNull();
+  fireEvent.change(screen.getByLabelText('videoProviders.protocol'), {
+    target: { value: 'custom-async-json' },
+  });
+  expect(screen.getByLabelText('videoProviders.custom.submitPath')).toHaveValue(
+    'tasks',
+  );
+  expect(screen.getByLabelText('videoProviders.custom.pollPath')).toHaveValue(
+    'tasks/{{remoteJobId}}',
+  );
+  expect(
+    (
+      screen.getByLabelText(
+        'videoProviders.custom.requestBody',
+      ) as HTMLTextAreaElement
+    ).value,
+  ).toContain('"{{prompt}}"');
+  fireEvent.change(screen.getByLabelText('videoProviders.name'), {
+    target: { value: 'My API' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.baseUrl'), {
+    target: { value: 'https://example.com/api' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.model'), {
+    target: { value: 'video-v1' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.apiKey'), {
+    target: { value: 'private-key' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'videoProviders.save' }));
+  await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+  expect(onSave.mock.calls[0][0]).toMatchObject({
+    protocol: 'custom-async-json',
+    profile: {
+      submit: {
+        method: 'POST',
+        path: 'tasks',
+        body: { prompt: '{{prompt}}' },
+      },
+      poll: { method: 'GET', path: 'tasks/{{remoteJobId}}' },
+      mapping: { jobId: 'id', status: 'status', resultUrl: 'output.url' },
+    },
+    capabilities: { durationsMs: [5000], aspectRatios: ['16:9'] },
+  });
+});
+test('custom request body reports a usable error before saving', async () => {
+  const onSave = jest.fn();
+  render(<VideoProviderForm onSave={onSave} />);
+  fireEvent.change(screen.getByLabelText('videoProviders.protocol'), {
+    target: { value: 'custom-async-json' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.name'), {
+    target: { value: 'My API' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.baseUrl'), {
+    target: { value: 'https://example.com/api' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.model'), {
+    target: { value: 'video-v1' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.apiKey'), {
+    target: { value: 'private-key' },
+  });
+  fireEvent.change(screen.getByLabelText('videoProviders.custom.requestBody'), {
+    target: { value: '{invalid' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'videoProviders.save' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'videoProviders.custom.invalidBody',
+  );
+  expect(onSave).not.toHaveBeenCalled();
+});
