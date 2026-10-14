@@ -196,12 +196,33 @@ export default function EpisodeEditor({
             providers.filter((p) => p.kind === 'image' && !p.archived),
           )}
         </div>
-        <Link
-          className="text-sm text-primary underline"
-          href={`/${locale}/engines?view=video:overview`}
-        >
-          {t('providers.configure')}
-        </Link>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <Link
+            className="text-primary underline"
+            href={`/${locale}/translation`}
+          >
+            {t('providers.configureLlm')}
+          </Link>
+          <Link
+            className="text-primary underline"
+            href={`/${locale}/engines?view=video:overview`}
+          >
+            {t('providers.configureMedia')}
+          </Link>
+        </div>
+        {llmProviders.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t('providers.emptyLlm')}{' '}
+            <a
+              className="text-primary underline"
+              href="https://platform.openai.com/api-keys"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('providers.getOpenAiKey')}
+            </a>
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <label className="flex gap-2">
             <input
