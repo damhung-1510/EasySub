@@ -56,10 +56,13 @@ import {
   trimPreviewWav,
   assembleTrack,
   amixWavs,
+  applyVoiceMixSettings,
+  mixPreviewClip,
   encodeMp3,
   probeMediaDurationMs,
 } from './audioPipeline';
 import { enqueueCompose, cancelComposeJob } from '../compose/composeQueue';
+import { probeVideoInfo } from '../toolbox/videoTrimmer';
 import {
   createComposeOutput,
   type ComposePublicationState,
@@ -103,6 +106,8 @@ import {
 import { composeDisplayText, resolveDubbingScript } from './bilingualScript';
 import {
   cueInheritsSpeaker,
+  dubbingMixSettings,
+  dubbingMultiVoiceEnabled,
   dubbingVoiceNeedsUpdate,
   missingDubbingSpeakerVoiceIds,
   primaryDubbingSpeakerId,
@@ -178,6 +183,8 @@ export interface DubbingSession {
   speakerSettings?: DubbingSpeakerSettingsMap;
   speakerSettingsConflicts?: Record<string, DubbingSpeakerSettings[]>;
   speakerVoiceConflicts: Record<string, string[]>;
+  /** False: ignore per-speaker voices and settings; every line uses the global voice. */
+  multiVoice?: boolean;
   workDir: string;
   running: boolean;
   abort: AbortController | null;
@@ -202,12 +209,29 @@ export function getDubbingSession(id: string): DubbingSession | undefined {
   return sessions.get(id);
 }
 
+/** Per-speaker voices and settings, or nothing at all while the session has them switched off. */
+function activeSpeakerVoiceMap(
+  session: DubbingSession,
+): DubbingSpeakerVoiceMap {
+  return dubbingMultiVoiceEnabled(session) ? session.speakerVoiceMap : {};
+}
+
+function activeSpeakerSettings(session: DubbingSession) {
+  return dubbingMultiVoiceEnabled(session)
+    ? session.speakerSettings
+    : undefined;
+}
+
 export function resolvedSessionCueVoice(
   session: DubbingSession,
   cue: SessionCue,
   globalVoiceId: string,
 ): string {
-  return resolveDubbingVoiceId(cue, session.speakerVoiceMap, globalVoiceId);
+  return resolveDubbingVoiceId(
+    cue,
+    activeSpeakerVoiceMap(session),
+    globalVoiceId,
+  );
 }
 
 export function resolvedDubbingLanguage(
@@ -257,7 +281,7 @@ export function syncDubbingVoiceStaleness(
     const voiceId = resolvedSessionCueVoice(session, cue, config.voice);
     const settings = resolveDubbingSpeakerSettings(
       cue,
-      session.speakerSettings,
+      activeSpeakerSettings(session),
     );
     const key = dubbingInputKey(
       config,
@@ -273,7 +297,7 @@ export function syncDubbingVoiceStaleness(
       dubbingInputNeedsUpdate(cue.synthesizedInputKey, key, config) ||
       dubbingVoiceNeedsUpdate(
         cue,
-        session.speakerVoiceMap,
+        activeSpeakerVoiceMap(session),
         config.voice,
         synthesizedVoiceId,
       );
@@ -304,6 +328,7 @@ function toSessionMeta(session: DubbingSession): DubbingSessionMeta {
     speakerSettings: session.speakerSettings,
     speakerSettingsConflicts: session.speakerSettingsConflicts,
     speakerVoiceConflicts: session.speakerVoiceConflicts,
+    ...(session.multiVoice === false ? { multiVoice: false } : {}),
     // 校准随会话落盘：半成品会话重开后续行的语速预估不从零开始
     calibration: session.calibration,
     cues: session.cues.map((c) => ({
@@ -616,6 +641,7 @@ export function restoreDubbingSession(
     speakerSettings,
     speakerSettingsConflicts,
     speakerVoiceConflicts,
+    ...(meta.multiVoice === false ? { multiVoice: false } : {}),
     cues: meta.cues.map((persisted) => {
       const resolved = resolvePersistedCue(meta.sessionId, persisted);
       const assignment = hasRefreshedMetadata
@@ -964,7 +990,7 @@ async function synthesizeAndAlignCue(
   const voiceId = resolvedSessionCueVoice(session, cue, config.voice);
   const speakerSettings = resolveDubbingSpeakerSettings(
     cue,
-    session.speakerSettings,
+    activeSpeakerSettings(session),
   );
   const previousWavPath = cue.wavPath;
   const attemptId = `${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -1142,10 +1168,9 @@ export async function runDubbingBatch(
       ),
     );
   assertSpeakerConflictsResolved(session);
-  const missingSpeakers = missingDubbingSpeakerVoiceIds(
-    session.speakers,
-    session.speakerVoiceMap,
-  );
+  const missingSpeakers = dubbingMultiVoiceEnabled(session)
+    ? missingDubbingSpeakerVoiceIds(session.speakers, session.speakerVoiceMap)
+    : [];
   if (missingSpeakers.length) {
     throw new Error(
       msg(
@@ -1560,6 +1585,20 @@ function commitSpeakerChange(
   }
 }
 
+/** Switch per-speaker voices on or off; lines whose voice or speed would change are marked stale. */
+export function setMultiVoice(
+  session: DubbingSession,
+  enabled: boolean,
+  config: DubbingConfig,
+): void {
+  if (session.running || session.disposed)
+    throw new Error('Dubbing session is busy or unavailable');
+  commitSpeakerChange(session, config, () => {
+    if (enabled) delete session.multiVoice;
+    else session.multiVoice = false;
+  });
+}
+
 export function setSpeakerSettings(
   session: DubbingSession,
   speakerId: number,
@@ -1644,6 +1683,7 @@ export async function setDubbingMedia(
 }
 
 function assertSpeakerConflictsResolved(session: DubbingSession): void {
+  if (!dubbingMultiVoiceEnabled(session)) return;
   const unresolved = session.speakers.some(
     (speaker) =>
       (session.speakerVoiceConflicts[String(speaker.id)]?.length || 0) > 1 ||
@@ -1924,6 +1964,15 @@ async function buildDubTrackUnlocked(
   }
   signal?.throwIfAborted();
 
+  // Volume / loudness evening applies to the whole dub track, so every output mode gets it.
+  const mix = dubbingMixSettings(opts.config);
+  if (mix.gainDb !== 0 || mix.normalize) {
+    const adjusted = path.join(directory, 'dub-track-mixed.wav');
+    await applyVoiceMixSettings(trackPath, adjusted, mix, signal);
+    fs.renameSync(adjusted, trackPath);
+    signal?.throwIfAborted();
+  }
+
   // 顺延字幕：按规划后的时间轴序列化；ifShifted 模式仅在时间轴实际变化时产出
   let shiftedSubtitlePath: string | undefined;
   if (opts.shiftedSubtitle) {
@@ -1980,6 +2029,141 @@ async function buildDubTrackUnlocked(
       .map((c) => c.index),
     plan,
   };
+}
+
+export const MIX_PREVIEW_MIN_MS = 5000;
+export const MIX_PREVIEW_MAX_MS = 60000;
+
+export interface DubMixPreview {
+  wavPath: string;
+  /** Where the clip really starts: moved back to the start of a line the request cut into. */
+  startMs: number;
+  durationMs: number;
+  /** True when the original track is in the clip (mixTrack output of a video with audio). */
+  withOriginal: boolean;
+  cueCount: number;
+}
+
+const lastMixPreview = new Map<string, string>();
+
+/**
+ * A short clip of the final mix, built from the cues already synthesized: the dub gets the same
+ * gain / loudness settings as the export, then goes through the same ducking filter for
+ * mixTrack output. Other outputs keep the original track separate, so the clip is the dub alone.
+ */
+export async function previewDubMix(
+  session: DubbingSession,
+  config: DubbingConfig,
+  opts: { startMs: number; durationMs: number; signal?: AbortSignal },
+): Promise<DubMixPreview> {
+  if (session.disposed)
+    throw new Error('Dubbing session is busy or unavailable');
+  assertDubbingConfig(config);
+  const durationMs = Math.round(
+    Math.min(
+      MIX_PREVIEW_MAX_MS,
+      Math.max(MIX_PREVIEW_MIN_MS, Number(opts.durationMs) || 0),
+    ),
+  );
+  const overlapMode = session.cues.some((cue) => cue.borrowedMs)
+    ? 'mix'
+    : (config.overlapMode ?? 'mix');
+  const plan = buildSessionPlan(
+    session,
+    config.overflow ?? 'truncate',
+    overlapMode,
+  );
+  const wavByIndex = new Map(session.cues.map((c) => [c.index, c.wavPath]));
+  const requested = Math.max(0, Math.round(Number(opts.startMs) || 0));
+  const overlapping = plan.items.filter(
+    (item) =>
+      wavByIndex.get(item.index) &&
+      item.targetStartMs + item.durationMs > requested &&
+      item.targetStartMs < requested + durationMs,
+  );
+  if (overlapping.length === 0)
+    throw new Error(
+      msg(
+        '该时间段内还没有已生成的配音',
+        'Chưa có giọng đã tạo trong đoạn này',
+      ),
+    );
+  const startMs = Math.min(
+    requested,
+    ...overlapping.map((item) => item.targetStartMs),
+  );
+  const items = plan.items.filter(
+    (item) =>
+      wavByIndex.get(item.index) &&
+      item.targetStartMs + item.durationMs > startMs &&
+      item.targetStartMs < startMs + durationMs,
+  );
+
+  const signal = opts.signal;
+  const directory = fs.mkdtempSync(path.join(session.workDir, 'mix-preview-'));
+  try {
+    const lanes = new Map<number, typeof items>();
+    for (const item of items) {
+      lanes.set(item.lane, [...(lanes.get(item.lane) ?? []), item]);
+    }
+    const laneTracks: string[] = [];
+    for (const [lane, laneItems] of Array.from(lanes.entries()).sort(
+      (a, b) => a[0] - b[0],
+    )) {
+      const lanePath = path.join(directory, `lane-${lane}.wav`);
+      await assembleTrack(
+        laneItems.map((item) => ({
+          wavPath: wavByIndex.get(item.index)!,
+          targetStartMs: Math.max(0, item.targetStartMs - startMs),
+          maxDurationMs: item.durationMs,
+        })),
+        lanePath,
+        { totalDurationMs: durationMs, signal },
+      );
+      laneTracks.push(lanePath);
+    }
+    let dubTrack = laneTracks[0];
+    if (laneTracks.length > 1) {
+      dubTrack = path.join(directory, 'dub.wav');
+      await amixWavs(laneTracks, dubTrack, signal);
+    }
+    const mix = dubbingMixSettings(config);
+    const adjusted = path.join(directory, 'dub-mixed.wav');
+    await applyVoiceMixSettings(dubTrack, adjusted, mix, signal);
+
+    const wantsOriginal = config.output === 'mixTrack' && !!session.videoPath;
+    const withOriginal =
+      wantsOriginal &&
+      (await probeVideoInfo(session.videoPath!, signal)).hasAudio;
+    const previous = lastMixPreview.get(session.id);
+    const outPath = path.join(
+      session.workDir,
+      `mix-preview-${Date.now()}-${randomUUID().slice(0, 6)}.wav`,
+    );
+    await mixPreviewClip(
+      {
+        videoPath: session.videoPath,
+        startMs,
+        durationMs,
+        dubWav: adjusted,
+        duckRatio: mix.duckRatio,
+        withOriginal,
+      },
+      outPath,
+      signal,
+    );
+    lastMixPreview.set(session.id, outPath);
+    if (previous) fs.rmSync(previous, { force: true });
+    return {
+      wavPath: outPath,
+      startMs,
+      durationMs,
+      withOriginal,
+      cueCount: items.length,
+    };
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 }
 
 /** 导出：配音轨构建 → 背景音/输出形态 → 可选顺延字幕。 */
@@ -2083,7 +2267,11 @@ export async function exportDubbing(
           videoPath: session.videoPath!,
           outputPath: output.staged,
           subtitle: { mode: 'none' },
-          audio: { mode: audioMode, trackPath },
+          audio: {
+            mode: audioMode,
+            trackPath,
+            duckRatio: dubbingMixSettings(config).duckRatio,
+          },
         },
         'dubbingExport',
       );

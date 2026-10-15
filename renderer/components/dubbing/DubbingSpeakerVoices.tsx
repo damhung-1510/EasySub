@@ -6,11 +6,15 @@ import {
   Volume2,
   ListMusic,
   Square,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { useTranslation } from 'next-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import VoiceLibrary from './VoiceLibrary';
+import DubbingSpeakerDiarize from './DubbingSpeakerDiarize';
 import type { UseDubbingReturn } from '../../hooks/useDubbing';
 import {
   DUBBING_GLOBAL_VOICE_ID,
@@ -58,8 +62,10 @@ function SpeakerNumber({
     }
   };
   return (
-    <label className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
-      <span className="shrink-0">{label}</span>
+    <label className="flex min-w-0 flex-col gap-1 text-xs text-muted-foreground">
+      <span className="truncate" title={label}>
+        {label}
+      </span>
       <Input
         type="number"
         aria-label={label}
@@ -113,12 +119,30 @@ export default function DubbingSpeakerVoices({
     setSpeakerVoice,
     regenerateSpeaker,
     previewVoice,
+    multiVoice,
   } = dub;
   const disabled =
     running || exporting || dub.speakerUpdating || dub.configBlocked;
   const voiceIds = new Set(
     (activeEngine?.voices || []).map((voice) => voice.id),
   );
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('dubbing.speakersCollapsed') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const hideCards = collapsed || !multiVoice;
+  const toggleCollapsed = () =>
+    setCollapsed((value) => {
+      try {
+        localStorage.setItem('dubbing.speakersCollapsed', value ? '0' : '1');
+      } catch {
+        /* storage unavailable: the choice just is not remembered */
+      }
+      return !value;
+    });
   const firstMissingRef = useRef<HTMLButtonElement | null>(null);
   const firstMissingId = missingSpeakerVoiceIds[0];
   const [auditioning, setAuditioning] = useState(false);
@@ -156,6 +180,7 @@ export default function DubbingSpeakerVoices({
 
   useEffect(() => {
     if (!firstMissingId || disabled) return;
+    setCollapsed(false);
     const frame = requestAnimationFrame(() => {
       firstMissingRef.current?.scrollIntoView({ block: 'nearest' });
       firstMissingRef.current?.focus();
@@ -168,29 +193,65 @@ export default function DubbingSpeakerVoices({
       aria-label={t('speakerVoicesTitle')}
       className="min-w-0 shrink-0 bg-muted/40 px-2 py-2"
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-medium">{t('speakerVoicesTitle')}</p>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 gap-1 text-xs"
-          disabled={
-            disabled ||
-            !activeVoice ||
-            missingSpeakerVoiceIds.length > 0 ||
-            dub.conflictingSpeakerIds?.length > 0
-          }
-          onClick={() => void auditionCast()}
+      <div
+        className={`${hideCards ? '' : 'mb-2 '}flex flex-wrap items-center justify-between gap-2`}
+      >
+        <button
+          type="button"
+          className="flex items-center gap-1 text-xs font-medium"
+          aria-expanded={!collapsed}
+          onClick={toggleCollapsed}
         >
-          {auditioning ? (
-            <Square className="h-3 w-3" />
+          {collapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
           ) : (
-            <ListMusic className="h-3 w-3" />
+            <ChevronDown className="h-3.5 w-3.5" />
           )}
-          {auditioning ? t('stopPreview') : t('previewCast')}
-        </Button>
+          {t('speakerVoicesTitle')}
+          <span className="font-normal text-muted-foreground">
+            ({speakers.length})
+          </span>
+        </button>
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Switch
+            checked={multiVoice}
+            disabled={disabled}
+            aria-label={t('multiVoiceLabel')}
+            onCheckedChange={(on) => void dub.setMultiVoice(on)}
+          />
+          {t('multiVoiceLabel')}
+        </label>
+        <DubbingSpeakerDiarize dub={dub} className="ml-auto" />
+        {multiVoice && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 gap-1 text-xs"
+            disabled={
+              disabled ||
+              !activeVoice ||
+              missingSpeakerVoiceIds.length > 0 ||
+              dub.conflictingSpeakerIds?.length > 0
+            }
+            onClick={() => void auditionCast()}
+          >
+            {auditioning ? (
+              <Square className="h-3 w-3" />
+            ) : (
+              <ListMusic className="h-3 w-3" />
+            )}
+            {auditioning ? t('stopPreview') : t('previewCast')}
+          </Button>
+        )}
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      {!multiVoice && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t('multiVoiceOffHint')}
+        </p>
+      )}
+      <div
+        className={`${hideCards ? 'hidden ' : ''}flex gap-2 overflow-x-auto pb-1`}
+      >
         {speakers.map((speaker) => {
           const settings = dub.speakerSettings[String(speaker.id)] || {
             speed: 1,

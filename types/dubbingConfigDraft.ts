@@ -14,6 +14,9 @@ const preferencesSchema = z.object({
   overflow: z.enum(['truncate', 'shift']),
   overlapMode: z.enum(['shift', 'mix']).optional(),
   exportShiftedSubtitle: z.boolean(),
+  voiceGainDb: z.number().finite().optional(),
+  duckLevel: z.enum(['light', 'medium', 'strong']).optional(),
+  normalizeVoice: z.boolean().optional(),
 });
 
 export type PersistedDubbingConfig = z.infer<typeof preferencesSchema>;
@@ -29,6 +32,9 @@ export const DEFAULT_DUBBING_PREFERENCES: PersistedDubbingConfig = {
   overflow: 'truncate',
   overlapMode: 'shift',
   exportShiftedSubtitle: false,
+  voiceGainDb: 0,
+  duckLevel: 'medium',
+  normalizeVoice: false,
 };
 
 export function parseDubbingPreferences(

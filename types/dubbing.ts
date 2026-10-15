@@ -100,6 +100,13 @@ export function resolveDubbingVoiceId(
     : speakerVoice;
 }
 
+/** Per-speaker voices are on unless a session switched them off (older sessions have no flag). */
+export function dubbingMultiVoiceEnabled(
+  source: { multiVoice?: boolean } | null | undefined,
+): boolean {
+  return source?.multiVoice !== false;
+}
+
 export function cueInheritsSpeaker(
   cue: DubbingSpeakerCueLike,
   speakerId: number,
@@ -225,6 +232,30 @@ export type DubbingOverflowMode = 'truncate' | 'shift';
  */
 export type DubbingOverlapMode = 'shift' | 'mix';
 
+/** How strongly the original track is lowered under the dub (mixTrack output). */
+export type DubbingDuckLevel = 'light' | 'medium' | 'strong';
+
+/** sidechaincompress ratio per level; "medium" is the ratio used before this was configurable. */
+export const DUBBING_DUCK_RATIO: Record<DubbingDuckLevel, number> = {
+  light: 3,
+  medium: 8,
+  strong: 16,
+};
+
+export const DUBBING_VOICE_GAIN_MIN_DB = -12;
+export const DUBBING_VOICE_GAIN_MAX_DB = 12;
+
+/** Post-synthesis mix settings; they never change the synthesized cue audio itself. */
+export function dubbingMixSettings(
+  config: Pick<DubbingConfig, 'voiceGainDb' | 'duckLevel' | 'normalizeVoice'>,
+): { gainDb: number; duckRatio: number; normalize: boolean } {
+  return {
+    gainDb: config.voiceGainDb ?? 0,
+    duckRatio: DUBBING_DUCK_RATIO[config.duckLevel ?? 'medium'],
+    normalize: config.normalizeVoice === true,
+  };
+}
+
 /** 克隆合成质量档（zipvoice numSteps 4/8；高档约两倍耗时）。 */
 export type DubbingCloneQuality = 'standard' | 'high';
 
@@ -251,6 +282,12 @@ export interface DubbingConfig {
   overlapMode?: DubbingOverlapMode;
   /** 同时导出时间轴顺延版字幕（纯音频输出场景有用）。 */
   exportShiftedSubtitle?: boolean;
+  /** Dub volume in dB applied before mixing (default 0). */
+  voiceGainDb?: number;
+  /** Original-track lowering under the dub in mixTrack output (default medium). */
+  duckLevel?: DubbingDuckLevel;
+  /** Even out line loudness before mixing (default off). */
+  normalizeVoice?: boolean;
 }
 
 export function assertDubbingConfig(
@@ -293,7 +330,15 @@ export function assertDubbingConfig(
     (config.overlapMode !== undefined &&
       !['shift', 'mix'].includes(config.overlapMode)) ||
     (config.exportShiftedSubtitle !== undefined &&
-      typeof config.exportShiftedSubtitle !== 'boolean')
+      typeof config.exportShiftedSubtitle !== 'boolean') ||
+    (config.voiceGainDb !== undefined &&
+      (!Number.isFinite(config.voiceGainDb) ||
+        config.voiceGainDb < DUBBING_VOICE_GAIN_MIN_DB ||
+        config.voiceGainDb > DUBBING_VOICE_GAIN_MAX_DB)) ||
+    (config.duckLevel !== undefined &&
+      !['light', 'medium', 'strong'].includes(config.duckLevel)) ||
+    (config.normalizeVoice !== undefined &&
+      typeof config.normalizeVoice !== 'boolean')
   )
     throw new Error('Invalid dubbing configuration');
 }
@@ -423,6 +468,8 @@ export interface DubbingSessionView {
   speakerSettingsConflicts?: Record<string, DubbingSpeakerSettings[]>;
   /** 角色合并/重新归属后存在多个旧映射，必须由用户重新确认。 */
   speakerVoiceConflicts?: Record<string, string[]>;
+  /** False: every line uses the global voice and speed, per-speaker settings are ignored. */
+  multiVoice?: boolean;
   /** 批量合成正在后台进行（回开重连时渲染层据此恢复运行态） */
   running?: boolean;
 }
@@ -516,6 +563,7 @@ export interface DubbingSessionMeta {
   speakerSettings?: DubbingSpeakerSettingsMap;
   speakerSettingsConflicts?: Record<string, DubbingSpeakerSettings[]>;
   speakerVoiceConflicts?: Record<string, string[]>;
+  multiVoice?: boolean;
   /**
    * 运行期语速校准累计（Σ预估/Σ实测）。可选：旧 session.json 无此字段，
    * 恢复时回落零校准，不影响版本兼容。

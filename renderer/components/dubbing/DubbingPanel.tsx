@@ -44,6 +44,7 @@ import DubbingFileBar from './DubbingFileBar';
 import DubbingConfigPanel from './DubbingConfigPanel';
 import DubbingCueList from './DubbingCueList';
 import DubbingSpeakerVoices from './DubbingSpeakerVoices';
+import DubbingSpeakerDiarize from './DubbingSpeakerDiarize';
 import DubbingPlayer, { type DubbingPlayerHandle } from './DubbingPlayer';
 
 interface DubbingPanelProps {
@@ -704,14 +705,27 @@ export default function DubbingPanel({
           <Card className="flex min-h-0 flex-col overflow-hidden">
             <CardContent className="min-h-0 flex-1 p-0">
               <ScrollArea className="h-full">
-                <DubbingConfigPanel dub={dub} />
+                <DubbingConfigPanel
+                  dub={dub}
+                  playheadMs={dub.videoPath ? currentTimeMs : -1}
+                />
               </ScrollArea>
             </CardContent>
           </Card>
 
           {/* 右栏：播放器（有视频时）+ 行列表 */}
           <div className="flex min-h-0 min-w-0 flex-col gap-3">
-            {dub.speakers.length > 0 && <DubbingSpeakerVoices dub={dub} />}
+            {dub.speakers.length > 0 ? (
+              <DubbingSpeakerVoices dub={dub} />
+            ) : (
+              dub.session &&
+              dub.videoPath && (
+                <DubbingSpeakerDiarize
+                  dub={dub}
+                  className="shrink-0 justify-end bg-muted/40 px-2 py-1.5"
+                />
+              )
+            )}
             {dub.videoPath && (
               <Card className="flex-shrink-0 overflow-hidden">
                 <DubbingPlayer

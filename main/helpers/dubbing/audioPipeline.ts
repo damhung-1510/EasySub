@@ -6,6 +6,7 @@ import { spawn } from 'child_process';
 import { TaskCancelledError } from '../taskContext';
 import { stderrTail } from '../ffmpegErrorUtils';
 import { assertDubbingSpeakerSettings } from '../../../types/dubbing';
+import { buildDuckMixFilters } from '../compose/composeCommandBuilder';
 
 // 与 audioProcessor 同源的 ffmpeg 路径设置（本模块可被独立引入）。
 const FFMPEG_BIN = ffmpegStatic.replace('app.asar', 'app.asar.unpacked');
@@ -288,6 +289,77 @@ export async function atempoWav(
     .audioCodec('pcm_s16le')
     .outputOptions('-y');
   await runSave(command, dst, signal);
+}
+
+/**
+ * Filters for the dub track before it is mixed: optional loudness evening, a gain in dB,
+ * and a limiter whenever either is on so a boost cannot clip. Empty when nothing changes.
+ */
+export function buildVoiceMixFilters(settings: {
+  gainDb: number;
+  normalize: boolean;
+}): string[] {
+  const filters: string[] = [];
+  // dynaudnorm adapts over a short window, so a short preview matches the full track.
+  if (settings.normalize) filters.push('dynaudnorm=f=150:g=5:p=0.8:m=10');
+  if (settings.gainDb !== 0) filters.push(`volume=${settings.gainDb}dB`);
+  if (filters.length) filters.push('alimiter=limit=0.97:level=disabled');
+  return filters;
+}
+
+/** Apply the voice mix filters to a wav, keeping its format. A no-op copy when nothing changes. */
+export async function applyVoiceMixSettings(
+  src: string,
+  dst: string,
+  settings: { gainDb: number; normalize: boolean },
+  signal?: AbortSignal,
+): Promise<void> {
+  const filters = buildVoiceMixFilters(settings);
+  if (filters.length === 0) {
+    fs.copyFileSync(src, dst);
+    return;
+  }
+  const command = ffmpeg(src)
+    .audioFilters(filters)
+    .audioCodec('pcm_s16le')
+    .outputOptions('-y');
+  await runSave(command, dst, signal);
+}
+
+/**
+ * A short preview of the final mix: the original audio of [startMs, +durationMs)
+ * lowered under the dub with the same filters the export uses, or the dub alone.
+ */
+export async function mixPreviewClip(
+  opts: {
+    videoPath?: string;
+    startMs: number;
+    durationMs: number;
+    dubWav: string;
+    duckRatio: number;
+    /** False when the video has no audio stream to duck. */
+    withOriginal: boolean;
+  },
+  outPath: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const seconds = opts.durationMs / 1000;
+  if (!opts.withOriginal || !opts.videoPath) {
+    const command = ffmpeg(opts.dubWav)
+      .duration(seconds)
+      .audioCodec('pcm_s16le')
+      .outputOptions('-y');
+    await runSave(command, outPath, signal);
+    return;
+  }
+  const command = ffmpeg(opts.videoPath)
+    .seekInput(opts.startMs / 1000)
+    .duration(seconds)
+    .input(opts.dubWav)
+    .complexFilter(buildDuckMixFilters(opts.duckRatio))
+    .outputOptions(['-map', '[mix]', '-vn', '-ac', '2', '-ar', '44100', '-y'])
+    .audioCodec('pcm_s16le');
+  await runSave(command, outPath, signal);
 }
 
 /** Flush the final analysis window before bounding a small automatic fit. */

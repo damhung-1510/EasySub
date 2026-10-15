@@ -30,22 +30,42 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { UseDubbingReturn } from '../../hooks/useDubbing';
-import type {
-  DubbingBackgroundMode,
-  DubbingOutputMode,
-  DubbingOverlapMode,
+import {
+  DUBBING_VOICE_GAIN_MAX_DB,
+  DUBBING_VOICE_GAIN_MIN_DB,
+  type DubbingBackgroundMode,
+  type DubbingDuckLevel,
+  type DubbingOutputMode,
+  type DubbingOverlapMode,
 } from '../../../types/dubbing';
 import CloneVoiceWizard from '../voiceClone/CloneVoiceWizard';
 import DubbingLanguageSelect from './DubbingLanguageSelect';
 import VoiceLibrary from './VoiceLibrary';
 import { ttsBaseLanguage } from '../../../types/ttsLanguage';
 
-export default function DubbingConfigPanel({ dub }: { dub: UseDubbingReturn }) {
+function formatClock(ms: number): string {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+const PREVIEW_LENGTHS = [10, 20, 30];
+
+export default function DubbingConfigPanel({
+  dub,
+  playheadMs = -1,
+}: {
+  dub: UseDubbingReturn;
+  /** Current video position; the mix preview starts there when it is known. */
+  playheadMs?: number;
+}) {
   const { t } = useTranslation('dubbing');
   const { t: cloneT } = useTranslation('voiceClone');
   const { t: commonT } = useTranslation('common');
   const [wizardOpen, setWizardOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [previewSeconds, setPreviewSeconds] = useState('20');
   const {
     engineOptions,
     activeEngine,
@@ -317,6 +337,138 @@ export default function DubbingConfigPanel({ dub }: { dub: UseDubbingReturn }) {
           </Select>
         </div>
       )}
+
+      <Separator />
+
+      {/* ── 混音：配音音量 / 响度 / 原声压低 + 试听 ── */}
+      <p className="label-caps">{t('groupMix')}</p>
+
+      <div className="space-y-1.5">
+        <label className="flex items-center justify-between text-sm font-medium">
+          {t('voiceGain')}
+          <span className="tabular-nums text-muted-foreground">
+            {(config.voiceGainDb ?? 0) > 0 ? '+' : ''}
+            {config.voiceGainDb ?? 0} dB
+          </span>
+        </label>
+        <Slider
+          aria-label={t('voiceGain')}
+          min={DUBBING_VOICE_GAIN_MIN_DB}
+          max={DUBBING_VOICE_GAIN_MAX_DB}
+          step={1}
+          value={[config.voiceGainDb ?? 0]}
+          onValueChange={([v]) => updateConfig({ voiceGainDb: v })}
+          disabled={disabled}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-sm font-medium">{t('normalizeVoice')}</label>
+          <Switch
+            aria-label={t('normalizeVoice')}
+            checked={config.normalizeVoice === true}
+            onCheckedChange={(v) => updateConfig({ normalizeVoice: v })}
+            disabled={disabled}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('normalizeVoiceHint')}
+        </p>
+      </div>
+
+      {effectiveOutput === 'mixTrack' && (
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">{t('duckLevel')}</label>
+          <Select
+            value={config.duckLevel ?? 'medium'}
+            onValueChange={(v) =>
+              updateConfig({ duckLevel: v as DubbingDuckLevel })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger aria-label={t('duckLevel')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">{t('duckLight')}</SelectItem>
+              <SelectItem value="medium">{t('duckMedium')}</SelectItem>
+              <SelectItem value="strong">{t('duckStrong')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <Select
+            value={previewSeconds}
+            onValueChange={setPreviewSeconds}
+            disabled={dub.mixPreview.status === 'building'}
+          >
+            <SelectTrigger className="w-24" aria-label={t('mixPreviewLength')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PREVIEW_LENGTHS.map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {t('mixPreviewSeconds', { count: n })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {dub.mixPreview.status === 'idle' ? (
+            <Button
+              size="sm"
+              className="flex-1 gap-1"
+              disabled={
+                running ||
+                exporting ||
+                dub.loading ||
+                dub.sessionLocked ||
+                !dub.session ||
+                !dub.cues.some((cue) => cue.wavPath)
+              }
+              onClick={() =>
+                void dub.previewMix(
+                  playheadMs >= 0 ? playheadMs : 0,
+                  Number(previewSeconds) * 1000,
+                )
+              }
+            >
+              <Volume2 className="h-3.5 w-3.5" />
+              {t('mixPreview')}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 gap-1"
+              onClick={dub.stopMixPreview}
+            >
+              {dub.mixPreview.status === 'building' ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Square className="h-3.5 w-3.5" />
+              )}
+              {dub.mixPreview.status === 'building'
+                ? t('mixPreviewBuilding')
+                : t('stopPreview')}
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {dub.mixPreview.status === 'playing' &&
+          dub.mixPreview.startMs !== undefined
+            ? t('mixPreviewPlaying', {
+                time: formatClock(dub.mixPreview.startMs),
+              })
+            : playheadMs >= 0
+              ? t('mixPreviewFromPlayhead', { time: formatClock(playheadMs) })
+              : t('mixPreviewFromStart')}
+          {effectiveOutput !== 'mixTrack' && ` ${t('mixPreviewDubOnly')}`}
+        </p>
+      </div>
 
       <Separator />
 

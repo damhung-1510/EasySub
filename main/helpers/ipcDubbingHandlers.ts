@@ -28,12 +28,15 @@ import {
   setCueVoiceOverride,
   setSpeakerVoiceMapping,
   setSpeakerSettings,
+  setMultiVoice,
   setDubbingMedia,
   saveDubbingConfig,
   saveDubbingCueTexts,
   exportDubbing,
   previewVoice,
   cancelDubbing,
+  flushDubbingSession,
+  previewDubMix,
   type DubbingSession,
   type SessionCue,
 } from './dubbing/dubbingProcessor';
@@ -63,8 +66,16 @@ import { getClonedVoiceById } from './voiceClone/voiceCloneManager';
 import { getTtsProviderById } from './ttsProviderManager';
 import { saveWorkItem, getWorkItemById, getWorkItems } from './workItemStore';
 import type { WorkItem } from '../../types/workItem';
-import type { DubbingConfig, DubbingProgressEvent } from '../../types/dubbing';
+import {
+  dubbingMultiVoiceEnabled,
+  type DubbingConfig,
+  type DubbingProgressEvent,
+} from '../../types/dubbing';
 import { msg } from './uiMessages';
+import {
+  cancelSessionDiarization,
+  diarizeDubbingSession,
+} from './dubbing/sessionDiarize';
 
 interface DubbingResponse<T = unknown> {
   success: boolean;
@@ -75,6 +86,9 @@ interface DubbingResponse<T = unknown> {
 }
 
 const DUBBING_POWER_SAVE_REASON = 'dubbing';
+
+/** Mix previews in flight, so a newer request replaces an older one. */
+const mixPreviewAbort = new Map<string, AbortController>();
 
 /** 渲染层可见的行视图（剥离 main 侧内部字段）。 */
 function cueView(cue: SessionCue) {
@@ -117,6 +131,7 @@ function sessionView(session: DubbingSession) {
     speakerSettings: session.speakerSettings || {},
     speakerSettingsConflicts: session.speakerSettingsConflicts || {},
     speakerVoiceConflicts: session.speakerVoiceConflicts,
+    multiVoice: dubbingMultiVoiceEnabled(session),
     // 批量在后台进行中：回开重连时渲染层恢复运行态并续接进度事件
     running: session.running,
   };
@@ -864,6 +879,124 @@ export function setupDubbingHandlers(mainWindow: BrowserWindow) {
         return fail(error);
       }
     },
+  );
+
+  // 试听一小段最终混音：用已生成的配音 + 与导出相同的音量/压低滤镜。
+  handleOwned(
+    'dubbing:previewMix',
+    async (
+      _event,
+      { sessionId, config, startMs, durationMs },
+    ): Promise<DubbingResponse> => {
+      const session = getDubbingSession(sessionId);
+      if (!session)
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
+      mixPreviewAbort.get(sessionId)?.abort();
+      const controller = new AbortController();
+      mixPreviewAbort.set(sessionId, controller);
+      try {
+        const data = await previewDubMix(session, config, {
+          startMs,
+          durationMs,
+          signal: controller.signal,
+        });
+        return { success: true, data };
+      } catch (error) {
+        return fail(error);
+      } finally {
+        if (mixPreviewAbort.get(sessionId) === controller)
+          mixPreviewAbort.delete(sessionId);
+      }
+    },
+  );
+
+  handleOwned(
+    'dubbing:cancelPreviewMix',
+    async (_event, { sessionId }): Promise<DubbingResponse> => {
+      mixPreviewAbort.get(sessionId)?.abort();
+      return { success: true };
+    },
+  );
+
+  // 开关：关闭后所有行用全局音色与语速，忽略角色音色和角色语速/音高。
+  handleOwned(
+    'dubbing:setMultiVoice',
+    async (
+      _event,
+      { sessionId, enabled, config },
+    ): Promise<DubbingResponse> => {
+      const session = getDubbingSession(sessionId);
+      if (!session)
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
+      try {
+        setMultiVoice(session, Boolean(enabled), config);
+        return {
+          success: true,
+          data: {
+            multiVoice: dubbingMultiVoiceEnabled(session),
+            cues: session.cues.map(cueView),
+          },
+        };
+      } catch (error) {
+        return fail(error);
+      }
+    },
+  );
+
+  // 在工作台内直接分离说话人：分析已加载视频的音频，结果写入任务 sidecar 并刷新会话角色。
+  handleOwned(
+    'dubbing:diarizeSpeakers',
+    async (_event, { sessionId, speakerCount }): Promise<DubbingResponse> => {
+      const session = getDubbingSession(sessionId);
+      if (!session)
+        return {
+          success: false,
+          error: msg(
+            '会话不存在，请重新加载字幕',
+            'Phiên không tồn tại, vui lòng tải lại phụ đề',
+          ),
+        };
+      try {
+        const { persisted } = await diarizeDubbingSession(session, {
+          speakerCount,
+          persist: () => flushDubbingSession(session),
+        });
+        return {
+          success: true,
+          data: {
+            persisted,
+            speakers: session.speakers,
+            speakerVoiceMap: session.speakerVoiceMap,
+            speakerVoiceConflicts: session.speakerVoiceConflicts,
+            speakerSettings: session.speakerSettings || {},
+            speakerSettingsConflicts: session.speakerSettingsConflicts || {},
+            cues: session.cues.map(cueView),
+          },
+        };
+      } catch (error) {
+        return fail(error);
+      }
+    },
+  );
+
+  handleOwned(
+    'dubbing:cancelDiarize',
+    async (_event, { sessionId }): Promise<DubbingResponse> => ({
+      success: true,
+      data: { cancelled: cancelSessionDiarization(sessionId) },
+    }),
   );
 
   // 单行重生成（可携新文本 / 新 voice）。

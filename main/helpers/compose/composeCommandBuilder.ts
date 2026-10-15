@@ -118,7 +118,7 @@ export function composePlanRequiresMkv(input: {
  * ducking 混音滤镜（与既有 duckMixIntoVideo 相同语义）：
  * 配音一分为二（sidechain 触发源 + 混音源），原声被压低后与配音叠加。
  */
-function buildDuckMixFilters(duckRatio: number): string[] {
+export function buildDuckMixFilters(duckRatio: number): string[] {
   return [
     '[1:a]asplit=2[sc][dub]',
     `[0:a][sc]sidechaincompress=threshold=0.03:ratio=${duckRatio}:attack=20:release=300[bg]`,

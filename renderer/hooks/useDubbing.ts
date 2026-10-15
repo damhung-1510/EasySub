@@ -476,12 +476,16 @@ export function useDubbing(options?: {
   );
 
   const speakers: DubbingSpeaker[] = session?.speakers || [];
-  const speakerVoiceMap: DubbingSpeakerVoiceMap =
-    session?.speakerVoiceMap || {};
+  // 关闭「按角色分配音色」后，角色音色/语速一律不参与：所有行用全局音色。
+  const multiVoice = session?.multiVoice !== false;
+  const speakerVoiceMap: DubbingSpeakerVoiceMap = multiVoice
+    ? session?.speakerVoiceMap || {}
+    : {};
   const speakerVoiceConflicts = session?.speakerVoiceConflicts || {};
-  const speakerSettings = session?.speakerSettings || {};
+  const speakerSettings = multiVoice ? session?.speakerSettings || {} : {};
   const speakerSettingsConflicts = session?.speakerSettingsConflicts || {};
   const [speakerUpdating, setSpeakerUpdating] = useState(false);
+  const [diarizing, setDiarizing] = useState(false);
   const speakerMutationRef = useRef(false);
   const voiceRevisionRef = useRef(0);
   const availableVoiceIds = useMemo(
@@ -489,15 +493,17 @@ export function useDubbing(options?: {
     [activeEngine],
   );
   const speakerMode =
-    speakers.filter((speaker) => speaker.cueCount > 0).length > 1;
+    multiVoice && speakers.filter((speaker) => speaker.cueCount > 0).length > 1;
   const missingSpeakerVoiceIds = useMemo(
     () =>
-      missingDubbingSpeakerVoiceIds(
-        speakers,
-        speakerVoiceMap,
-        availableVoiceIds,
-      ),
-    [speakers, speakerVoiceMap, availableVoiceIds],
+      multiVoice
+        ? missingDubbingSpeakerVoiceIds(
+            speakers,
+            speakerVoiceMap,
+            availableVoiceIds,
+          )
+        : [],
+    [multiVoice, speakers, speakerVoiceMap, availableVoiceIds],
   );
   const conflictingSpeakerIds = useMemo(() => {
     const activeSpeakerIds = new Set(
@@ -505,6 +511,7 @@ export function useDubbing(options?: {
         .filter((speaker) => speaker.cueCount > 0)
         .map((speaker) => speaker.id),
     );
+    if (!multiVoice) return [];
     return Array.from(
       new Set([
         ...Object.keys(speakerVoiceConflicts),
@@ -583,6 +590,9 @@ export function useDubbing(options?: {
       overflow: persisted.overflow,
       overlapMode: persisted.overlapMode ?? 'shift',
       exportShiftedSubtitle: persisted.exportShiftedSubtitle,
+      voiceGainDb: persisted.voiceGainDb ?? 0,
+      duckLevel: persisted.duckLevel ?? 'medium',
+      normalizeVoice: persisted.normalizeVoice ?? false,
     };
   }, [engineOptions, persisted, videoPath, mediaIsAudio]);
 
@@ -1807,6 +1817,126 @@ export function useDubbing(options?: {
     [updateSpeaker],
   );
 
+  const setMultiVoice = useCallback(
+    async (enabled: boolean) => {
+      const config = buildConfig();
+      if (
+        !session ||
+        !config ||
+        loading ||
+        running ||
+        exporting ||
+        configBlockedRef.current() ||
+        speakerMutationRef.current
+      )
+        return false;
+      const id = session.sessionId;
+      speakerMutationRef.current = true;
+      setSpeakerUpdating(true);
+      voiceRevisionRef.current++;
+      setActionError(null);
+      try {
+        const result = await window.ipc.invoke('dubbing:setMultiVoice', {
+          sessionId: id,
+          leaseId: session.leaseId,
+          enabled,
+          config,
+        });
+        if (!result?.success || !result.data)
+          throw new Error(result?.error || 'Multi-voice update failed');
+        if (!ownsLease(session.leaseId) || sessionIdRef.current !== id)
+          return false;
+        setSession((current) =>
+          current?.sessionId === id
+            ? { ...current, multiVoice: result.data.multiVoice }
+            : current,
+        );
+        setCues(result.data.cues);
+        return true;
+      } catch (error) {
+        if (ownsLease(session.leaseId) && sessionIdRef.current === id)
+          setActionError(
+            error instanceof Error ? error.message : String(error),
+          );
+        return false;
+      } finally {
+        speakerMutationRef.current = false;
+        if (mountedRef.current) setSpeakerUpdating(false);
+      }
+    },
+    [session, buildConfig, running, exporting, loading],
+  );
+
+  // 在工作台内分离说话人：分析已加载视频的音频，成功后会话角色与行归属整体替换。
+  const diarizeSpeakers = useCallback(
+    async (speakerCount?: number) => {
+      if (
+        !session ||
+        !session.videoPath ||
+        loading ||
+        running ||
+        exporting ||
+        configBlockedRef.current() ||
+        speakerMutationRef.current
+      )
+        return false;
+      const id = session.sessionId;
+      speakerMutationRef.current = true;
+      setSpeakerUpdating(true);
+      setDiarizing(true);
+      voiceRevisionRef.current++;
+      setActionError(null);
+      try {
+        const result = await window.ipc.invoke('dubbing:diarizeSpeakers', {
+          sessionId: id,
+          leaseId: session.leaseId,
+          speakerCount,
+        });
+        if (result?.cancelled) return false;
+        if (!result?.success || !result.data)
+          throw new Error(result?.error || 'Speaker diarization failed');
+        if (!ownsLease(session.leaseId) || sessionIdRef.current !== id)
+          return false;
+        const data = result.data;
+        setSession((current) =>
+          current?.sessionId === id
+            ? {
+                ...current,
+                speakers: data.speakers,
+                speakerVoiceMap: data.speakerVoiceMap,
+                speakerVoiceConflicts: data.speakerVoiceConflicts,
+                speakerSettings: data.speakerSettings,
+                speakerSettingsConflicts: data.speakerSettingsConflicts,
+              }
+            : current,
+        );
+        setCues(data.cues);
+        return true;
+      } catch (error) {
+        if (ownsLease(session.leaseId) && sessionIdRef.current === id)
+          setActionError(
+            error instanceof Error ? error.message : String(error),
+          );
+        return false;
+      } finally {
+        speakerMutationRef.current = false;
+        if (mountedRef.current) {
+          setSpeakerUpdating(false);
+          setDiarizing(false);
+        }
+      }
+    },
+    [session, running, exporting, loading],
+  );
+
+  const cancelDiarize = useCallback(async () => {
+    if (!session) return;
+    await window.ipc.invoke('dubbing:cancelDiarize', {
+      sessionId: session.sessionId,
+      leaseId: session.leaseId,
+    });
+  }, [session]);
+
   const regenerateSpeaker = useCallback(
     async (speakerId: number) => {
       await start({ staleOnly: true, speakerId });
@@ -1859,6 +1989,100 @@ export function useDubbing(options?: {
       audio.play().catch(() => setPlayingKey(null));
     },
     [stopAudio],
+  );
+
+  // ── 试听最终混音片段（与导出相同的音量/压低滤镜）─────────────────────────
+  const [mixPreview, setMixPreview] = useState<{
+    status: 'idle' | 'building' | 'playing';
+    startMs?: number;
+    withOriginal?: boolean;
+    cueCount?: number;
+  }>({ status: 'idle' });
+  const mixAudioRef = useRef<HTMLAudioElement | null>(null);
+  const mixPreviewTokenRef = useRef(0);
+
+  const stopMixPreview = useCallback(() => {
+    mixPreviewTokenRef.current++;
+    mixAudioRef.current?.pause();
+    mixAudioRef.current = null;
+    if (session) {
+      void window.ipc.invoke('dubbing:cancelPreviewMix', {
+        sessionId: session.sessionId,
+        leaseId: session.leaseId,
+      });
+    }
+    setMixPreview({ status: 'idle' });
+  }, [session]);
+
+  useEffect(
+    () => () => {
+      mixPreviewTokenRef.current++;
+      mixAudioRef.current?.pause();
+      mixAudioRef.current = null;
+    },
+    [activeSessionId],
+  );
+
+  const previewMix = useCallback(
+    async (startMs: number, durationMs: number) => {
+      const config = buildConfig();
+      if (!session || !config || loading || running || exporting) return false;
+      stopAudio();
+      stopPreviewRef.current();
+      mixAudioRef.current?.pause();
+      mixAudioRef.current = null;
+      const token = ++mixPreviewTokenRef.current;
+      const id = session.sessionId;
+      setActionError(null);
+      setMixPreview({ status: 'building' });
+      try {
+        const result = await window.ipc.invoke('dubbing:previewMix', {
+          sessionId: id,
+          leaseId: session.leaseId,
+          config,
+          startMs,
+          durationMs,
+        });
+        if (token !== mixPreviewTokenRef.current) return false;
+        if (result?.cancelled) {
+          setMixPreview({ status: 'idle' });
+          return false;
+        }
+        if (!result?.success || !result.data)
+          throw new Error(result?.error || 'Mix preview failed');
+        const data = result.data as {
+          wavPath: string;
+          startMs: number;
+          withOriginal: boolean;
+          cueCount: number;
+        };
+        const audio = new Audio(mediaUrl(data.wavPath));
+        mixAudioRef.current = audio;
+        const finish = () => {
+          if (token === mixPreviewTokenRef.current)
+            setMixPreview({ status: 'idle' });
+        };
+        audio.onended = finish;
+        audio.onerror = finish;
+        setMixPreview({
+          status: 'playing',
+          startMs: data.startMs,
+          withOriginal: data.withOriginal,
+          cueCount: data.cueCount,
+        });
+        await audio.play();
+        return true;
+      } catch (error) {
+        if (token === mixPreviewTokenRef.current) {
+          setMixPreview({ status: 'idle' });
+          setActionError(
+            error instanceof Error ? error.message : String(error),
+          );
+        }
+        return false;
+      }
+    },
+    [session, buildConfig, loading, running, exporting, stopAudio],
   );
 
   /** 顺序播放所有已合成行（再点一次停止）。 */
@@ -2182,6 +2406,14 @@ export function useDubbing(options?: {
     setCueVoice,
     setSpeakerVoice,
     setSpeakerSettings,
+    diarizeSpeakers,
+    cancelDiarize,
+    diarizing,
+    multiVoice,
+    setMultiVoice,
+    mixPreview,
+    previewMix,
+    stopMixPreview,
     regenerateSpeaker,
     regenerateStale,
     playCue,
