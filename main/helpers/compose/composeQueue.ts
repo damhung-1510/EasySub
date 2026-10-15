@@ -85,6 +85,9 @@ function toView(job: InternalJob): ComposeJobView {
     error: job.error,
     videoPath: job.config.videoPath,
     subtitlePath: subtitle.mode === 'none' ? undefined : subtitle.subtitlePath,
+    ...(subtitle.mode !== 'none' && subtitle.linesMode
+      ? { subtitleLines: subtitle.linesMode }
+      : {}),
     subtitleMode: subtitle.mode,
     ...(subtitle.mode === 'hard'
       ? {

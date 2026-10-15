@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, CheckCircle, XCircle, Folder, RotateCcw } from 'lucide-react';
 import type {
+  SubtitleLinesMode,
   SubtitleStyle,
   VideoInfo,
   MergeProgress,
@@ -38,6 +39,8 @@ interface VideoPreviewProps {
   videoInfo: VideoInfo | null;
   style: SubtitleStyle;
   subtitlePath?: string | null;
+  /** Bilingual subtitle: both lines (default), only the top or the bottom block. */
+  subtitleLines?: SubtitleLinesMode;
   sampleText?: string;
   /** 合成进度（用于处理中/错误浮层） */
   progress?: MergeProgress;
@@ -95,6 +98,7 @@ export default function VideoPreview({
   videoInfo,
   style,
   subtitlePath = null,
+  subtitleLines = 'both',
   sampleText = '字幕预览效果',
   progress,
   status = 'idle',
@@ -181,8 +185,9 @@ export default function VideoPreview({
     (async () => {
       try {
         const entries: Array<{ startEndTime: string; content: string[] }> =
-          await window.ipc.invoke('readSubtitleFile', {
-            filePath: subtitlePath,
+          await window.ipc.invoke('subtitleMerge:readSubtitleEntries', {
+            subtitlePath,
+            subtitleLines,
           });
         if (stale) return;
         const parsed = (entries || [])
@@ -216,13 +221,14 @@ export default function VideoPreview({
     return () => {
       stale = true;
     };
-  }, [subtitlePath, previewAttempt, t]);
+  }, [subtitlePath, subtitleLines, previewAttempt, t]);
 
   // JASSUB（libass WASM）预览引擎：与烧录消费同一份生成的 ASS 内容，所见即所得。
   // 引擎就绪前/初始化失败时回退下方 CSS 模拟叠加层。
   const jassub = useJassubPreview({
     videoEl,
     subtitlePath,
+    subtitleLines,
     sampleText,
     style: previewStyle,
     currentTime,

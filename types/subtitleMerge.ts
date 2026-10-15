@@ -213,10 +213,12 @@ export type ComposeAudioMode = 'keep' | 'replace' | 'mix' | 'addTrack';
 
 export type ComposeSubtitleSpec =
   | { mode: 'none' }
-  | { mode: 'soft'; subtitlePath: string }
+  | { mode: 'soft'; subtitlePath: string; linesMode?: SubtitleLinesMode }
   | {
       mode: 'hard';
       subtitlePath: string;
+      /** Bilingual subtitle: which block to burn in (default both). */
+      linesMode?: SubtitleLinesMode;
       style: SubtitleStyle;
       videoQuality?: VideoQuality;
       encoderMode?: EncoderMode;
@@ -275,6 +277,7 @@ export interface ComposeJobView {
   /** 重连上下文：合成页重挂载时据此恢复文件区与进行中状态 */
   videoPath: string;
   subtitlePath?: string;
+  subtitleLines?: SubtitleLinesMode;
   subtitleMode: ComposeSubtitleMode;
   style?: SubtitleStyle;
   videoQuality?: VideoQuality;
@@ -297,6 +300,8 @@ export interface MergeConfig {
   subtitlePath: string;
   /** 输出文件路径 */
   outputPath: string;
+  /** Bilingual subtitle: keep both lines (default), only the top or only the bottom block. */
+  subtitleLines?: SubtitleLinesMode;
   /** 字幕样式 */
   style: SubtitleStyle;
   /** 输出方式（缺省 hardcode，向后兼容） */
@@ -372,6 +377,17 @@ export interface VideoInfo {
 /**
  * 字幕文件信息
  */
+/** Which block of a bilingual cue to keep: both lines, the top block or the bottom block. */
+export type SubtitleLinesMode = 'both' | 'top' | 'bottom';
+
+/** Present on SubtitleInfo when the subtitle has a source block and a translation block per cue. */
+export interface BilingualSubtitleInfo {
+  /** Which block comes first; 'unknown' when it is only guessed from two lines per cue. */
+  order: 'sourceAndTranslate' | 'translateAndSource' | 'unknown';
+  /** Cues that cannot be split and keep both lines whatever the mode. */
+  unresolved: number;
+}
+
 export interface SubtitleInfo {
   /** 字幕路径 */
   path: string;
@@ -379,6 +395,8 @@ export interface SubtitleInfo {
   fileName: string;
   /** 字幕条数 */
   count: number;
+  /** Set when the file is a bilingual SRT/VTT. */
+  bilingual?: BilingualSubtitleInfo;
   /** 格式 (srt, ass, vtt) */
   format: string;
 }

@@ -87,6 +87,7 @@
     "test:e2e:compose-ass": "node scripts/e2e/compose-ass.mjs",
     "test:e2e:compose-collisions": "node scripts/e2e/compose-collisions.mjs",
     "test:dubbing-speakers": "node scripts/dubbing/test-speaker-settings.cjs",
+    "test:bilingual-subtitle": "tsx scripts/test-bilingual-subtitle.ts && node scripts/compose/test-compose-lines-mode.cjs",
     "test:dubbing-ownership": "tsx scripts/dubbing/test-session-ownership.ts && tsx scripts/dubbing/test-session-deletion.ts",
     "test:dubbing-config-draft": "tsx scripts/dubbing/test-config-draft.ts",
     "test:dubbing-operations": "tsx scripts/dubbing/test-operation-store.ts",

@@ -40,6 +40,7 @@ import { useNavigationGuard } from '@/context/NavigationGuardContext';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import StepGuide from '@/components/StepGuide';
 import FileSelector from './FileSelector';
+import SubtitleLinesSelect from './SubtitleLinesSelect';
 import StylePresets from './StylePresets';
 import BasicStyleSettings from './BasicStyleSettings';
 import EffectStyleSettings from './EffectStyleSettings';
@@ -82,6 +83,7 @@ export default function SubtitleMergePanel({
     subtitleInfo,
     audioTrackPath,
     audioTrackMode,
+    subtitleLines,
 
     // 样式状态
     style,
@@ -109,6 +111,7 @@ export default function SubtitleMergePanel({
     clearVideo,
     clearSubtitle,
     clearAudioTrack,
+    setSubtitleLines,
 
     // 样式操作方法
     updateStyle,
@@ -407,6 +410,19 @@ export default function SubtitleMergePanel({
           />
           <ScrollArea className="min-h-0 flex-1">
             <div className="space-y-3 p-3">
+              {/* 双语字幕：只显示其中一种语言 */}
+              {subtitleInfo?.bilingual && (
+                <>
+                  <SubtitleLinesSelect
+                    bilingual={subtitleInfo.bilingual}
+                    value={subtitleLines ?? 'both'}
+                    onChange={setSubtitleLines}
+                    disabled={isProcessing || documentBlocked}
+                  />
+                  <Separator />
+                </>
+              )}
+
               {/* 预设样式（系统预设 + 我的样式） */}
               <StylePresets
                 activePresetId={activePresetId}
@@ -482,6 +498,7 @@ export default function SubtitleMergePanel({
                   videoInfo={videoInfo}
                   style={style}
                   subtitlePath={subtitlePath}
+                  subtitleLines={subtitleLines ?? 'both'}
                   onUpdateStyle={documentBlocked ? undefined : updateStyle}
                   softMux={isSoftMux}
                   progress={progress}

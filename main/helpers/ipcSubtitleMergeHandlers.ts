@@ -39,10 +39,19 @@ import type {
   SubtitleMergeResponse,
   VideoInfo,
   SubtitleInfo,
+  SubtitleLinesMode,
   HwAccelInfo,
   UserStylePreset,
 } from '../../types/subtitleMerge';
 import { msg } from './uiMessages';
+import {
+  filterSubtitleLines,
+  inspectBilingualSubtitle,
+} from './bilingualSubtitle';
+import {
+  detectSubtitleFormatFromContent,
+  parseSubtitleEntries,
+} from './subtitleFormats';
 
 function readStylePresets(): UserStylePreset[] {
   const list = store.get('mergeStylePresets');
@@ -61,10 +70,15 @@ function mergeConfigToComposeConfig(
     outputPath,
     subtitle:
       config.outputMode === 'softmux'
-        ? { mode: 'soft', subtitlePath: config.subtitlePath }
+        ? {
+            mode: 'soft',
+            subtitlePath: config.subtitlePath,
+            linesMode: config.subtitleLines,
+          }
         : {
             mode: 'hard',
             subtitlePath: config.subtitlePath,
+            linesMode: config.subtitleLines,
             style: config.style,
             videoQuality: config.videoQuality,
             encoderMode: config.encoderMode,
@@ -166,6 +180,19 @@ export function setupSubtitleMergeHandlers(
 
         const count = await countSubtitles(subtitlePath);
         const format = getSubtitleFormat(subtitlePath);
+        let bilingual: SubtitleInfo['bilingual'];
+        try {
+          bilingual = inspectBilingualSubtitle(
+            subtitlePath,
+            await fs.promises.readFile(subtitlePath, 'utf-8'),
+          );
+        } catch (error) {
+          // Detection is a convenience: a failure only hides the line selector.
+          logMessage(
+            `bilingual subtitle detection failed: ${error}`,
+            'warning',
+          );
+        }
 
         return {
           success: true,
@@ -174,6 +201,7 @@ export function setupSubtitleMergeHandlers(
             fileName: path.basename(subtitlePath),
             count,
             format,
+            ...(bilingual ? { bilingual } : {}),
           },
         };
       } catch (error) {
@@ -473,6 +501,28 @@ export function setupSubtitleMergeHandlers(
   );
 
   // 生成预览用 ASS 内容（与烧录共用同一生成逻辑，保证所见即所得）
+  // Cues for the preview overlay, with the chosen block of a bilingual subtitle.
+  ipcMain.handle(
+    'subtitleMerge:readSubtitleEntries',
+    async (
+      _event,
+      {
+        subtitlePath,
+        subtitleLines,
+      }: { subtitlePath: string; subtitleLines?: SubtitleLinesMode },
+    ) => {
+      const content = filterSubtitleLines(
+        subtitlePath,
+        await fs.promises.readFile(subtitlePath, 'utf-8'),
+        subtitleLines,
+      );
+      return parseSubtitleEntries(
+        content,
+        detectSubtitleFormatFromContent(subtitlePath, content),
+      );
+    },
+  );
+
   ipcMain.handle(
     'subtitleMerge:buildPreviewAss',
     async (
@@ -481,17 +531,23 @@ export function setupSubtitleMergeHandlers(
         subtitlePath,
         sampleText,
         style,
+        subtitleLines,
       }: {
         subtitlePath?: string | null;
         sampleText?: string;
         style: SubtitleStyle;
+        subtitleLines?: SubtitleLinesMode;
       },
     ): Promise<SubtitleMergeResponse<string>> => {
       try {
         let content: string;
         let pathForFormat: string;
         if (subtitlePath) {
-          content = await fs.promises.readFile(subtitlePath, 'utf-8');
+          content = filterSubtitleLines(
+            subtitlePath,
+            await fs.promises.readFile(subtitlePath, 'utf-8'),
+            subtitleLines,
+          );
           pathForFormat = subtitlePath;
         } else {
           // 未选字幕文件：用样例文字生成一条全程显示的字幕（调样式用）

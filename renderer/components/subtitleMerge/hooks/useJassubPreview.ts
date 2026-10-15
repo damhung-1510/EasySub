@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type JASSUB from 'jassub';
-import type { SubtitleStyle } from '../../../../types/subtitleMerge';
+import type {
+  SubtitleLinesMode,
+  SubtitleStyle,
+} from '../../../../types/subtitleMerge';
 import { useSubtitleBounds } from './useSubtitleBounds';
 import {
   assEventPositionY,
@@ -11,6 +14,8 @@ import {
 interface UseJassubPreviewOptions {
   videoEl: HTMLVideoElement | null;
   subtitlePath?: string | null;
+  /** Bilingual subtitle: both lines (default), only the top or the bottom block. */
+  subtitleLines?: SubtitleLinesMode;
   sampleText?: string;
   style: SubtitleStyle;
   currentTime?: number;
@@ -46,6 +51,7 @@ function destroyPreview(session: PreviewSession) {
 export function useJassubPreview({
   videoEl,
   subtitlePath,
+  subtitleLines,
   sampleText,
   style,
   currentTime = 0,
@@ -147,7 +153,12 @@ export function useJassubPreview({
         try {
           const response = await window.ipc.invoke(
             'subtitleMerge:buildPreviewAss',
-            { subtitlePath: subtitlePath || null, sampleText, style },
+            {
+              subtitlePath: subtitlePath || null,
+              subtitleLines,
+              sampleText,
+              style,
+            },
           );
           if (!current()) return;
           if (!response?.success || typeof response.data !== 'string') {
@@ -329,7 +340,7 @@ export function useJassubPreview({
     };
     // styleKey is the serialized value, avoiding reference-only restarts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoEl, subtitlePath, sampleText, styleKey, attempt]);
+  }, [videoEl, subtitlePath, subtitleLines, sampleText, styleKey, attempt]);
 
   return {
     active,

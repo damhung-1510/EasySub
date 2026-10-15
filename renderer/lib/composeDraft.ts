@@ -4,6 +4,7 @@ import type {
   MergeOutputMode,
   VideoQuality,
   EncoderMode,
+  SubtitleLinesMode,
 } from '../../types/subtitleMerge';
 
 export interface ComposeDocument {
@@ -18,6 +19,8 @@ export interface ComposeDocument {
   softContainer: 'mkv' | 'mp4';
   videoQuality: VideoQuality;
   encoderMode: EncoderMode;
+  /** Bilingual subtitle: both lines (default), only the top or the bottom block. */
+  subtitleLines?: SubtitleLinesMode;
 }
 // Drafts must preserve partially typed fields as well as finished settings.
 const color = z.string();
@@ -70,6 +73,8 @@ const documentSchema = z.object({
   softContainer: z.enum(['mkv', 'mp4']),
   videoQuality: z.enum(['original', 'high', 'standard']),
   encoderMode: z.enum(['cpu', 'hardware']),
+  // Absent in drafts saved before the selector existed.
+  subtitleLines: z.enum(['both', 'top', 'bottom']).optional(),
 });
 const schema = z.object({
   version: z.literal(1),

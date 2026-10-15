@@ -9,6 +9,7 @@ import type {
   MergeOutputMode,
   VideoQuality,
   EncoderMode,
+  SubtitleLinesMode,
   HwAccelInfo,
   UserStylePreset,
   ComposeJobView,
@@ -405,6 +406,7 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
         {
           videoPath: job.videoPath,
           subtitlePath: job.subtitlePath || null,
+          subtitleLines: job.subtitleLines ?? 'both',
           outputPath: job.outputPath,
           outputMode: job.subtitleMode === 'soft' ? 'softmux' : 'hardcode',
           softContainer: /\.mp4$/i.test(job.outputPath) ? 'mp4' : 'mkv',
@@ -600,7 +602,7 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
   );
   const setSubtitlePath = useCallback(
     async (path: string) => {
-      edit({ subtitlePath: path });
+      edit({ subtitlePath: path, subtitleLines: 'both' });
     },
     [edit],
   );
@@ -703,7 +705,7 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
     if (edit({ videoPath: null, outputPath: null })) outputRevision.current++;
   }, [edit]);
   const clearSubtitle = useCallback(() => {
-    edit({ subtitlePath: null });
+    edit({ subtitlePath: null, subtitleLines: 'both' });
   }, [edit]);
   const setStyle = useCallback(
     (style: SubtitleStyle) => {
@@ -910,6 +912,12 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
     },
     [withExtension, persistPreferences],
   );
+  const setSubtitleLines = useCallback(
+    (subtitleLines: SubtitleLinesMode) => {
+      edit({ subtitleLines });
+    },
+    [edit],
+  );
   const setVideoQuality = useCallback(
     (videoQuality: VideoQuality) => {
       if (edit({ videoQuality })) persistPreferences();
@@ -957,6 +965,7 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
         outputMode: doc.outputMode,
         videoQuality: doc.videoQuality,
         encoderMode,
+        subtitleLines: doc.subtitleLines ?? 'both',
         ...(doc.audioTrackPath
           ? {
               audioTrack: {
@@ -1143,6 +1152,7 @@ export function useSubtitleMerge(options: UseSubtitleMergeOptions = {}) {
     setSoftContainer,
     setVideoQuality,
     setEncoderMode,
+    setSubtitleLines,
     startMerge,
     cancelMerge,
     openOutputFolder,

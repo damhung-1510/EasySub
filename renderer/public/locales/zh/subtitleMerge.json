@@ -204,5 +204,13 @@
   "reconnectQueued": "排队中",
   "draftLocked": "此合成工程正在另一个窗口中编辑。该窗口离开或关闭后，将自动读取最新草稿。",
   "draftLockFailed": "无法取得合成工程编辑锁，已暂停编辑以保护草稿。",
-  "pageDesc": "把字幕烧录进画面，或封装为软字幕轨道"
+  "pageDesc": "把字幕烧录进画面，或封装为软字幕轨道",
+  "subtitleLinesTitle": "显示字幕",
+  "subtitleLinesBoth": "双语",
+  "subtitleLinesSource": "仅原文",
+  "subtitleLinesTranslation": "仅译文",
+  "subtitleLinesTop": "仅上行",
+  "subtitleLinesBottom": "仅下行",
+  "subtitleLinesGuess": "未找到该文件的任务数据，按上下两行拆分。",
+  "subtitleLinesUnresolved": "{{count}} 条字幕无法拆分，保留双行。"
 }

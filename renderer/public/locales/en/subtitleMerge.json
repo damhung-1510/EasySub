@@ -204,5 +204,13 @@
   "reconnectQueued": "Queued",
   "draftLocked": "This composition is open in another window. Waiting for that window to leave or close before loading the latest draft.",
   "draftLockFailed": "Cannot acquire the composition lock. Editing is disabled to protect the draft.",
-  "pageDesc": "Burn subtitles into the video, or mux them as a soft subtitle track"
+  "pageDesc": "Burn subtitles into the video, or mux them as a soft subtitle track",
+  "subtitleLinesTitle": "Show subtitle",
+  "subtitleLinesBoth": "Both languages",
+  "subtitleLinesSource": "Original only",
+  "subtitleLinesTranslation": "Translation only",
+  "subtitleLinesTop": "Top line only",
+  "subtitleLinesBottom": "Bottom line only",
+  "subtitleLinesGuess": "No task data found for this file, so the lines are split top and bottom.",
+  "subtitleLinesUnresolved": "{{count}} cue(s) cannot be split and keep both lines."
 }

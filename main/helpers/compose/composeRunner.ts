@@ -42,6 +42,7 @@ import {
   getVideoInfo,
 } from '../subtitleMerger';
 import { buildAssStyleLine } from '../assStyleBuilder';
+import { filterSubtitleLines } from '../bilingualSubtitle';
 import { translatedAssFilter } from '../assCanvas';
 import {
   buildComposePlan,
@@ -447,11 +448,32 @@ export async function runComposeJob(
       });
     }
 
+    // A soft track keeps one block of a bilingual subtitle through a temporary copy;
+    // the user's own file is never rewritten.
+    let softSubtitlePath =
+      subtitle.mode === 'soft' ? subtitle.subtitlePath : '';
+    if (subtitle.mode === 'soft' && subtitle.linesMode) {
+      const original = fs.readFileSync(subtitle.subtitlePath, 'utf-8');
+      const filtered = filterSubtitleLines(
+        subtitle.subtitlePath,
+        original,
+        subtitle.linesMode,
+      );
+      if (filtered !== original) {
+        softSubtitlePath = path.join(
+          os.tmpdir(),
+          `video-subtitle-master-lines-${randomUUID()}${path.extname(subtitle.subtitlePath)}`,
+        );
+        fs.writeFileSync(softSubtitlePath, filtered, 'utf-8');
+        tempFiles.push(softSubtitlePath);
+      }
+    }
+
     const planSubtitle: ComposePlanSubtitle =
       subtitle.mode === 'hard'
         ? prepared!.plan
         : subtitle.mode === 'soft'
-          ? { mode: 'soft', subtitlePath: subtitle.subtitlePath }
+          ? { mode: 'soft', subtitlePath: softSubtitlePath }
           : { mode: 'none' };
 
     // This directory is unique to the job; never use an external ID as a path.
@@ -620,7 +642,11 @@ async function prepareHardSubtitle(
   if (totalDurationSec > 0) onDuration(totalDurationSec);
 
   // Preview and export consume the same ASS, including native ASS/SSA input.
-  const subtitleContent = fs.readFileSync(subtitlePath, 'utf-8');
+  const subtitleContent = filterSubtitleLines(
+    subtitlePath,
+    fs.readFileSync(subtitlePath, 'utf-8'),
+    subtitle.linesMode,
+  );
   await prepareSubtitleFonts();
   const { assContent, effectiveStyle, translateY } = buildAssForSubtitle(
     subtitleContent,

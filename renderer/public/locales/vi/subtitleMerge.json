@@ -204,5 +204,13 @@
   "reconnectQueued": "Đang chờ",
   "draftLocked": "Dự án này đang mở ở cửa sổ khác. Hãy đợi cửa sổ đó đóng hoặc thoát để tải bản nháp mới nhất.",
   "draftLockFailed": "Không thể khóa dự án để chỉnh sửa. Đã tắt chỉnh sửa để bảo vệ bản nháp.",
-  "pageDesc": "Gắn cứng phụ đề vào hình ảnh, hoặc đóng gói thành track phụ đề mềm"
+  "pageDesc": "Gắn cứng phụ đề vào hình ảnh, hoặc đóng gói thành track phụ đề mềm",
+  "subtitleLinesTitle": "Hiển thị phụ đề",
+  "subtitleLinesBoth": "Cả hai ngôn ngữ",
+  "subtitleLinesSource": "Chỉ bản gốc",
+  "subtitleLinesTranslation": "Chỉ bản dịch",
+  "subtitleLinesTop": "Chỉ dòng trên",
+  "subtitleLinesBottom": "Chỉ dòng dưới",
+  "subtitleLinesGuess": "Không tìm thấy dữ liệu tác vụ của file này nên tách theo dòng trên và dòng dưới.",
+  "subtitleLinesUnresolved": "{{count}} câu không tách được nên giữ cả hai dòng."
 }
