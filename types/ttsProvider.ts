@@ -176,6 +176,15 @@ export const TTS_PROVIDER_TYPES: TtsProviderType[] = [
         step: 1,
         tips: 'ttsConcurrencyTips',
       },
+      {
+        // 部分兼容端点（如 VieNeu）接收但忽略 speed；开启后由本应用用 ffmpeg 变速。
+        key: 'localSpeed',
+        label: 'ttsLocalSpeed',
+        type: 'switch',
+        required: false,
+        defaultValue: false,
+        tips: 'ttsLocalSpeedTips',
+      },
     ],
   },
   {

@@ -552,5 +552,7 @@
     "fetchVoicesDone": "Đã lấy {{count}} giọng (danh sách đã được thay bằng tập khả dụng của tài khoản, tên tự động ánh xạ)",
     "fetchVoicesLabeled": "Đã lấy ánh xạ tên của {{count}} giọng (danh sách giữ nguyên, nhãn hiển thị theo tên; vẫn có thể tự thêm bớt giọng)",
     "fetchVoicesFailed": "Lấy danh sách giọng thất bại: "
-  }
+  },
+  "ttsLocalSpeed": "Áp tốc độ trong EasySub",
+  "ttsLocalSpeedTips": "Bật khi server nhận nhưng bỏ qua tham số tốc độ (ví dụ VieNeu). EasySub sẽ tự đổi tốc độ sau khi tạo giọng. Nghe thử giọng vẫn ở tốc độ thường."
 }

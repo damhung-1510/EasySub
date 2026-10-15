@@ -552,5 +552,7 @@
     "fetchVoicesDone": "Fetched {{count}} voice(s) — list replaced with your account's voices, names mapped automatically",
     "fetchVoicesLabeled": "Fetched name mappings for {{count}} voice(s) — your list is unchanged, tags now show names; keep adding/removing voices manually",
     "fetchVoicesFailed": "Failed to fetch voices:"
-  }
+  },
+  "ttsLocalSpeed": "Apply speed in EasySub",
+  "ttsLocalSpeedTips": "Turn on when the server accepts but ignores the speed parameter (e.g. VieNeu). EasySub then changes the speed itself after synthesis. Voice previews stay at normal speed."
 }

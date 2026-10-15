@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Popover,
@@ -530,6 +531,14 @@ const TtsProviderPanel: React.FC<TtsProviderPanelProps> = ({
               </Command>
             </PopoverContent>
           </Popover>
+        ) : field.type === 'switch' ? (
+          <div>
+            <Switch
+              aria-label={label}
+              checked={value === true || value === 'true'}
+              onCheckedChange={(checked) => handleField(field.key, checked)}
+            />
+          </div>
         ) : field.type === 'number' ? (
           <Input
             type="number"

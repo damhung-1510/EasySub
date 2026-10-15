@@ -7,6 +7,7 @@ import type {
 import type { TtsSynthesizeResult } from './types';
 import { streamPreviewAudio } from './previewStream';
 import {
+  atempoWav,
   transcodeToPcm16Wav,
   readWavInfo,
 } from '../../helpers/dubbing/audioPipeline';
@@ -73,13 +74,59 @@ const RIFF_MAGIC = Buffer.from('RIFF', 'ascii');
 /** 与 transcodeToPcm16Wav 默认值及本地/Edge 引擎输出一致。 */
 const PIPELINE_SAMPLE_RATE = 24000;
 
+/** 端点忽略 speed（如 VieNeu）时由本应用变速；开关值可能是布尔或字符串。 */
+export function usesLocalSpeed(provider: TtsProvider): boolean {
+  const value = provider.localSpeed;
+  return value === true || value === 'true' || value === 1 || value === '1';
+}
+
+/** 整段改为本地 atempo 后重新测时长，使上层对齐/校准看到的是变速后的真实时长。 */
+async function applyLocalSpeed(
+  result: TtsSynthesizeResult,
+  speed: number,
+  signal?: AbortSignal,
+): Promise<TtsSynthesizeResult> {
+  if (Math.abs(speed - 1) < 1e-3) return result;
+  const tmp = `${result.wavPath}.tempo-${Date.now()}.wav`;
+  try {
+    await atempoWav(result.wavPath, tmp, speed, signal);
+    fs.renameSync(tmp, result.wavPath);
+  } finally {
+    try {
+      if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+    } catch {
+      /* ignore */
+    }
+  }
+  return {
+    wavPath: result.wavPath,
+    durationMs: readWavInfo(result.wavPath).durationMs,
+  };
+}
+
 /**
  * OpenAI 兼容 /audio/speech 合成：请求 wav 直出；端点若忽略 response_format
  * 返回 mp3 等格式，按字节头嗅探后经 ffmpeg 统一转 16-bit PCM 单声道 wav。
+ * 开启 localSpeed 时不向端点发送 speed，合成后由 ffmpeg atempo 变速（试听流除外）。
  */
 export async function synthesizeWithOpenAiCompatible(
   provider: TtsProvider,
   request: TtsSegmentRequest,
+): Promise<TtsSynthesizeResult> {
+  const local = usesLocalSpeed(provider);
+  const result = await requestSpeech(provider, request, local);
+  if (!local || request.preview) return result;
+  return applyLocalSpeed(
+    result,
+    clampOpenAiSpeed(request.speed),
+    request.signal,
+  );
+}
+
+async function requestSpeech(
+  provider: TtsProvider,
+  request: TtsSegmentRequest,
+  omitSpeed: boolean,
 ): Promise<TtsSynthesizeResult> {
   const base = normalizeTtsBaseURL(provider.apiUrl);
   const apiKey = String(provider.apiKey ?? '').trim();
@@ -100,7 +147,7 @@ export async function synthesizeWithOpenAiCompatible(
       model,
       input: request.text,
       voice: request.voice,
-      speed: clampOpenAiSpeed(request.speed),
+      ...(omitSpeed ? {} : { speed: clampOpenAiSpeed(request.speed) }),
       response_format: 'wav',
     }),
     signal: AbortSignal.any(signals),

@@ -552,5 +552,7 @@
     "fetchVoicesDone": "已拉取 {{count}} 个音色（清单已替换为账号可用集，名称自动映射）",
     "fetchVoicesLabeled": "已获取 {{count}} 个音色的名称映射（清单保持不变，标签按名称展示；可继续手动增删音色）",
     "fetchVoicesFailed": "拉取音色失败："
-  }
+  },
+  "ttsLocalSpeed": "由 EasySub 调整语速",
+  "ttsLocalSpeedTips": "当服务端接收但忽略 speed 参数时开启（如 VieNeu），合成后由 EasySub 自行变速。音色试听仍为原速。"
 }
